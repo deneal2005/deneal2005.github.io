@@ -105,6 +105,11 @@ ol {
   border-radius: 1px;
 }
 
+/* Sections focused programmatically (skip link, contents) don't need a ring around the whole chapter. */
+[tabindex='-1']:focus {
+  outline: none;
+}
+
 .vh {
   position: absolute !important;
   width: 1px;

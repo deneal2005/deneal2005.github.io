@@ -76,11 +76,14 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     padding: var(--masthead-h) var(--margin) 0;
   }
 
+  /* Intro at the top, headline on the ground, the sky between them. A grid, so on
+     short screens the two push the panel taller instead of overlapping. */
   .hero__panel {
     position: relative;
-    height: calc(100svh - var(--masthead-h) - var(--margin) * 0.6);
-    min-height: 34rem;
-    max-height: 68rem;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: clamp(30rem, calc(100svh - var(--masthead-h) - var(--margin) * 0.6), 68rem);
+    padding: var(--pad) var(--pad) calc(var(--pad) * 1.2);
     border: var(--panel-border) solid var(--sumi);
     isolation: isolate;
   }
@@ -199,9 +202,8 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
   }
 
   .hero__copy {
-    position: absolute;
-    left: var(--pad);
-    bottom: calc(var(--pad) * 1.2);
+    grid-row: 3;
+    margin-top: var(--space-6);
   }
 
   .hero__name {
@@ -257,9 +259,8 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
   }
 
   .hero__intro {
-    position: absolute;
-    top: clamp(5.5rem, 18%, 11rem);
-    left: calc(var(--pad) + 4.75rem);
+    grid-row: 1;
+    margin: clamp(3rem, 11svh, 8.5rem) 0 0 4.75rem;
     max-width: 25.5rem;
     font-size: var(--text-s);
     line-height: 1.55;
@@ -279,7 +280,8 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
   .hero__next {
     position: absolute;
     right: var(--pad);
-    bottom: var(--space-3);
+    bottom: var(--space-2);
+    background: var(--washi);
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -313,6 +315,43 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     }
   }
 
+  /* ── Squarer landscape screens (4:3 laptops, tablets on their side) ──
+   * The sun moves off the right edge so the intro keeps clear paper to sit on. */
+  @media (min-aspect-ratio: 5/4) and (max-aspect-ratio: 8/5) {
+    .hero__stage {
+      top: 6%;
+      right: -14%;
+      height: 96%;
+    }
+
+    .hero__intro {
+      max-width: 20rem;
+    }
+  }
+
+  /* ── Short screens: everything tightens so the headline stays in the frame ── */
+  @media (min-aspect-ratio: 5/4) and (max-height: 760px) {
+    .hero__intro {
+      margin-top: clamp(1.5rem, 6svh, 3rem);
+    }
+
+    .hero__title {
+      font-size: clamp(3.4rem, min(10vw, 18.5svh), 13.5rem);
+    }
+
+    .hero__name {
+      margin-bottom: var(--space-3);
+    }
+
+    .hero__copy {
+      margin-top: var(--space-4);
+    }
+
+    .hero__gloss {
+      display: none;
+    }
+  }
+
   /* ── Portrait screens ─────────────────────────────────
    * Its own composition, not a shrunk one: the sun rises off the right edge,
    * the horizon sits under it, and the type stacks on the ground below.
@@ -323,9 +362,7 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     }
 
     .hero__panel {
-      height: auto;
       min-height: calc(100svh - var(--masthead-h) - var(--margin));
-      max-height: none;
       display: flex;
       flex-direction: column;
       padding: 0 var(--pad) var(--pad);
@@ -382,7 +419,7 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     }
 
     .hero__intro {
-      margin-top: var(--space-5);
+      margin: var(--space-5) 0 0;
       max-width: 30rem;
     }
 

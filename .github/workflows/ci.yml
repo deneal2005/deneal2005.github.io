@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+        env:
+          # The default Actions token raises GitHub's API rate limit for the journey's build-time data.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Preview and QA
+        run: |
+          npx astro preview --port 4321 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4321/ >/dev/null && break; sleep 2; done
+          npm run qa -- http://localhost:4321 --skip-external

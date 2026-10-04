@@ -1,7 +1,9 @@
 {
-  "name": "portfolio",
+  "name": "delin-portfolio",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Delin Thangjam’s portfolio, set as a manga volume. Astro 7, no client framework.",
   "type": "module",
-  "version": "0.0.1",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -9,6 +11,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "check": "astro check",
+    "qa": "node scripts/qa.mjs",
+    "shot": "node scripts/capture.mjs",
+    "og": "node scripts/capture.mjs http://localhost:4321/ public/og.png 1200 630 1",
+    "icons": "node scripts/icons.mjs",
     "astro": "astro"
   },
   "dependencies": {
@@ -17,13 +24,13 @@
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "astro": "^7.3.5"
   },
-  "allowScripts": {
-    "esbuild": true
-  },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/node": "^26.6.4",
     "sharp": "^0.35.5",
     "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild": true
   }
 }

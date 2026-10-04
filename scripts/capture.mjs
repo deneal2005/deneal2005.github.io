@@ -1,109 +1,36 @@
-// Dev QA helper: screen-by-screen captures through the Chrome DevTools Protocol.
-// Emulates a real viewport (true phone widths included), scrolls the page and
-// saves one PNG per screen, plus any console errors it saw.
+// Dev QA helper: screen-by-screen captures of a page through headless Chrome.
+// Emulates a real viewport (true phone widths included), scrolls and saves one
+// PNG per screen. Reduced motion is on unless --motion is passed.
 //
 // Usage: node scripts/capture.mjs <url> <outPrefix|file.png> [width=1440] [height=900] [screens=6] [--mobile] [--motion] [--from=#id]
-import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { launch, sleep } from './lib/cdp.mjs';
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const flags = new Set(process.argv.slice(2).filter((a) => a.startsWith('--')));
+const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
 const [url = 'http://localhost:4321/', prefix = 'capture', w = '1440', h = '900', screens = '6'] = args;
-const width = Number(w);
 const height = Number(h);
+const motion = flags.includes('--motion');
+const from = flags.find((f) => f.startsWith('--from='))?.slice(7);
 
-const browser = [
-  process.env.CHROME_PATH,
-  'C:/Program Files/Google/Chrome/Application/chrome.exe',
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/usr/bin/google-chrome',
-].find((p) => p && existsSync(p));
-if (!browser) throw new Error('No Chrome/Edge found. Set CHROME_PATH.');
+const page = await launch();
+await page.viewport(Number(w), height, { mobile: flags.includes('--mobile'), reducedMotion: !motion });
+await page.goto(url, 4500);
 
-const port = 9300 + Math.floor(Math.random() * 500);
-const chrome = spawn(browser, [
-  '--headless=new',
-  '--hide-scrollbars',
-  `--remote-debugging-port=${port}`,
-  `--user-data-dir=${mkdtempSync(join(tmpdir(), 'cap-'))}`,
-  'about:blank',
-]);
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-let targets;
-for (let i = 0; i < 50 && !targets; i++) {
-  await sleep(200);
-  targets = await fetch(`http://127.0.0.1:${port}/json/list`).then((r) => r.json()).catch(() => undefined);
-}
-const page = targets.find((t) => t.type === 'page');
-const ws = new WebSocket(page.webSocketDebuggerUrl);
-await new Promise((r) => ws.addEventListener('open', r, { once: true }));
-
-let id = 0;
-const pending = new Map();
-const errors = [];
-ws.addEventListener('message', ({ data }) => {
-  const msg = JSON.parse(data);
-  if (msg.id && pending.has(msg.id)) {
-    pending.get(msg.id)(msg.result ?? msg);
-    pending.delete(msg.id);
-  }
-  if (msg.method === 'Runtime.exceptionThrown') errors.push(msg.params.exceptionDetails.text);
-  if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error')
-    errors.push(msg.params.args.map((a) => a.value ?? a.description).join(' '));
-  if (msg.method === 'Log.entryAdded' && msg.params.entry.level === 'error') errors.push(msg.params.entry.text);
-});
-const send = (method, params = {}) =>
-  new Promise((r) => {
-    pending.set(++id, r);
-    ws.send(JSON.stringify({ id, method, params }));
-  });
-
-await send('Runtime.enable');
-await send('Log.enable');
-await send('Page.enable');
-await send('Emulation.setDeviceMetricsOverride', {
-  width,
-  height,
-  deviceScaleFactor: 1,
-  mobile: flags.has('--mobile'),
-});
-if (flags.has('--mobile')) await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
-if (!flags.has('--motion'))
-  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-
-await send('Page.navigate', { url });
-await sleep(4500);
-
-const { result } = await send('Runtime.evaluate', {
-  expression: 'document.documentElement.scrollHeight',
-  returnByValue: true,
-});
-// --from=#id starts the sequence at that element instead of the top of the page.
-const fromFlag = [...flags].find((f) => f.startsWith('--from='));
-const { result: start } = fromFlag
-  ? await send('Runtime.evaluate', {
-      expression: `Math.round(document.querySelector(${JSON.stringify(fromFlag.slice(7))}).getBoundingClientRect().top + scrollY)`,
-      returnByValue: true,
-    })
-  : { result: { value: 0 } };
-const total = Math.min(Number(screens), Math.ceil((result.value - start.value) / height));
+const total = await page.eval('document.documentElement.scrollHeight');
+const start = from ? await page.eval(`Math.round(document.querySelector(${JSON.stringify(from)}).getBoundingClientRect().top + scrollY)`) : 0;
+const count = Math.min(Number(screens), Math.ceil((total - start) / height));
 const saved = [];
-for (let i = 0; i < total; i++) {
-  await send('Runtime.evaluate', { expression: `window.scrollTo({top:${start.value + i * height},behavior:'instant'})` });
-  await sleep(flags.has('--motion') ? 2200 : 700);
-  const shot = await send('Page.captureScreenshot', { format: 'png' });
+for (let i = 0; i < count; i++) {
+  await page.eval(`window.scrollTo({ top: ${start + i * height}, behavior: 'instant' })`);
+  await sleep(motion ? 2200 : 700);
   // A prefix ending in .png means "write exactly this file" (used for the share image).
   const file = resolve(prefix.endsWith('.png') ? prefix : `${prefix}-${i}.png`);
-  writeFileSync(file, Buffer.from(shot.data, 'base64'));
+  writeFileSync(file, await page.screenshot());
   saved.push(file);
 }
 
-console.log(JSON.stringify({ pageHeight: result.value, saved, errors }, null, 2));
-ws.close();
-chrome.kill();
+console.log(JSON.stringify({ pageHeight: total, saved, errors: page.errors }, null, 2));
+page.close();
 process.exit(0);

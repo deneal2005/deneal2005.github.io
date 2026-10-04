@@ -1,3 +1,5 @@
+import { reducedMotion } from './env';
+
 /** The contents dialog: open/close, and page numbers measured from the live layout. */
 export function initContents() {
   const dialog = document.querySelector<HTMLDialogElement>('#contents');
@@ -31,8 +33,20 @@ export function initContents() {
     openers.forEach((button) => button.setAttribute('aria-expanded', 'false'));
   });
 
-  // Following a link closes the book first, so in-page anchors scroll the page beneath.
+  // Following a link closes the book first. Same-page chapters are scrolled to by hand,
+  // because the page is still scroll-locked when the browser would handle the jump.
   dialog.addEventListener('click', (event) => {
-    if ((event.target as Element).closest('[data-contents-link]')) dialog.close();
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-contents-link]');
+    if (!link) return;
+    const url = new URL(link.href);
+    const target = url.pathname === location.pathname && url.hash ? document.getElementById(url.hash.slice(1)) : null;
+    dialog.close();
+    if (!target) return;
+    event.preventDefault();
+    history.pushState(null, '', url.hash);
+    // scrollIntoView forces the style update, so the scroll lock from the open dialog is already gone.
+    target.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
   });
 }
