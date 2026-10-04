@@ -1,0 +1,119 @@
+---
+/** Education as a short vertical timeline, oldest first; the ongoing entry is marked. */
+import { education } from '../../data/education';
+---
+
+<section class="edu" id="education" aria-labelledby="education-title">
+  <h3 id="education-title" class="edu__heading meta">Education</h3>
+  <ol class="edu__list">
+    {
+      education.map((entry, i) => (
+        <li class:list={['edu__item', { 'is-current': entry.current }]} data-reveal="fade" style={`--i: ${i}`}>
+          <span class="edu__node" aria-hidden="true" />
+          <p class="edu__years meta">
+            <time datetime={String(entry.start)}>{entry.start}</time> – <span>{entry.end}</span>
+          </p>
+          <h4 class="edu__title">{entry.title}</h4>
+          <p class="edu__sub">{entry.subtitle}</p>
+          {entry.status && <p class="edu__status">{entry.status}</p>}
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .edu {
+    max-width: 34rem;
+  }
+
+  .edu__heading {
+    padding-bottom: var(--space-3);
+    border-bottom: var(--panel-border) solid var(--sumi);
+    color: var(--color-text);
+    scroll-margin-top: calc(var(--masthead-h) + var(--space-5));
+  }
+
+  .edu__list {
+    position: relative;
+    margin-top: var(--space-5);
+  }
+
+  /* The spine joining the three stages */
+  .edu__list::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    bottom: 0.45rem;
+    left: 0.35rem;
+    width: 1px;
+    background: var(--color-rule-strong);
+  }
+
+  .edu__item {
+    position: relative;
+    padding: 0 0 var(--space-6) calc(0.7rem + var(--space-5));
+  }
+
+  .edu__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .edu__node {
+    position: absolute;
+    top: 0.3rem;
+    left: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1.5px solid var(--sumi);
+    background: var(--color-bg);
+    transform: rotate(45deg);
+  }
+
+  .edu__years {
+    color: var(--color-text);
+  }
+
+  .edu__title {
+    margin-top: var(--space-2);
+    font-family: var(--type-display);
+    font-size: clamp(1.3rem, 1.1rem + 0.7vw, 1.75rem);
+    font-weight: 400;
+    font-stretch: 82%;
+    line-height: 1.12;
+  }
+
+  .edu__sub {
+    margin-top: var(--space-1);
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  /* Ongoing: a filled vermilion node, a panel, and a seal-like status */
+  .edu__item.is-current {
+    margin-left: calc(var(--space-4) * -1);
+    padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 0.7rem + var(--space-5));
+    border: var(--panel-border) solid var(--sumi);
+    background: var(--gofun);
+  }
+
+  .edu__item.is-current .edu__node {
+    top: calc(var(--space-4) + 0.3rem);
+    left: var(--space-4);
+    background: var(--shu);
+    border-color: var(--shu);
+  }
+
+  .edu__status {
+    display: inline-block;
+    margin-top: var(--space-3);
+    padding: 0.2rem 0.55rem;
+    background: var(--shu);
+    color: var(--gofun);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+</style>

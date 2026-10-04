@@ -270,6 +270,14 @@ ol {
   transform: translateY(1px);
 }
 
+/* Long labels wrap on the narrowest phones instead of widening the page */
+@media (max-width: 30rem) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
 /* The one primary action in a view */
 .btn--ink {
   background-color: var(--color-text);

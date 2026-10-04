@@ -37,15 +37,22 @@ Almost everything is edited in one of three places: **`src/data/`** for identity
 
 ### Your identity: `src/data/profile.ts`
 
-Name, role, city, the one-sentence statement, the About text and every link. An empty value hides whatever depends on it:
+Name, role, the one-sentence statement, the About text and every link. The site deliberately states no location. An empty value hides whatever depends on it:
 
 | Field | When empty |
 | --- | --- |
-| `links.linkedin` | No LinkedIn link anywhere |
-| `links.email` (or `PUBLIC_CONTACT_EMAIL`) | The contact chapter leads with GitHub, and "Copy email" disappears |
+| `links.linkedin` | No LinkedIn icon anywhere |
+| `links.email` (or `PUBLIC_CONTACT_EMAIL`) | No email icon, and "Copy email" disappears |
+| `links.phone` | No phone icon. Use the international format, e.g. `+919862667033` |
 | `links.resume` | No résumé link. To add one, put `resume.pdf` in `public/` and set `resume: '/resume.pdf'` |
 | `about.exploring`, `about.learning` | Those lists are hidden in Chapter 01 |
 | `portrait` | A printed sunrise plate stands in for a photo |
+
+LinkedIn, email and phone always appear as icons (`tel:` and `mailto:` links), never as raw URLs or addresses.
+
+### Education: `src/data/education.ts`
+
+Shown in Chapter 01 as a timeline, oldest first. Mark the ongoing entry with `current: true` and a `status`.
 
 ### What you're doing now: `src/data/now.ts`
 
@@ -150,8 +157,6 @@ scripts/         QA crawl, screenshots, icon rendering, glyph collection for the
 Things only you can provide. Each one is a single field, and nothing shows until it's set:
 
 - [ ] Your role in your own words (`profile.role`, plus a `role:` line on each project)
-- [ ] LinkedIn URL (`profile.links.linkedin`)
-- [ ] A public email (`profile.links.email` or `PUBLIC_CONTACT_EMAIL`)
 - [ ] Résumé PDF (`public/resume.pdf` + `profile.links.resume`)
 - [ ] What you're learning and exploring (`profile.about`, `now.ts`), and `status` on the skills you're working on (`path.ts`)
 - [ ] Your current JLPT level (`ladder.current` in `path.ts`)

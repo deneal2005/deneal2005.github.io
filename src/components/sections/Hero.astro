@@ -45,7 +45,7 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     <div class="hero__copy">
       <h1 id="hero-title" class="hero__heading">
         <span class="hero__name" data-reveal="fade" style="--i: 12">
-          {site.name}<span class="hero__role">{site.role}, {site.location.city}</span>
+          {site.name}<span class="hero__role">{site.role}</span>
         </span>
         <span class="hero__title display" data-reveal="rise" style="--delay: 1450ms">
           <span class="rise" style="--line: 0"><span>Every line</span></span>
@@ -60,7 +60,7 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
         <a class="btn btn--ink" href="#work">See the work <Arrow /></a>
         <a class="btn" href="/journey/">Follow the journey</a>
       </div>
-      <ProfileLinks exclude={['email']} class="hero__links" />
+      <ProfileLinks class="hero__links" />
     </div>
 
     <a class="hero__next meta" href="#hamon" data-reveal="fade" style="--i: 22">

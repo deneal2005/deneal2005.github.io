@@ -1,21 +1,15 @@
 ---
 /**
  * Final chapter — The Invitation. The volume opened on a sun cut in two;
- * it closes on a whole one, rising. Leads with email when one is set in
- * profile.ts, otherwise with GitHub.
+ * it closes on a whole one, rising. Contact leads with LinkedIn, email and
+ * phone as icon tiles; everything else follows as rows.
  */
-import Arrow from '../ui/Arrow.astro';
 import ProfileLinks from '../ui/ProfileLinks.astro';
 import { chapterById } from '../../data/chapters';
-import { githubUrl } from '../../data/profile';
 import { site } from '../../data/site';
 
 const chapter = chapterById('invitation');
-const primary = site.email
-  ? { id: 'email', href: `mailto:${site.email}`, text: site.email, newTab: false }
-  : githubUrl
-    ? { id: 'github', href: githubUrl, text: `github.com/${site.links.github}`, newTab: true }
-    : null;
+const contact = ['linkedin', 'email', 'phone'];
 ---
 
 <section
@@ -48,36 +42,18 @@ const primary = site.email
       </p>
 
       <div class="invite__contact" data-reveal="fade" style="--i: 2">
+        <ProfileLinks variant="tiles" only={contact} class="invite__tiles" />
         {
-          primary && (
-            <a
-              class="invite__email"
-              href={primary.href}
-              data-magnetic="0.18"
-              target={primary.newTab ? '_blank' : undefined}
-              rel={primary.newTab ? 'me noopener' : undefined}
-            >
-              <span>{primary.text}</span>
-              <Arrow dir={primary.newTab ? 'out' : 'right'} />
-              {primary.newTab && <span class="vh">(opens in a new tab)</span>}
-            </a>
-          )
-        }
-        <div class="invite__actions">
-          {
-            site.email && (
+          site.email && (
+            <div class="invite__actions">
               <button class="btn" type="button" data-copy={site.email}>
                 <span data-copy-label>Copy email</span>
               </button>
-            )
-          }
-          <p class="meta invite__meta">
-            Local time in {site.location.city}
-            <time data-local-time={site.location.timeZone}>—</time>
-          </p>
-        </div>
+            </div>
+          )
+        }
         <p class="vh" aria-live="polite" data-copy-status></p>
-        <ProfileLinks variant="rows" exclude={primary ? [primary.id] : []} class="invite__links" />
+        <ProfileLinks variant="rows" exclude={contact} class="invite__links" />
       </div>
     </div>
   </div>
@@ -165,38 +141,6 @@ const primary = site.email
     grid-column: 6 / -1;
   }
 
-  .invite__email {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-4);
-    max-width: 100%;
-    font-family: var(--type-display);
-    font-size: clamp(1.9rem, 1rem + 3.4vw, 4.5rem);
-    font-stretch: 75%;
-    font-weight: 400;
-    line-height: 1.05;
-    overflow-wrap: anywhere;
-    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 100% 2px;
-    padding-bottom: 0.1em;
-    transition:
-      transform 0.5s var(--ease-out),
-      color var(--dur-1) linear;
-  }
-
-  .invite__email .arrow {
-    width: 0.6em;
-    height: 0.4em;
-  }
-
-  @media (hover: hover) {
-    .invite__email:hover {
-      color: var(--shu-light);
-    }
-
-    .invite__email:hover .arrow {
-      transform: translateX(0.2em);
-    }
-  }
 
   .invite__actions {
     display: flex;
@@ -206,11 +150,6 @@ const primary = site.email
     margin-top: var(--space-6);
   }
 
-  .invite__meta time {
-    margin-left: var(--space-2);
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-  }
 
   .invite__contact :global(.invite__links) {
     margin-top: var(--space-7);

@@ -33,7 +33,6 @@ const personLd = person
       name: site.name,
       jobTitle: site.role,
       description: site.statement,
-      address: { '@type': 'PostalAddress', addressLocality: site.location.city },
       ...(Astro.site ? { url: Astro.site.href } : {}),
       ...(sameAs.length ? { sameAs } : {}),
     })

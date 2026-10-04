@@ -38,7 +38,8 @@ while (queue.length) {
   const report = await page.eval(`(() => {
     const name = (el) => (el.getAttribute('aria-label') || el.textContent || el.querySelector('img[alt]')?.alt || '').trim();
     return {
-      overflow: document.documentElement.scrollWidth - innerWidth,
+      // clientWidth, not innerWidth: on phones the layout viewport grows to fit overflowing content.
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       h1: document.querySelectorAll('h1').length,
       noAlt: [...document.querySelectorAll('img:not([alt])')].map((i) => i.src),
       unnamed: [...document.querySelectorAll('a[href], button')].filter((el) => !name(el) && !el.closest('[aria-hidden="true"]')).map((el) => el.outerHTML.slice(0, 90)),

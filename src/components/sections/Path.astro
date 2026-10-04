@@ -102,7 +102,6 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
                   <span class="path__mark" aria-hidden="true" />
                   <span class="skill__text">
                     <span class="skill__name">{skill.name}</span>
-                    {skill.detail && <span class="skill__detail">{skill.detail}</span>}
                     {skill.status && <span class="path__status">{statusLabel[skill.status]}</span>}
                   </span>
                   {skill.usedIn?.length ? (
@@ -303,11 +302,6 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     font-size: var(--text-base);
   }
 
-  .skill__detail {
-    margin-left: var(--space-2);
-    font-size: var(--text-s);
-    color: var(--color-text-muted);
-  }
 
   .skill__used {
     flex: none;

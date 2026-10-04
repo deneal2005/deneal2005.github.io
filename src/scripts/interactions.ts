@@ -102,19 +102,8 @@ export function initDepth() {
   });
 }
 
-/** Live local time for the studio, and a copy-to-clipboard for the address. */
+/** Copy-to-clipboard for the email address. */
 export function initInvitation() {
-  document.querySelectorAll<HTMLElement>('[data-local-time]').forEach((el) => {
-    const format = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: el.dataset.localTime,
-    });
-    const tick = () => (el.textContent = format.format(new Date()));
-    tick();
-    setInterval(tick, 20_000);
-  });
-
   document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
     const label = button.querySelector<HTMLElement>('[data-copy-label]') ?? button;
     const initial = label.textContent;

@@ -1,21 +1,30 @@
 ---
 /**
- * GitHub, LinkedIn, résumé, email: whichever are set in profile.ts.
- * `variant="inline"` is a quiet row of labels; `variant="rows"` is the
- * contact-sheet layout with handles and rules.
+ * LinkedIn, email, phone, GitHub, résumé: whichever are set in profile.ts.
+ * Contact links (LinkedIn, email, phone) always render as icons, never as raw
+ * URLs or addresses.
+ *
+ * `variant="inline"`: a quiet row; contact links as square icon buttons.
+ * `variant="rows"`:   the contact-sheet layout with rules.
+ * `variant="tiles"`:  large icon tiles with a small label (the final chapter).
  */
 import Arrow from './Arrow.astro';
+import Icon from './Icon.astro';
 import { profileLinks } from '../../lib/links';
 
 interface Props {
-  variant?: 'inline' | 'rows';
-  /** Leave some out where they'd repeat nearby content (e.g. email beside the big email link). */
+  variant?: 'inline' | 'rows' | 'tiles';
+  /** Leave some out where they'd repeat nearby content. */
   exclude?: string[];
+  /** Show only these ids, in profile order. */
+  only?: string[];
   class?: string;
 }
 
-const { variant = 'inline', exclude = [], class: className } = Astro.props;
-const links = profileLinks().filter((l) => !exclude.includes(l.id));
+const { variant = 'inline', exclude = [], only, class: className } = Astro.props;
+const links = profileLinks().filter((l) => !exclude.includes(l.id) && (!only || only.includes(l.id)));
+// In rows, text-only links keep an empty icon cell so every label lines up.
+const hasIcons = links.some((l) => l.icon);
 ---
 
 {
@@ -24,14 +33,21 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
       {links.map((link) => (
         <li>
           <a
-            class="plinks__link"
+            class:list={['plinks__link', { 'plinks__link--icon': link.icon }]}
             href={link.href}
             target={link.newTab ? '_blank' : undefined}
             rel={link.newTab ? (link.me ? 'me noopener' : 'noopener') : undefined}
+            title={variant === 'inline' && link.icon ? link.label : undefined}
+            data-magnetic={variant === 'tiles' ? '0.2' : undefined}
           >
-            <span class="plinks__label">{link.label}</span>
+            {link.icon ? <Icon name={link.icon} /> : variant === 'rows' && hasIcons && <span class="plinks__spacer" aria-hidden="true" />}
+            {link.icon && variant === 'inline' ? (
+              <span class="vh">{link.label}</span>
+            ) : (
+              <span class="plinks__label">{link.label}</span>
+            )}
             {variant === 'rows' && link.detail && <span class="plinks__detail">{link.detail}</span>}
-            <Arrow dir={link.newTab ? 'out' : 'right'} />
+            {!(link.icon && variant !== 'rows') && <Arrow dir={link.newTab ? 'out' : 'right'} />}
             {link.newTab && <span class="vh">(opens in a new tab)</span>}
           </a>
         </li>
@@ -41,10 +57,12 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
 }
 
 <style>
+  /* ── Inline ─────────────────────────────────────── */
   .plinks--inline {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
+    align-items: center;
+    gap: var(--space-2) var(--space-2);
   }
 
   .plinks--inline .plinks__link {
@@ -61,11 +79,28 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
     transition: background-size var(--dur-2) var(--ease-out);
   }
 
+  /* Text links keep their breathing room after the icon squares */
+  .plinks--inline li:has(.plinks__link:not(.plinks__link--icon)) {
+    margin-left: var(--space-3);
+  }
+
+  .plinks--inline .plinks__link--icon {
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1.5px solid currentColor;
+    background: none;
+    transition:
+      background-color var(--dur-1) linear,
+      color var(--dur-1) linear;
+  }
+
   .plinks--inline .arrow {
     width: 0.7rem;
     height: 0.55rem;
   }
 
+  /* ── Rows ───────────────────────────────────────── */
   .plinks--rows li {
     border-top: 1px solid var(--color-rule);
   }
@@ -81,6 +116,12 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
     gap: var(--space-4);
     padding-block: var(--space-4);
     min-height: 2.75rem;
+  }
+
+  .plinks--rows .plinks__link--icon,
+  .plinks--rows .plinks__link:has(.plinks__spacer) {
+    grid-template-columns: 1.2rem calc(7rem - 1.2rem - var(--space-4)) minmax(0, 1fr) auto;
+    align-items: center;
   }
 
   .plinks--rows .plinks__label {
@@ -104,9 +145,49 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
     align-self: center;
   }
 
+  /* ── Tiles ──────────────────────────────────────── */
+  .plinks--tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .plinks--tiles .plinks__link {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-3);
+    width: clamp(5.5rem, 4.5rem + 3vw, 7.5rem);
+    aspect-ratio: 1;
+    border: var(--panel-border) solid currentColor;
+    transition:
+      background-color var(--dur-1) linear,
+      border-color var(--dur-1) linear,
+      color var(--dur-1) linear,
+      transform 0.5s var(--ease-out);
+  }
+
+  .plinks--tiles :global(.icon) {
+    width: clamp(1.75rem, 1.4rem + 1vw, 2.4rem);
+    height: clamp(1.75rem, 1.4rem + 1vw, 2.4rem);
+  }
+
+  .plinks--tiles .plinks__label {
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
   @media (hover: hover) {
-    .plinks--inline .plinks__link:hover {
+    .plinks--inline .plinks__link:not(.plinks__link--icon):hover {
       background-size: 100% 1px;
+    }
+
+    .plinks--inline .plinks__link--icon:hover {
+      background-color: var(--color-text);
+      color: var(--color-bg);
     }
 
     .plinks__link:hover .arrow {
@@ -115,6 +196,12 @@ const links = profileLinks().filter((l) => !exclude.includes(l.id));
 
     .plinks--rows .plinks__link:hover .plinks__detail {
       color: var(--color-accent-text);
+    }
+
+    .plinks--tiles .plinks__link:hover {
+      background-color: var(--shu);
+      border-color: var(--shu);
+      color: var(--gofun);
     }
   }
 </style>

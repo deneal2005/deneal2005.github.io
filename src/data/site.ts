@@ -9,6 +9,6 @@ export const site = {
   volumeTitle: 'Hamon',
   volume: 'Vol. 01',
   edition: 'First edition, October 2026',
-  title: `${profile.name}: ${profile.role}, ${profile.location.city}`,
-  description: `${profile.name}, ${profile.role.toLowerCase()} in ${profile.location.city}. ${profile.statement}`,
+  title: `${profile.name}: ${profile.role}`,
+  description: `${profile.name}, ${profile.role.toLowerCase()}. ${profile.statement}`,
 };

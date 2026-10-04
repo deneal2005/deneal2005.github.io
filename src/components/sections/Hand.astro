@@ -4,6 +4,7 @@ import ChapterOpener from '../ui/ChapterOpener.astro';
 import Plate from '../ui/Plate.astro';
 import Arrow from '../ui/Arrow.astro';
 import ProfileLinks from '../ui/ProfileLinks.astro';
+import Education from '../ui/Education.astro';
 import { chapterById } from '../../data/chapters';
 import { site } from '../../data/site';
 import { plates, plateSize, plateUrl } from '../../lib/plates';
@@ -19,9 +20,8 @@ const { about } = site;
 
 const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const facts = [
-  { label: 'Based in', value: site.location.city },
   github.status === 'ok' && { label: 'On GitHub since', value: monthYear.format(new Date(github.memberSince)) },
-  { label: 'Working toward', value: 'Software backend engineering in Japan' },
+  { label: 'Working toward', value: 'Software backend engineering' },
   {
     label: 'In this volume',
     value: [
@@ -73,6 +73,8 @@ const facts = [
           ))
         }
       </dl>
+
+      <Education />
 
       {
         (about.exploring.length > 0 || about.learning.length > 0) && (
@@ -176,6 +178,10 @@ const facts = [
     font-size: var(--text-m);
     font-stretch: 85%;
     line-height: 1.2;
+  }
+
+  .hand__intro :global(.edu) {
+    margin-top: var(--space-8);
   }
 
   .hand__lists {
