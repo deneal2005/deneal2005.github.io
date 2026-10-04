@@ -10,10 +10,12 @@ export interface Chapter {
 
 export const chapters: Chapter[] = [
   { id: 'prologue', label: 'Prologue', title: 'Every line is final', ja: '序', romaji: 'Jo' },
-  { id: 'work', label: 'Chapter 01', title: 'The Work', ja: '作品', romaji: 'Sakuhin' },
-  { id: 'precepts', label: 'Chapter 02', title: 'Precepts', ja: '心得', romaji: 'Kokoroe' },
-  { id: 'keiko', label: 'Chapter 03', title: 'Keiko', ja: '稽古', romaji: 'Keiko' },
-  { id: 'hand', label: 'Chapter 04', title: 'The Hand', ja: '職人', romaji: 'Shokunin' },
+  { id: 'hand', label: 'Chapter 01', title: 'The Hand', ja: '職人', romaji: 'Shokunin' },
+  { id: 'index', label: 'Chapter 02', title: 'Index', ja: '索引', romaji: 'Sakuin' },
+  { id: 'work', label: 'Chapter 03', title: 'The Work', ja: '作品', romaji: 'Sakuhin' },
+  { id: 'precepts', label: 'Chapter 04', title: 'Precepts', ja: '心得', romaji: 'Kokoroe' },
+  { id: 'keiko', label: 'Chapter 05', title: 'Keiko', ja: '稽古', romaji: 'Keiko' },
+  { id: 'journey', label: 'Chapter 06', title: 'Journey', ja: '修行', romaji: 'Shugyō' },
   { id: 'invitation', label: 'Final chapter', title: 'The Invitation', ja: '続く', romaji: 'Tsuzuku' },
 ];
 

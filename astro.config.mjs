@@ -16,13 +16,16 @@ export default defineConfig({
   devToolbar: { enabled: false },
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   build: { inlineStylesheets: 'auto' },
+  // Code samples are short and set in the volume's own mono; no highlighter needed.
+  markdown: { syntaxHighlight: false },
   env: {
     schema: {
-      PUBLIC_CONTACT_EMAIL: envField.string({
-        context: 'client',
-        access: 'public',
-        default: 'hello@hamon.example',
-      }),
+      // Overrides profile.email in src/data/profile.ts when set.
+      PUBLIC_CONTACT_EMAIL: envField.string({ context: 'client', access: 'public', optional: true }),
+      // Optional. Raises the GitHub API rate limit for build-time data; never sent to the browser.
+      GITHUB_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Set to "1" to skip GitHub requests (offline builds); the site shows its fallback state.
+      GITHUB_OFFLINE: envField.boolean({ context: 'server', access: 'public', default: false }),
     },
   },
   fonts: [

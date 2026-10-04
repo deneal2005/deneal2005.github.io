@@ -1,0 +1,169 @@
+---
+/**
+ * 今 Currently. Hand-written fields from src/data/now.ts, plus the latest
+ * push from GitHub when the build could reach it. Empty fields are hidden.
+ */
+import { now, type NowItem } from '../../data/now';
+import { formatDate } from '../../lib/content';
+import { getGitHub } from '../../lib/github';
+
+interface Props {
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const github = await getGitHub();
+const latest = github.status === 'ok' ? github.repos[0] : undefined;
+
+const rows: { label: string; items: NowItem[] }[] = [
+  { label: 'Building', items: now.building },
+  { label: 'Learning', items: now.learning },
+  { label: 'Exploring', items: now.exploring },
+  { label: 'Reading', items: now.reading },
+].filter((row) => row.items.length > 0);
+---
+
+<aside class="now" aria-labelledby="now-title">
+  <div class="now__head">
+    <p class="now__ja" lang="ja" aria-hidden="true">今</p>
+    <div>
+      <Heading class="now__title" id="now-title">Currently</Heading>
+      <p class="meta">Updated by hand · <time datetime={now.updated}>{formatDate(now.updated)}</time></p>
+    </div>
+  </div>
+
+  <dl class="now__rows">
+    {
+      rows.map((row) => (
+        <div class="now__row">
+          <dt class="meta">{row.label}</dt>
+          <dd>
+            <ul>
+              {row.items.map((item) => (
+                <li>{item.href ? <a class="now__link" href={item.href}>{item.text}</a> : item.text}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))
+    }
+    {
+      now.goal && (
+        <div class="now__row">
+          <dt class="meta">Goal</dt>
+          <dd>{now.goal}</dd>
+        </div>
+      )
+    }
+    {
+      latest && (
+        <div class="now__row now__row--auto">
+          <dt class="meta">Last pushed</dt>
+          <dd>
+            <a class="now__link" href={latest.url} target="_blank" rel="noopener">
+              {latest.name}
+            </a>
+            <span class="now__when">
+              {' '}
+              on GitHub, <time datetime={latest.pushedAt}>{formatDate(latest.pushedAt)}</time>
+            </span>
+          </dd>
+        </div>
+      )
+    }
+  </dl>
+</aside>
+
+<style>
+  .now {
+    position: relative;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: var(--panel-border) solid var(--sumi);
+    background: var(--gofun);
+  }
+
+  .now__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .now__ja {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    flex: none;
+    background: var(--shu);
+    color: var(--gofun);
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: 1.9rem;
+    line-height: 1;
+    transform: rotate(-3deg);
+  }
+
+  .now__title {
+    font-family: var(--type-display);
+    font-size: clamp(1.75rem, 1.4rem + 1vw, 2.4rem);
+    font-style: italic;
+    font-weight: 350;
+    font-stretch: 80%;
+    line-height: 1;
+  }
+
+  .now__rows {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+  }
+
+  .now__row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .now__row dd {
+    margin: 0;
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+    line-height: 1.25;
+  }
+
+  .now__row ul {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .now__link {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.18em;
+  }
+
+  .now__when {
+    font-family: var(--type-sans);
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  @media (hover: hover) {
+    .now__link:hover {
+      color: var(--color-accent-text);
+      text-decoration-color: currentColor;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .now__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-1);
+    }
+  }
+</style>

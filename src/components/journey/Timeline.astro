@@ -1,0 +1,279 @@
+---
+/**
+ * The journey as a timeline: newest first, grouped by year, one row per entry.
+ * Rows link to their own page when the entry has a body.
+ */
+import type { CollectionEntry } from 'astro:content';
+import Arrow from '../ui/Arrow.astro';
+import { formatDate, hasPage } from '../../lib/content';
+
+interface Props {
+  entries: CollectionEntry<'journey'>[];
+  /** Group under big year numerals (the full journey page). */
+  byYear?: boolean;
+  headingLevel?: 'h3' | 'h4';
+}
+
+const { entries, byYear = false, headingLevel = 'h3' } = Astro.props;
+const Title = headingLevel;
+
+const groups = byYear
+  ? [...new Set(entries.map((e) => e.data.date.getUTCFullYear()))].map((year) => ({
+      year,
+      entries: entries.filter((e) => e.data.date.getUTCFullYear() === year),
+    }))
+  : [{ year: null, entries }];
+---
+
+<div class:list={['timeline', { 'timeline--years': byYear }]}>
+  {
+    groups.map((group) => (
+      <section class="timeline__group" aria-label={group.year ? String(group.year) : undefined}>
+        {group.year && (
+          <p class="timeline__year display" aria-hidden="true">
+            {group.year}
+          </p>
+        )}
+        <ol class="timeline__list" data-draw>
+          {group.entries.map((entry) => (
+            <li class="entry" id={entry.id} data-reveal="fade">
+              <time class="entry__date meta" datetime={entry.data.date.toISOString().slice(0, 10)}>
+                {formatDate(entry.data.date)}
+              </time>
+              <span class="entry__node" aria-hidden="true" />
+              <div class="entry__body">
+                <p class="entry__labels">
+                  <span class="entry__category">{entry.data.category}</span>
+                  {entry.data.status && <span class="entry__status meta">{entry.data.status}</span>}
+                </p>
+                <Title class="entry__title">
+                  {hasPage(entry) ? (
+                    <a class="entry__link" href={`/journey/${entry.id}/`}>
+                      {entry.data.title}
+                    </a>
+                  ) : (
+                    entry.data.title
+                  )}
+                </Title>
+                <p class="entry__summary">{entry.data.summary}</p>
+                {entry.data.learned && (
+                  <p class="entry__note">
+                    <span class="meta">Learned</span> {entry.data.learned}
+                  </p>
+                )}
+                {entry.data.next && (
+                  <p class="entry__note">
+                    <span class="meta">Next</span> {entry.data.next}
+                  </p>
+                )}
+                {(entry.data.stack.length > 0 || entry.data.project || entry.data.links.github || entry.data.links.external || hasPage(entry)) && (
+                  <p class="entry__foot">
+                    {entry.data.stack.length > 0 && <span class="meta">{entry.data.stack.join(' · ')}</span>}
+                    {entry.data.project && (
+                      <a class="entry__ref" href={`/work/${entry.data.project.id}/`}>
+                        Case study <Arrow />
+                      </a>
+                    )}
+                    {entry.data.links.github && (
+                      <a class="entry__ref" href={entry.data.links.github} target="_blank" rel="noopener">
+                        GitHub <Arrow dir="out" />
+                        <span class="vh">(opens in a new tab)</span>
+                      </a>
+                    )}
+                    {entry.data.links.external && (
+                      <a class="entry__ref" href={entry.data.links.external} target="_blank" rel="noopener">
+                        Link <Arrow dir="out" />
+                        <span class="vh">(opens in a new tab)</span>
+                      </a>
+                    )}
+                    {hasPage(entry) && (
+                      <a class="entry__ref entry__ref--more" href={`/journey/${entry.id}/`} aria-hidden="true" tabindex="-1">
+                        Read the entry <Arrow />
+                      </a>
+                    )}
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .timeline__group + .timeline__group {
+    margin-top: var(--space-8);
+  }
+
+  .timeline__year {
+    font-size: clamp(3.5rem, 2rem + 5vw, 7rem);
+    font-weight: 200;
+    color: var(--color-text);
+    margin-bottom: var(--space-4);
+  }
+
+  .timeline__list {
+    position: relative;
+  }
+
+  /* The spine: drawn top to bottom when the list arrives */
+  .timeline__list::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0;
+    left: calc(8.5rem + 0.6rem);
+    width: 1px;
+    background: var(--color-rule-strong);
+    transform-origin: top;
+    transition: transform 1.6s var(--ease-in-out);
+  }
+
+  :global(.js) .timeline__list[data-draw]::before {
+    transform: scaleY(0);
+  }
+
+  :global(.js) .timeline__list[data-draw].is-in::before {
+    transform: none;
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 8.5rem 1.2rem minmax(0, 1fr);
+    column-gap: var(--space-4);
+    padding-bottom: var(--space-7);
+  }
+
+  .entry:last-child {
+    padding-bottom: 0;
+  }
+
+  .entry__date {
+    padding-top: 0.3rem;
+    color: var(--color-text);
+    text-align: right;
+  }
+
+  .entry__node {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-top: 0.42rem;
+    background: var(--shu);
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 4px var(--color-bg);
+  }
+
+  .entry__labels {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .entry__category {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--color-rule-strong);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .entry__title {
+    margin-top: var(--space-2);
+    font-family: var(--type-display);
+    font-size: clamp(1.45rem, 1.15rem + 1vw, 2.1rem);
+    font-weight: 400;
+    font-stretch: 80%;
+    line-height: 1.1;
+  }
+
+  .entry__link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.15em;
+  }
+
+  .entry__summary {
+    margin-top: var(--space-2);
+    max-width: 38rem;
+    color: var(--color-text-muted);
+  }
+
+  .entry__note {
+    margin-top: var(--space-2);
+    max-width: 38rem;
+    font-size: var(--text-s);
+  }
+
+  .entry__note .meta {
+    margin-right: var(--space-2);
+    color: var(--color-accent-text);
+  }
+
+  .entry__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-3);
+  }
+
+  .entry__ref {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2rem;
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .entry__ref .arrow {
+    width: 0.75rem;
+    height: 0.55rem;
+  }
+
+  @media (hover: hover) {
+    .entry__link:hover,
+    .entry__ref:hover {
+      color: var(--color-accent-text);
+      text-decoration-color: currentColor;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .timeline__list::before {
+      left: 0.35rem;
+    }
+
+    .entry {
+      grid-template-columns: 0.7rem minmax(0, 1fr);
+    }
+
+    .entry__date {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: left;
+      padding-top: 0;
+    }
+
+    .entry__node {
+      grid-column: 1;
+      grid-row: 1;
+      margin-top: 0.3rem;
+    }
+
+    .entry__body {
+      grid-column: 2;
+      margin-top: var(--space-2);
+    }
+  }
+</style>

@@ -3,10 +3,11 @@
  * 目次 — the contents page. Replaces a conventional menu: chapters on the
  * left page, the five works on the right, with live page numbers.
  */
-import { getCollection } from 'astro:content';
+import ProfileLinks from '../ui/ProfileLinks.astro';
 import { chapters } from '../../data/chapters';
+import { getJourney, getWorks } from '../../lib/content';
 
-const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const [works, journey] = await Promise.all([getWorks(), getJourney()]);
 ---
 
 <dialog id="contents" class="contents" aria-labelledby="contents-title" data-tone="ink">
@@ -40,8 +41,8 @@ const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data
       </ol>
     </nav>
 
-    <nav class="contents__works" aria-label="Selected work">
-      <p class="meta">Inside Chapter 01</p>
+    <nav class="contents__works" aria-label="Projects and pages">
+      <p class="meta">Inside Chapter 03</p>
       <ol>
         {
           works.map((work) => (
@@ -54,6 +55,16 @@ const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data
           ))
         }
       </ol>
+      <p class="meta contents__sub">Elsewhere</p>
+      <ol>
+        <li>
+          <a class="contents__work" href="/journey/" data-contents-link>
+            <span class="meta">{String(journey.length).padStart(2, '0')}</span>
+            <span>The full journey</span>
+          </a>
+        </li>
+      </ol>
+      <ProfileLinks class="contents__links" exclude={['email']} />
     </nav>
   </div>
 </dialog>
@@ -186,6 +197,14 @@ const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data
 
   .contents__works ol {
     margin-top: var(--space-4);
+  }
+
+  .contents__sub {
+    margin-top: var(--space-6);
+  }
+
+  .contents__works :global(.contents__links) {
+    margin-top: var(--space-5);
   }
 
   .contents__work {

@@ -2,7 +2,7 @@
 // Emulates a real viewport (true phone widths included), scrolls the page and
 // saves one PNG per screen, plus any console errors it saw.
 //
-// Usage: node scripts/capture.mjs <url> <outPrefix> [width=1440] [height=900] [screens=6] [--mobile] [--motion] [--from=#id]
+// Usage: node scripts/capture.mjs <url> <outPrefix|file.png> [width=1440] [height=900] [screens=6] [--mobile] [--motion] [--from=#id]
 import { spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -97,7 +97,8 @@ for (let i = 0; i < total; i++) {
   await send('Runtime.evaluate', { expression: `window.scrollTo({top:${start.value + i * height},behavior:'instant'})` });
   await sleep(flags.has('--motion') ? 2200 : 700);
   const shot = await send('Page.captureScreenshot', { format: 'png' });
-  const file = resolve(`${prefix}-${i}.png`);
+  // A prefix ending in .png means "write exactly this file" (used for the share image).
+  const file = resolve(prefix.endsWith('.png') ? prefix : `${prefix}-${i}.png`);
   writeFileSync(file, Buffer.from(shot.data, 'base64'));
   saved.push(file);
 }

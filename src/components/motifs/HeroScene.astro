@@ -1,68 +1,13 @@
 ---
 /**
  * Plate 00 — The Cut. A vermilion sun split by a single stroke, and the
- * swordsman who made it. Drawn in a 1000 × 1000 box; the horizon line is a
- * separate element so it can run the full width of the panel.
+ * swordsman who made it. Drawn in a 1000 × 1000 box (geometry in lib/scene.ts);
+ * the horizon line is a separate element so it can run the full width of the panel.
  */
-import { FIGURE } from '../../lib/figure';
-import { brushStroke, halftone, round, smoothstep, splitCircle } from '../../lib/draw';
+import { computeScene } from '../../lib/scene';
 
-const sun = { cx: 520, cy: 430, r: 390 };
-const ground = 850;
-const scale = 0.82;
-const figureX = 485;
-const figureY = ground - FIGURE.height * scale;
-
-// The cut passes high, clear of the swordsman: the stroke is already over and
-// his blade is lowered. The sun only comes apart afterwards.
-const angle = 24;
-const through = [520, 362] as const;
-const halves = splitCircle({ ...sun, through, angle, reach: 2000 });
-const [ux, uy] = halves.direction;
-const [nx, ny] = halves.normal;
-const cutFrom = [through[0] - ux * 520, through[1] - uy * 520] as const;
-const cutTo = [through[0] + ux * 500, through[1] + uy * 500] as const;
-const cut = brushStroke({ from: cutFrom, to: cutTo, width: 11, peak: 0.36, seed: 11, wobble: 0.35, segments: 40 });
-
-// After the cut: the cap slides down its own face, the body of the sun settles.
-const gap = 8;
-const slide = 15;
-const upperShift = { x: round(-nx * gap + ux * slide), y: round(-ny * gap + uy * slide) };
-const lowerShift = { x: round(nx * gap * 0.5), y: round(ny * gap * 0.5) };
-
-// The lower edge of the sun dissolves into a halftone screen above the horizon.
-const fadeTop = 610;
-const fadeBottom = sun.cy + sun.r;
-const sunDots = halftone({
-  x: sun.cx - sun.r,
-  y: fadeTop - 30,
-  width: sun.r * 2,
-  height: fadeBottom - fadeTop + 50,
-  step: 17,
-  angle: 45,
-  value: (x, y) =>
-    (x - sun.cx) ** 2 + (y - sun.cy) ** 2 > sun.r ** 2 ? 0 : 1 - smoothstep(fadeTop + 10, fadeBottom - 4, y),
-});
-
-// The figure's shadow falls toward the reader, printed as a coarse screen.
-const feet = { left: figureX + 58 * scale, right: figureX + 226 * scale };
-const shadowDots = halftone({
-  x: feet.left - 10,
-  y: ground + 4,
-  width: 260,
-  height: 150,
-  step: 8,
-  angle: 15,
-  value: (x, y) => {
-    const t = (y - ground) / 150;
-    const left = feet.left + 6 + t * 30;
-    const right = feet.right - 10 + t * 70;
-    if (x < left || x > right) return 0;
-    return (1 - smoothstep(ground, ground + 120, y)) * 0.34;
-  },
-});
-
-const figureTransform = `translate(${round(figureX)} ${round(figureY)}) scale(${scale})`;
+const { sun, halves, cut, cutLine, upperShift, lowerShift, fadeTop, sunDots, shadowDots, figure, figureTransform } =
+  computeScene();
 ---
 
 <svg
@@ -93,7 +38,7 @@ const figureTransform = `translate(${round(figureX)} ${round(figureY)}) scale(${
     <mask id="scene-cut-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
       <path
         class="scene__cut-mask"
-        d={`M${round(cutFrom[0])} ${round(cutFrom[1])} L${round(cutTo[0])} ${round(cutTo[1])}`}
+        d={cutLine}
         pathLength="1"
         stroke="#fff"
         stroke-width="60"
@@ -124,12 +69,12 @@ const figureTransform = `translate(${round(figureX)} ${round(figureY)}) scale(${
     <g class="scene__shadow" set:html={shadowDots} />
     <g class="scene__figure" filter="url(#scene-ink)">
       <g transform={figureTransform}>
-        <path d={FIGURE.ribbon}></path>
-        <path d={FIGURE.saya}></path>
-        <path d={FIGURE.body}></path>
-        <path d={FIGURE.tsuka}></path>
-        <path d={FIGURE.tsuba}></path>
-        <path class="scene__blade" d={FIGURE.blade}></path>
+        <path d={figure.ribbon}></path>
+        <path d={figure.saya}></path>
+        <path d={figure.body}></path>
+        <path d={figure.tsuka}></path>
+        <path d={figure.tsuba}></path>
+        <path class="scene__blade" d={figure.blade}></path>
       </g>
     </g>
   </g>

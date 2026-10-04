@@ -265,6 +265,30 @@ ol {
   transform: translateY(1px);
 }
 
+/* The one primary action in a view */
+.btn--ink {
+  background-color: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+@media (hover: hover) {
+  .btn--ink:hover {
+    background-color: var(--shu);
+    border-color: var(--shu);
+    color: var(--gofun);
+  }
+
+  .btn:hover .arrow--right {
+    transform: translateX(0.2rem);
+  }
+}
+
+.btn .arrow {
+  width: 1rem;
+  height: 0.6rem;
+}
+
 .arrow {
   display: inline-block;
   width: 1.1em;
@@ -303,4 +327,97 @@ ol {
 .cursor.is-visible {
   opacity: 1;
   scale: 1;
+}
+
+/* ── Long-form Markdown (case studies, journal entries) ── */
+.longform {
+  max-width: 40rem;
+}
+
+.longform h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  font-family: var(--type-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  scroll-margin-top: calc(var(--masthead-h) + var(--space-5));
+}
+
+.longform h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-rule);
+}
+
+.longform > h2:first-child {
+  margin-top: 0;
+}
+
+.longform p,
+.longform ul,
+.longform ol {
+  margin-top: var(--space-4);
+  font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.longform ul {
+  list-style: square;
+  padding-left: 1.2em;
+}
+
+.longform ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+}
+
+.longform li + li {
+  margin-top: var(--space-2);
+}
+
+.longform h2 + p {
+  font-family: var(--type-display);
+  font-size: var(--text-m);
+  font-stretch: 90%;
+  line-height: 1.38;
+}
+
+.longform em {
+  font-family: var(--type-display);
+  font-style: italic;
+  font-size: 1.08em;
+  color: var(--color-accent-text);
+}
+
+.longform a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.longform code {
+  font-family: var(--type-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  background: var(--washi-deep);
+}
+
+.longform pre {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  overflow-x: auto;
+  background: var(--sumi) !important;
+  color: var(--washi);
+  border-left: var(--panel-border) solid var(--shu);
+}
+
+.longform pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: var(--text-s);
 }

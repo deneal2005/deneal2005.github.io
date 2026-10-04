@@ -1,0 +1,188 @@
+---
+/**
+ * Chapter 06 — Journey (修行), the homepage preview: what's on the desk now,
+ * the latest entries, the newest experiment and GitHub activity. The whole
+ * record lives at /journey/.
+ */
+import ChapterOpener from '../ui/ChapterOpener.astro';
+import Arrow from '../ui/Arrow.astro';
+import NowPanel from '../journey/NowPanel.astro';
+import Timeline from '../journey/Timeline.astro';
+import GitHubActivity from '../journey/GitHubActivity.astro';
+import RepoList from '../journey/RepoList.astro';
+import { chapterById } from '../../data/chapters';
+import { getExperiments, getJourney } from '../../lib/content';
+import { getGitHub } from '../../lib/github';
+
+const chapter = chapterById('journey');
+const [journey, experiments, github] = await Promise.all([getJourney(), getExperiments(), getGitHub()]);
+const latestExperiment = experiments[0];
+---
+
+<section
+  id={chapter.id}
+  class="journey wrap"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="journey-title"
+>
+  <ChapterOpener
+    id="journey"
+    epigraph="The running record: what I learned, built and tried, newest first. Short entries, dated, kept honest."
+  />
+
+  <div class="journey__grid grid">
+    <div class="journey__side">
+      <NowPanel />
+      {
+        latestExperiment && (
+          <a class="journey__lab" href={`#study-${latestExperiment.id}`}>
+            <span class="meta">Latest experiment</span>
+            <span class="journey__lab-title">
+              {latestExperiment.data.ja && (
+                <span lang="ja" aria-hidden="true">
+                  {latestExperiment.data.ja}{' '}
+                </span>
+              )}
+              {latestExperiment.data.title}
+            </span>
+            <span class="journey__lab-summary">{latestExperiment.data.summary}</span>
+            <span class="journey__lab-cta meta">
+              Try it in Chapter 05 <Arrow />
+            </span>
+          </a>
+        )
+      }
+    </div>
+
+    <div class="journey__recent">
+      <h3 class="journey__heading meta">Recent entries</h3>
+      <Timeline entries={journey.slice(0, 4)} headingLevel="h4" />
+      <a class="btn btn--ink journey__all" href="/journey/">
+        Read the whole journey · {journey.length} entries <Arrow />
+      </a>
+    </div>
+  </div>
+
+  <div class="journey__github grid">
+    <div class="journey__activity">
+      <GitHubActivity github={github} />
+    </div>
+    {
+      github.status === 'ok' && github.repos.length > 0 && (
+        <div class="journey__repos">
+          <h3 class="journey__heading meta">Recently pushed</h3>
+          <RepoList github={github} limit={3} />
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .journey {
+    padding-block: var(--space-section);
+  }
+
+  .journey__grid {
+    row-gap: var(--space-8);
+    align-items: start;
+  }
+
+  .journey__side {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .journey__recent {
+    grid-column: 7 / -1;
+  }
+
+  .journey__heading {
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-rule);
+    color: var(--color-text);
+  }
+
+  .journey__all {
+    margin-top: var(--space-7);
+  }
+
+  .journey__lab {
+    display: grid;
+    gap: var(--space-2);
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    background: var(--sumi);
+    color: var(--washi);
+    transition: background-color var(--dur-2) linear;
+  }
+
+  .journey__lab .meta {
+    color: var(--usuzumi);
+  }
+
+  .journey__lab-title {
+    font-family: var(--type-display);
+    font-size: clamp(1.6rem, 1.3rem + 1vw, 2.2rem);
+    font-style: italic;
+    font-stretch: 80%;
+    line-height: 1.05;
+  }
+
+  .journey__lab-title [lang='ja'] {
+    font-family: var(--type-jp);
+    font-style: normal;
+    font-weight: 800;
+    color: var(--shu-light);
+  }
+
+  .journey__lab-summary {
+    font-size: var(--text-s);
+    color: var(--usuzumi);
+  }
+
+  .journey__lab-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    color: var(--washi) !important;
+  }
+
+  @media (hover: hover) {
+    .journey__lab:hover {
+      background: var(--keshizumi);
+    }
+
+    .journey__lab:hover .arrow {
+      transform: translateX(0.25rem);
+    }
+  }
+
+  .journey__github {
+    margin-top: var(--space-section);
+    padding-top: var(--space-6);
+    border-top: var(--panel-border) solid var(--sumi);
+    row-gap: var(--space-7);
+    align-items: start;
+  }
+
+  .journey__activity {
+    grid-column: 1 / span 7;
+  }
+
+  .journey__repos {
+    grid-column: 9 / -1;
+  }
+
+  @media (max-width: 63.99rem) {
+    .journey__side,
+    .journey__recent,
+    .journey__activity,
+    .journey__repos {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

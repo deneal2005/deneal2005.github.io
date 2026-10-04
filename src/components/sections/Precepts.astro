@@ -1,12 +1,14 @@
 ---
 /**
- * Chapter 02 — Precepts, laid out as a manga page. Each panel doesn't just
+ * Chapter 04 — Precepts, laid out as a manga page. Each panel doesn't just
  * state its precept, it performs it: Ma is nearly empty, Kata is a grid,
  * Shu-Ha-Ri breaks a line in three steps, Zanshin is the moment after.
+ * Each also names where the idea shows up in real work (src/data/precepts.ts).
  */
 import ChapterOpener from '../ui/ChapterOpener.astro';
+import PreceptText from '../ui/PreceptText.astro';
 import { chapterById } from '../../data/chapters';
-import { precepts } from '../../data/practice';
+import { precepts } from '../../data/precepts';
 import { brushStroke, rng, round } from '../../lib/draw';
 
 const chapter = chapterById('precepts');
@@ -35,7 +37,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
   data-chapter-title={chapter.title}
   aria-labelledby="precepts-title"
 >
-  <ChapterOpener id="precepts" epigraph="Four rules I work by. Each one is drawn the way it asks to be read." />
+  <ChapterOpener id="precepts" epigraph="Four ideas I keep coming back to, each drawn the way it asks to be read, and each with a place it shows up in my work." />
 
   <div class="page">
     <!-- 間 Ma: the panel is the pause -->
@@ -43,12 +45,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
       <div class="panel">
         <div class="panel__inner">
           <span class="ma__stop" aria-hidden="true"></span>
-          <div class="precept precept--corner">
-            <p class="precept__ja" lang="ja" aria-hidden="true">{ma.ja}</p>
-            <h3 class="precept__name meta">{ma.name}</h3>
-            <p class="precept__rule">{ma.rule}</p>
-            <p class="precept__body">{ma.body}</p>
-          </div>
+          <PreceptText precept={ma} class="precept--corner" />
         </div>
       </div>
     </article>
@@ -60,12 +57,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
           <div class="kata__grid" aria-hidden="true">
             {kataCells.map((i) => <span class:list={['kata__cell', { 'is-odd': i === 23 }]} />)}
           </div>
-          <div class="precept">
-            <p class="precept__ja" lang="ja" aria-hidden="true">{kata.ja}</p>
-            <h3 class="precept__name meta">{kata.name}</h3>
-            <p class="precept__rule">{kata.rule}</p>
-            <p class="precept__body">{kata.body}</p>
-          </div>
+          <PreceptText precept={kata} />
         </div>
       </div>
     </article>
@@ -74,12 +66,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
     <article class="cell cell--shuhari" data-reveal="panel" style="--i: 2">
       <div class="panel">
         <div class="panel__inner">
-          <div class="precept">
-            <p class="precept__ja" lang="ja" aria-hidden="true">{shuhari.ja}</p>
-            <h3 class="precept__name meta">{shuhari.name}</h3>
-            <p class="precept__rule">{shuhari.rule}</p>
-            <p class="precept__body">{shuhari.body}</p>
-          </div>
+          <PreceptText precept={shuhari} />
           <ol class="stages">
             {
               shuhari.stages.map((stage, i) => (
@@ -127,12 +114,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
             </g>
           </svg>
           <span class="zanshin__scrim" aria-hidden="true"></span>
-          <div class="precept precept--wide">
-            <p class="precept__ja" lang="ja" aria-hidden="true">{zanshin.ja}</p>
-            <h3 class="precept__name meta">{zanshin.name}</h3>
-            <p class="precept__rule">{zanshin.rule}</p>
-            <p class="precept__body">{zanshin.body}</p>
-          </div>
+          <PreceptText precept={zanshin} class="precept--wide" />
         </div>
       </div>
     </article>
@@ -205,46 +187,8 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
     --shape: polygon(0 var(--slant), 100% 0, 100% 100%, 0 100%);
   }
 
-  /* ── Precept text ─────────────────────────────────── */
-  .precept {
-    position: relative;
-    align-self: end;
-    padding: clamp(1.25rem, 2.5vw, 2.25rem);
-    max-width: 30rem;
-  }
-
-  .precept__ja {
-    font-family: var(--type-jp);
-    font-weight: 800;
-    font-size: clamp(2.25rem, 1.6rem + 1.8vw, 3.5rem);
-    line-height: 1;
-    letter-spacing: 0.06em;
-  }
-
-  .precept__name {
-    margin-top: var(--space-4);
-    color: var(--color-accent-text);
-  }
-
-  .precept__rule {
-    margin-top: var(--space-2);
-    font-family: var(--type-display);
-    font-size: var(--text-m);
-    font-style: italic;
-    font-weight: 400;
-    font-stretch: 85%;
-    line-height: 1.2;
-  }
-
-  .precept__body {
-    margin-top: var(--space-3);
-    font-size: var(--text-s);
-    line-height: 1.55;
-    color: var(--color-text-muted);
-  }
-
   /* 間: almost nothing, on purpose */
-  .precept--corner {
+  .panel__inner :global(.precept--corner) {
     justify-self: end;
     max-width: 22rem;
     padding-bottom: calc(var(--slant) + 1.5rem);
@@ -370,13 +314,9 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
     fill: var(--shu);
   }
 
-  .precept--wide {
+  .panel__inner :global(.precept--wide) {
     max-width: 34rem;
     align-self: center;
-  }
-
-  .precept--wide .precept__name {
-    color: var(--shu-light);
   }
 
   /* ── Small screens: panels stack, gutters keep their slant ── */
@@ -412,11 +352,8 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
       grid-template-columns: repeat(7, 1fr);
     }
 
-    .precept--corner {
-      padding-bottom: calc(var(--slant) + 1.25rem);
-    }
-
-    .cell--kata .precept {
+    .panel__inner :global(.precept--corner),
+    .cell--kata :global(.precept) {
       padding-bottom: calc(var(--slant) + 1.25rem);
     }
 
@@ -424,7 +361,7 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .cell--shuhari .precept {
+    .cell--shuhari :global(.precept) {
       padding-top: calc(var(--slant) + 1.25rem);
     }
 

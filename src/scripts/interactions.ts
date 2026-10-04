@@ -123,12 +123,16 @@ export function initInvitation() {
       try {
         await navigator.clipboard.writeText(button.dataset.copy ?? '');
         label.textContent = 'Copied';
+        button.classList.add('is-copied');
         if (status) status.textContent = 'Email address copied to the clipboard.';
       } catch {
-        label.textContent = 'Press Ctrl+C';
-        if (status) status.textContent = 'Copying was blocked by the browser. Select the address to copy it.';
+        label.textContent = 'Copy blocked';
+        if (status) status.textContent = 'Your browser blocked copying. Select the address above to copy it by hand.';
       }
-      setTimeout(() => (label.textContent = initial), 2400);
+      setTimeout(() => {
+        label.textContent = initial;
+        button.classList.remove('is-copied');
+      }, 2400);
     });
   });
 }

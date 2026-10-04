@@ -6,6 +6,7 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import Plate from '../ui/Plate.astro';
+import Arrow from '../ui/Arrow.astro';
 import { plates, plateSize, plateUrl } from '../../lib/plates';
 
 interface Props {
@@ -16,7 +17,7 @@ const { work } = Astro.props;
 const { data } = work;
 const number = String(data.order).padStart(2, '0');
 const size = plateSize(plates[data.plate], 'a');
-const src = data.cover ?? plateUrl(data.plate, 'a');
+const src = plateUrl(data.plate, 'a');
 // The wide spread crops its plate to a cinematic letterbox.
 const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
 ---
@@ -36,9 +37,10 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     <p class="spread__index meta">
       <span class="spread__no">{number}</span>
       <span class="spread__rule" aria-hidden="true"></span>
-      <span>{data.sector}</span>
+      <span>{data.kind}</span>
       <span aria-hidden="true">·</span>
       <span>{data.year}</span>
+      <span class="spread__status">{data.status}</span>
     </p>
 
     <h3 class="spread__title display" data-reveal="rise">
@@ -54,11 +56,11 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     </h3>
 
     <div class="spread__body">
-      <p class="spread__disciplines meta">{data.disciplines.join(' / ')}</p>
-      <p class="spread__logline">{data.logline}</p>
+      <p class="spread__logline">{data.summary}</p>
+      <p class="spread__disciplines meta">{data.stack.slice(0, 4).join(' / ')}</p>
       <p class="spread__cta meta" aria-hidden="true">
-        Read chapter {number}
-        <svg class="arrow" viewBox="0 0 18 10"><path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
+        Read the case study
+        <Arrow />
       </p>
     </div>
   </div>
@@ -102,6 +104,12 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     color: var(--color-accent-text);
   }
 
+  .spread__status {
+    margin-left: var(--space-2);
+    padding: 0.15rem 0.45rem;
+    border: 1px solid currentColor;
+  }
+
   .spread__rule {
     width: 2.5rem;
     height: 1px;
@@ -120,8 +128,11 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     margin-top: var(--space-5);
   }
 
+  .spread__disciplines {
+    margin-top: var(--space-4);
+  }
+
   .spread__logline {
-    margin-top: var(--space-3);
     max-width: 24rem;
     font-family: var(--type-display);
     font-size: var(--text-m);

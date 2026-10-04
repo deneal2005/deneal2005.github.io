@@ -1,12 +1,15 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Plate from '../../components/ui/Plate.astro';
+import Arrow from '../../components/ui/Arrow.astro';
 import HamonLine from '../../components/motifs/HamonLine.astro';
+import { formatDate, getJourney, getWorks, journeyHref } from '../../lib/content';
 import { plates, plateSize, plateUrl } from '../../lib/plates';
 
 export async function getStaticPaths() {
-  const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  const works = await getWorks();
   return works.map((work, i) => ({
     params: { slug: work.id },
     props: { work, next: works[(i + 1) % works.length], total: works.length },
@@ -23,35 +26,36 @@ const { work, next, total } = Astro.props;
 const { data } = work;
 const { Content, headings } = await render(work);
 const number = String(data.order).padStart(2, '0');
-const nextNumber = String(next.data.order).padStart(2, '0');
 const isFinal = data.order === total;
+const related = (await getJourney()).filter((entry) => entry.data.project?.id === work.id);
 
 const plate = plates[data.plate];
-const cover = { src: data.cover ?? plateUrl(data.plate, 'a'), ...plateSize(plate, 'a') };
-const detail = { src: data.detail ?? plateUrl(data.plate, 'b'), ...plateSize(plate, 'b') };
+const cover = { src: plateUrl(data.plate, 'a'), ...plateSize(plate, 'a') };
+const detail = { src: plateUrl(data.plate, 'b'), ...plateSize(plate, 'b') };
 const landscape = cover.width > cover.height;
-const nextCover = { src: next.data.cover ?? plateUrl(next.data.plate, 'a'), ...plateSize(plates[next.data.plate], 'a') };
+const nextCover = { src: plateUrl(next.data.plate, 'a'), ...plateSize(plates[next.data.plate], 'a') };
 
 const meta = [
-  { label: 'Client', value: data.client },
+  { label: 'What', value: data.kind },
   { label: 'Year', value: String(data.year) },
-  { label: 'Role', value: data.role },
-  ...data.facts,
-];
+  { label: 'Status', value: data.status },
+  data.role && { label: 'Role', value: data.role },
+].filter((m): m is { label: string; value: string } => Boolean(m));
 ---
 
-<BaseLayout title={data.title} description={data.logline} running={{ label: `Chapter 01 · ${number}`, title: data.title }}>
-  <article class="case" data-chapter-label={`Chapter 01 · ${number}`} data-chapter-title={data.title} aria-labelledby="case-title">
+<BaseLayout
+  title={data.title}
+  description={data.summary}
+  running={{ label: `Chapter 03 · ${number}`, title: data.title }}
+>
+  <article class="case" data-chapter-label={`Chapter 03 · ${number}`} data-chapter-title={data.title} aria-labelledby="case-title">
     <header class="case__head wrap">
       <div class="case__trail">
-        <a class="case__back meta" href="/#work">
-          <svg class="arrow" viewBox="0 0 18 10" aria-hidden="true"><path d="M18 5H2M6 1L2 5l4 4" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
-          The Work
-        </a>
-        <p class="meta">Chapter 01 · {number} of {String(total).padStart(2, '0')}</p>
+        <a class="case__back meta" href="/#work"><Arrow dir="left" /> The Work</a>
+        <p class="meta">Chapter 03 · {number} of {String(total).padStart(2, '0')}</p>
       </div>
 
-      <p class="case__sector meta"><span class="case__no">{number}</span> {data.sector} · {data.disciplines.join(' / ')}</p>
+      <p class="case__kind meta"><span class="case__no">{number}</span> {data.kind} · {data.year} · {data.status}</p>
       <h1 id="case-title" class="case__title display" data-reveal="rise">
         {
           data.titleLines.map((line, i) => (
@@ -61,7 +65,33 @@ const meta = [
           ))
         }
       </h1>
-      <p class="case__logline lede" data-reveal="fade" style="--i: 3">{data.logline}</p>
+      <div class="case__intro">
+        <p class="case__summary lede" data-reveal="fade" style="--i: 3">{data.summary}</p>
+        {
+          (data.links.live || data.links.repo || data.links.other.length > 0) && (
+            <p class="case__actions" data-reveal="fade" style="--i: 5">
+              {data.links.live && (
+                <a class="btn btn--ink" href={data.links.live} target="_blank" rel="noopener">
+                  Visit the live site <Arrow dir="out" />
+                  <span class="vh">(opens in a new tab)</span>
+                </a>
+              )}
+              {data.links.repo && (
+                <a class="btn" href={data.links.repo} target="_blank" rel="noopener">
+                  Source on GitHub <Arrow dir="out" />
+                  <span class="vh">(opens in a new tab)</span>
+                </a>
+              )}
+              {data.links.other.map((link) => (
+                <a class="btn" href={link.href} target="_blank" rel="noopener">
+                  {link.label} <Arrow dir="out" />
+                  <span class="vh">(opens in a new tab)</span>
+                </a>
+              ))}
+            </p>
+          )
+        }
+      </div>
     </header>
 
     <div class:list={['case__cover', landscape ? 'case__cover--wide' : 'case__cover--tall']}>
@@ -79,55 +109,139 @@ const meta = [
               </div>
             ))
           }
-        </dl>
-        <nav class="case__toc" aria-label="In this chapter">
-          <p class="meta">In this chapter</p>
-          <ol>
-            {
-              headings
-                .filter((h) => h.depth === 2)
-                .map((h) => (
+          <div>
+            <dt class="meta">Stack</dt>
+            <dd>
+              <ul class="case__stack">
+                {data.stack.map((term) => (
                   <li>
-                    <a class="link" href={`#${h.slug}`}>
-                      {h.text}
+                    <a href="/#index">{term}</a>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+        {
+          headings.some((h) => h.depth === 2) && (
+            <nav class="case__toc" aria-label="On this page">
+              <p class="meta">On this page</p>
+              <ol>
+                {data.features.length > 0 && (
+                  <li>
+                    <a class="link" href="#features">
+                      Key features
                     </a>
                   </li>
-                ))
-            }
-          </ol>
-        </nav>
+                )}
+                {headings
+                  .filter((h) => h.depth === 2)
+                  .map((h) => (
+                    <li>
+                      <a class="link" href={`#${h.slug}`}>
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+              </ol>
+            </nav>
+          )
+        }
       </aside>
 
-      <div class="case__prose">
-        <Content />
+      <div class="case__main">
+        {
+          data.features.length > 0 && (
+            <section class="case__features" aria-labelledby="features">
+              <h2 id="features" class="case__features-title meta">
+                Key features
+              </h2>
+              <ol>
+                {data.features.map((feature, i) => (
+                  <li>
+                    <span class="case__feature-n meta" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )
+        }
+        <div class="longform">
+          <Content />
+        </div>
       </div>
     </div>
+
+    {
+      data.screens.length > 0 && (
+        <section class="case__screens wrap" aria-label="Screenshots">
+          {data.screens.map((screen) => (
+            <figure>
+              <Image src={screen.src} alt={screen.alt} widths={[640, 1280, 1920]} sizes="(min-width: 64rem) 80vw, 100vw" />
+              {screen.caption && <figcaption class="meta">{screen.caption}</figcaption>}
+            </figure>
+          ))}
+        </section>
+      )
+    }
 
     <figure class="case__detail wrap">
       <Plate src={detail.src} alt={data.detailAlt} width={detail.width} height={detail.height} />
       <figcaption class="meta">Detail · Plate {number}, enlarged</figcaption>
     </figure>
 
+    {
+      related.length > 0 && (
+        <section class="case__related wrap" aria-labelledby="related-title">
+          <h2 id="related-title" class="meta">
+            In the journey
+          </h2>
+          <ol>
+            {related.map((entry) => (
+              <li>
+                <a class="case__related-link" href={journeyHref(entry)}>
+                  <time class="meta" datetime={entry.data.date.toISOString().slice(0, 10)}>
+                    {formatDate(entry.data.date)}
+                  </time>
+                  <span class="case__related-title">{entry.data.title}</span>
+                  <Arrow />
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
     <HamonLine seed={data.order * 5} class="case__hamon" />
 
-    <nav class="case__next wrap" aria-label="Next chapter">
-      <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Turn">
-        <span class="next__label meta">{isFinal ? 'Back to the first chapter' : 'Next chapter'} · {nextNumber}</span>
-        <span class="next__title display">{next.data.title}</span>
-        <span class="next__logline">{next.data.logline}</span>
-        <span class="next__plate">
-          <img
-            src={nextCover.src}
-            alt=""
-            width={nextCover.width}
-            height={nextCover.height}
-            loading="lazy"
-            decoding="async"
-            style={`view-transition-name: plate-${next.id}`}
-          />
-        </span>
-      </a>
-    </nav>
+    {
+      total > 1 && (
+        <nav class="case__next wrap" aria-label="Next project">
+          <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Turn">
+            <span class="next__label meta">
+              {isFinal ? 'Back to the first project' : 'Next project'} · {String(next.data.order).padStart(2, '0')}
+            </span>
+            <span class="next__title display">{next.data.title}</span>
+            <span class="next__summary">{next.data.summary}</span>
+            <span class="next__plate">
+              <img
+                src={nextCover.src}
+                alt=""
+                width={nextCover.width}
+                height={nextCover.height}
+                loading="lazy"
+                decoding="async"
+                style={`view-transition-name: plate-${next.id}`}
+              />
+            </span>
+          </a>
+        </nav>
+      )
+    }
   </article>
 </BaseLayout>
 
@@ -159,7 +273,7 @@ const meta = [
     }
   }
 
-  .case__sector {
+  .case__kind {
     margin-top: var(--space-8);
   }
 
@@ -175,10 +289,25 @@ const meta = [
     text-transform: uppercase;
   }
 
-  .case__logline {
+  .case__intro {
     margin: var(--space-6) 0 0 auto;
-    max-width: 38rem;
+    max-width: 40rem;
+  }
+
+  .case__summary {
     font-style: italic;
+  }
+
+  .case__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .case__actions .arrow--out {
+    width: 0.8rem;
+    height: 0.62rem;
   }
 
   /* ── Cover ─────────────────────────────────────────── */
@@ -226,9 +355,9 @@ const meta = [
     font-size: var(--text-s);
   }
 
-  .case__meta div {
+  .case__meta > div {
     display: grid;
-    grid-template-columns: 7rem minmax(0, 1fr);
+    grid-template-columns: 5.5rem minmax(0, 1fr);
     gap: var(--space-3);
     padding-bottom: var(--space-3);
     border-bottom: 1px solid var(--color-rule);
@@ -238,6 +367,18 @@ const meta = [
     margin: 0;
   }
 
+  .case__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .case__stack a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.18em;
+  }
+
   .case__toc ol {
     display: grid;
     gap: var(--space-2);
@@ -245,56 +386,56 @@ const meta = [
     font-size: var(--text-s);
   }
 
-  .case__prose {
+  .case__main {
     grid-column: 6 / -1;
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .case__features {
     max-width: 40rem;
   }
 
-  .case__prose :global(h2) {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-top: var(--space-8);
-    font-family: var(--type-mono);
-    font-size: var(--text-xs);
-    font-weight: 500;
-    letter-spacing: var(--tracking-meta);
-    text-transform: uppercase;
+  .case__features-title {
+    padding-bottom: var(--space-3);
+    border-bottom: var(--panel-border) solid var(--sumi);
     scroll-margin-top: calc(var(--masthead-h) + var(--space-5));
   }
 
-  .case__prose :global(h2::after) {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--color-rule);
+  .case__features ol {
+    display: grid;
   }
 
-  .case__prose :global(h2:first-child) {
-    margin-top: 0;
+  .case__features li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
   }
 
-  .case__prose :global(p) {
-    margin-top: var(--space-4);
-    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
-    line-height: 1.65;
-  }
-
-  .case__prose :global(h2 + p) {
-    font-family: var(--type-display);
-    font-size: var(--text-m);
-    font-stretch: 90%;
-    line-height: 1.38;
-  }
-
-  .case__prose :global(em) {
-    font-family: var(--type-display);
-    font-style: italic;
-    font-size: 1.08em;
+  .case__feature-n {
     color: var(--color-accent-text);
   }
 
-  /* ── Detail plate ─────────────────────────────────── */
+  /* ── Screens & detail ─────────────────────────────── */
+  .case__screens {
+    display: grid;
+    gap: var(--space-8);
+    margin-top: var(--space-section);
+  }
+
+  .case__screens img {
+    width: 100%;
+    height: auto;
+    border: var(--panel-border) solid var(--sumi);
+  }
+
+  .case__screens figcaption {
+    margin-top: var(--space-3);
+  }
+
   .case__detail {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -302,13 +443,47 @@ const meta = [
     margin-top: var(--space-section);
   }
 
-  .case__detail :global(.plate) {
+  .case__detail :global(.plate),
+  .case__detail figcaption {
     grid-column: 5 / -1;
   }
 
   .case__detail figcaption {
-    grid-column: 5 / -1;
     margin-top: var(--space-3);
+  }
+
+  .case__related {
+    margin-top: var(--space-section);
+  }
+
+  .case__related h2 {
+    padding-bottom: var(--space-3);
+    border-bottom: var(--panel-border) solid var(--sumi);
+  }
+
+  .case__related-link {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .case__related-title {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+  }
+
+  @media (hover: hover) {
+    .case__related-link:hover .case__related-title {
+      color: var(--color-accent-text);
+    }
+
+    .case__related-link:hover .arrow {
+      transform: translateX(0.25rem);
+    }
   }
 
   .case :global(.case__hamon) {
@@ -316,7 +491,7 @@ const meta = [
     padding-inline: var(--margin);
   }
 
-  /* ── Next chapter ─────────────────────────────────── */
+  /* ── Next project ─────────────────────────────────── */
   .case__next {
     padding-block: var(--space-8) var(--space-section);
   }
@@ -342,7 +517,7 @@ const meta = [
     transition: color var(--dur-1) linear;
   }
 
-  .next__logline {
+  .next__summary {
     grid-column: 1 / span 5;
     color: var(--color-text-muted);
     font-size: var(--text-s);
@@ -374,12 +549,9 @@ const meta = [
   }
 
   @media (max-width: 63.99rem) {
-    .case__cover--tall :global(.plate) {
-      grid-column: 1 / -1;
-    }
-
+    .case__cover--tall :global(.plate),
     .case__aside,
-    .case__prose,
+    .case__main,
     .case__detail :global(.plate),
     .case__detail figcaption {
       grid-column: 1 / -1;
@@ -391,7 +563,7 @@ const meta = [
 
     .next__label,
     .next__title,
-    .next__logline,
+    .next__summary,
     .next__plate {
       grid-column: 1 / -1;
       grid-row: auto;
@@ -400,6 +572,16 @@ const meta = [
     .next__plate {
       order: -1;
       margin-bottom: var(--space-4);
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .case__related-link {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .case__related-link time {
+      grid-column: 1 / -1;
     }
   }
 </style>

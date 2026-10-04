@@ -1,193 +1,179 @@
 import { brushStroke, halftone, rng, round, smoothstep } from '../draw';
+import { computeScene } from '../scene';
 import { INK, type Plate } from './shared';
 
 export { renderPlate, plateSize, type Plate, type Variant } from './shared';
 
-/** 01 — Meridian House: a colonnade in front of a low sun, its reflection on polished stone. */
-const meridian: Plate = {
+/** GreenUP: a sapling on a globe printed in ink dots, pinned where actions were logged. */
+const greenup: Plate = {
   width: 800,
   height: 1000,
-  detail: [150, 330, 500, 375],
+  detail: [150, 230, 500, 375],
   draw: () => {
-    const sun = { cx: 400, cy: 610, r: 168 };
-    const beam = 128;
-    const slab = { top: 700, height: 56 };
-    // An even facade rhythm with one interval left open around the sun: 間.
-    const columns = [104, 148, 192, 236, 564, 608, 652, 696]
-      .map((x, i) => `<rect x="${x - (i % 2 ? 2 : 3.5)}" y="${beam}" width="${i % 2 ? 4 : 7}" height="${slab.top - beam}"/>`)
-      .join('');
-    const reflection = halftone({
-      x: 130,
-      y: slab.top + slab.height + 8,
-      width: 540,
-      height: 210,
+    const globe = { cx: 400, cy: 540, r: 290 };
+    const spin = 2.3;
+    // Abstract continents: layered waves over latitude and longitude, with seeded phases.
+    const random = rng(8);
+    const phases = Array.from({ length: 8 }, () => random() * Math.PI * 2);
+    const land = (lat: number, lon: number) => {
+      let v = 0;
+      for (let o = 0, amp = 1, f = 1.4; o < 4; o++, amp *= 0.55, f *= 2.05) {
+        v += amp * Math.sin(lon * f * 1.3 + phases[o]) * Math.cos(lat * f + phases[o + 4]);
+      }
+      return v > 0.12;
+    };
+    const sphere = (x: number, y: number) => {
+      const nx = (x - globe.cx) / globe.r;
+      const ny = (y - globe.cy) / globe.r;
+      const d = nx * nx + ny * ny;
+      if (d > 1) return null;
+      const nz = Math.sqrt(1 - d);
+      return { nx, ny, nz, lat: Math.asin(-ny), lon: Math.atan2(nx, nz) + spin };
+    };
+    // Land prints as distinct dots (coverage below the merge point); sea as a faint screen.
+    const dots = halftone({
+      x: globe.cx - globe.r,
+      y: globe.cy - globe.r,
+      width: globe.r * 2,
+      height: globe.r * 2,
       step: 11,
-      angle: 0,
+      angle: 30,
       value: (x, y) => {
-        const spread = Math.abs(x - sun.cx) / (sun.r * (1.05 - (y - 764) / 900));
-        if (spread > 1) return 0;
-        const depth = (y - (slab.top + slab.height)) / 210;
-        return (1 - spread ** 2) * (1 - depth) * (0.62 + 0.38 * Math.sin(y * 0.3));
+        const p = sphere(x, y);
+        if (!p) return 0;
+        const light = Math.max(0, -0.45 * p.nx - 0.55 * p.ny + 0.7 * p.nz);
+        const base = land(p.lat, p.lon) ? 0.26 + 0.22 * light : 0.045 + 0.02 * light;
+        return base * (0.55 + 0.45 * p.nz);
       },
     });
+    // Graticule: a few parallels and meridians as hairlines, so it reads as a globe.
+    const graticule = [
+      ...[-0.5, 0, 0.5].map((t) => {
+        const y = globe.cy - t * globe.r;
+        const rx = globe.r * Math.sqrt(1 - t * t);
+        return `<ellipse cx="${globe.cx}" cy="${round(y)}" rx="${round(rx)}" ry="${round(rx * 0.12)}"/>`;
+      }),
+      ...[0.38, 0.8].map((k) => `<ellipse cx="${globe.cx}" cy="${globe.cy}" rx="${round(globe.r * k)}" ry="${globe.r}"/>`),
+    ].join('');
+    // Pins only on land, facing the viewer, never crowding each other.
+    const pins: { x: number; y: number }[] = [];
+    for (let tries = 0; pins.length < 7 && tries < 600; tries++) {
+      const x = globe.cx + (random() - 0.5) * globe.r * 1.6;
+      const y = globe.cy + (random() - 0.5) * globe.r * 1.6;
+      const p = sphere(x, y);
+      if (!p || p.nz < 0.4 || !land(p.lat, p.lon)) continue;
+      if (pins.some((q) => Math.hypot(q.x - x, q.y - y) < 70)) continue;
+      pins.push({ x, y });
+    }
+    const pinMarks = pins
+      .map(
+        ({ x, y }) =>
+          `<circle cx="${round(x)}" cy="${round(y)}" r="13" fill="${INK.washi}" stroke="${INK.shu}" stroke-width="2.5"/><circle cx="${round(x)}" cy="${round(y)}" r="5.5" fill="${INK.shu}"/>`,
+      )
+      .join('');
+    const shadow = halftone({
+      x: 160,
+      y: 860,
+      width: 480,
+      height: 70,
+      step: 9,
+      angle: 0,
+      value: (x, y) => Math.max(0, 1 - ((x - 400) / 240) ** 2 - ((y - 895) / 30) ** 2) * 0.32,
+    });
+    const top = globe.cy - globe.r;
     return {
       ground: 'washi',
-      defs: `<clipPath id="above-slab"><rect width="800" height="${slab.top}"/></clipPath>`,
       body: [
-        `<circle cx="${sun.cx}" cy="${sun.cy}" r="${sun.r}" fill="${INK.shu}" clip-path="url(#above-slab)"/>`,
-        `<g fill="${INK.sumi}">${columns}<rect x="98" y="${beam - 6}" width="605" height="6"/><rect x="58" y="${slab.top}" width="684" height="${slab.height}"/></g>`,
-        `<g fill="${INK.shu}">${reflection}</g>`,
+        `<g fill="${INK.sumi}">${shadow}</g>`,
+        `<g fill="${INK.sumi}">${dots}</g>`,
+        `<g fill="none" stroke="${INK.sumi}" stroke-width="1" opacity="0.28">${graticule}</g>`,
+        `<circle cx="${globe.cx}" cy="${globe.cy}" r="${globe.r}" fill="none" stroke="${INK.sumi}" stroke-width="1.5" opacity="0.7"/>`,
+        pinMarks,
+        // the sapling
+        `<g fill="${INK.sumi}"><path d="M397 ${top + 2} C393 ${top - 26} 396 ${top - 52} 402 ${top - 74} L407 ${top - 73} C402 ${top - 50} 400 ${top - 26} 404 ${top + 2} Z"/>`,
+        `<path d="M401 ${top - 40} C380 ${top - 64} 350 ${top - 64} 338 ${top - 52} C352 ${top - 34} 382 ${top - 30} 401 ${top - 40} Z"/>`,
+        `<path d="M404 ${top - 62} C424 ${top - 92} 458 ${top - 96} 472 ${top - 84} C458 ${top - 62} 428 ${top - 54} 404 ${top - 62} Z"/></g>`,
       ].join(''),
     };
   },
 };
 
-/** 02 — Salt & Silence: a single drop on still black water. */
-const salt: Plate = {
+/** Scriptly: a waveform, printed in vermilion, becoming lines of transcript. */
+const scriptly: Plate = {
   width: 1200,
   height: 800,
-  detail: [560, 300, 440, 260],
+  detail: [150, 300, 640, 400],
   draw: () => {
-    const c = { x: 770, y: 420 };
-    const rings = Array.from({ length: 24 }, (_, n) => {
-      const r = 26 + Math.pow(n, 1.42) * 17;
-      const w = Math.max(0.6, 2.1 - n * 0.065);
-      const o = Math.max(0.12, 0.92 - n * 0.034);
-      return `<ellipse cx="${c.x}" cy="${c.y}" rx="${round(r)}" ry="${round(r * 0.34)}" stroke-width="${round(w, 2)}" opacity="${round(o, 2)}"/>`;
-    }).join('');
-    const mist = halftone({
-      x: 0,
-      y: 360,
-      width: 820,
-      height: 440,
-      step: 10,
-      angle: 30,
-      value: (x, y) => (1 - x / 820) * smoothstep(380, 800, y) * 0.55,
-    });
+    const random = rng(29);
+    const wave: string[] = [];
+    const mid = 196;
+    for (let x = 120; x <= 1080; x += 12) {
+      const envelope = 0.35 + 0.65 * Math.abs(Math.sin(x * 0.0065 + 0.6));
+      const amp = 66 * envelope * (0.55 + 0.45 * Math.abs(Math.sin(x * 0.07) * Math.cos(x * 0.023)));
+      for (let y = mid - amp; y <= mid + amp; y += 10) {
+        const fade = 1 - Math.abs(y - mid) / (amp + 1);
+        wave.push(`<circle cx="${x}" cy="${round(y)}" r="${round(1.4 + 2.6 * fade, 2)}"/>`);
+      }
+    }
+    const lines: string[] = [];
+    const stamps: string[] = [];
+    let highlight = '';
+    for (let i = 0, y = 334; y < 720; i++, y += 36) {
+      stamps.push(`<rect x="120" y="${y - 3}" width="58" height="6" rx="3"/>`);
+      if (i === 4) highlight = `<rect x="440" y="${y - 13}" width="168" height="26" fill="${INK.shu}"/>`;
+      lines.push(`<rect x="232" y="${y - 4}" width="${round(360 + random() * 520)}" height="8" rx="4"/>`);
+    }
     return {
       ground: 'sumi',
       body: [
-        `<g fill="none" stroke="${INK.gofun}">${rings}</g>`,
-        `<ellipse cx="${c.x}" cy="${c.y}" rx="16" ry="5.5" fill="none" stroke="${INK.shu}" stroke-width="2"/>`,
-        `<circle cx="${c.x}" cy="${c.y - 3}" r="5" fill="${INK.shu}"/>`,
-        `<g fill="${INK.gofun}" opacity="0.75">${mist}</g>`,
+        `<g fill="${INK.shu}">${wave.join('')}</g>`,
+        `<path d="M520 104V288" stroke="${INK.gofun}" stroke-width="1.5"/>`,
+        `<circle cx="520" cy="104" r="5" fill="${INK.gofun}"/>`,
+        `<g fill="${INK.usuzumi}" opacity="0.7">${stamps.join('')}</g>`,
+        highlight,
+        `<g fill="${INK.gofun}" opacity="0.82">${lines.join('')}</g>`,
       ].join(''),
     };
   },
 };
 
-/** 03 — One Thousand Folds: an accordion-pleated sheet, one crease in vermilion. */
-const folds: Plate = {
-  width: 1000,
-  height: 1000,
-  detail: [470, 300, 420, 420],
+/** Hamon, Vol. 01 (this site): the opening plate, The Cut, at rest. */
+const hamon: Plate = {
+  width: 1600,
+  height: 900,
+  detail: [620, 120, 680, 450],
   draw: () => {
-    const pleat = 72;
-    const count = 10;
-    const half = (pleat * count) / 2;
-    const top = (k: number) => -320 + (k % 2 ? 26 : 0);
-    const bottom = (k: number) => 320 - (k % 2 ? 26 : 0);
-    const faces: string[] = [];
-    const shade: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const x0 = -half + i * pleat;
-      const x1 = x0 + pleat;
-      const pts = `${x0},${top(i)} ${x1},${top(i + 1)} ${x1},${bottom(i + 1)} ${x0},${bottom(i)}`;
-      faces.push(`<polygon points="${pts}" fill="${i % 2 ? INK.washiDeep : INK.gofun}"/>`);
-      if (i % 2) shade.push(`<polygon points="${pts}" fill="url(#screen)"/>`);
-    }
-    const outline = [
-      ...Array.from({ length: count + 1 }, (_, k) => `${-half + k * pleat},${top(k)}`),
-      ...Array.from({ length: count + 1 }, (_, k) => `${half - k * pleat},${bottom(count - k)}`),
-    ].join(' ');
-    const crease = Array.from({ length: count + 1 }, (_, k) => `${-half + k * pleat},${48 + (k % 2 ? 9 : 0)}`).join(' ');
+    const s = computeScene({ sun: { cx: 1000, cy: 400, r: 330 }, ground: 755, figureX: 970, figureScale: 0.69 });
+    const horizon = brushStroke({ from: [0, s.ground], to: [1600, s.ground], width: 5, peak: 0.5, seed: 5, wobble: 0.5, segments: 80 });
+    const sunBody = (shift: { x: number; y: number }, clip: string) =>
+      `<g transform="translate(${shift.x} ${shift.y})"><g clip-path="url(#${clip})">` +
+      `<circle cx="${s.sun.cx + 6}" cy="${s.sun.cy + 5}" r="${s.sun.r}" fill="${INK.enji}" mask="url(#ghost)"/>` +
+      `<circle cx="${s.sun.cx}" cy="${s.sun.cy}" r="${s.sun.r}" fill="${INK.shu}" clip-path="url(#solid)"/>` +
+      `<g fill="${INK.shu}" clip-path="url(#disc)">${s.sunDots}</g></g></g>`;
+    const f = s.figure;
     return {
       ground: 'washi',
       defs: [
-        `<pattern id="screen" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.45" fill="${INK.sumi}"/></pattern>`,
-        `<pattern id="shadow" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="4.5" cy="4.5" r="1.9" fill="${INK.sumi}"/></pattern>`,
+        `<clipPath id="upper"><polygon points="${s.halves.upper}"/></clipPath>`,
+        `<clipPath id="lower"><polygon points="${s.halves.lower}"/></clipPath>`,
+        `<clipPath id="solid"><rect width="1600" height="${round(s.fadeTop + 26)}"/></clipPath>`,
+        `<clipPath id="disc"><circle cx="${s.sun.cx}" cy="${s.sun.cy}" r="${s.sun.r}"/></clipPath>`,
+        `<linearGradient id="ghost-fade" gradientUnits="userSpaceOnUse" x1="0" y1="${s.sun.cy - 60}" x2="0" y2="${round(s.fadeTop)}"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>`,
+        `<mask id="ghost" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#ghost-fade)"/></mask>`,
       ].join(''),
       body: [
-        `<g transform="translate(500 520) rotate(-10)">`,
-        `<polygon points="${outline}" transform="translate(26 30)" fill="url(#shadow)" opacity="0.55"/>`,
-        faces.join(''),
-        `<g opacity="0.5">${shade.join('')}</g>`,
-        `<polygon points="${outline}" fill="none" stroke="${INK.sumi}" stroke-width="2.5" stroke-linejoin="round"/>`,
-        `<polyline points="${crease}" fill="none" stroke="${INK.shu}" stroke-width="5" stroke-linejoin="round"/>`,
-        `</g>`,
+        sunBody(s.upperShift, 'upper'),
+        sunBody(s.lowerShift, 'lower'),
+        `<path d="${s.cut}" fill="${INK.sumi}"/>`,
+        `<path d="${horizon}" fill="${INK.sumi}"/>`,
+        `<g fill="${INK.sumi}">${s.shadowDots}</g>`,
+        `<g fill="${INK.sumi}" transform="${s.figureTransform}"><path d="${f.ribbon}"/><path d="${f.saya}"/><path d="${f.body}"/><path d="${f.tsuka}"/><path d="${f.tsuba}"/><path d="${f.blade}" fill="${INK.keshizumi}"/></g>`,
       ].join(''),
     };
   },
 };
 
-/** 04 — Kage Grotesk: a letter and the shadow it casts, out of register. */
-const kage: Plate = {
-  width: 1600,
-  height: 900,
-  detail: [700, 260, 560, 420],
-  draw: () => {
-    const k = [
-      `<rect x="560" y="-80" width="250" height="1120"/>`,
-      `<polygon points="810,620 810,330 1240,-80 1580,-80"/>`,
-      `<polygon points="930,455 1130,300 1700,1040 1370,1040"/>`,
-    ].join('');
-    const guide = (y: number) =>
-      `<path d="M60 ${y}H1540" stroke="${INK.sumi}" stroke-width="1" opacity="0.32"/><path d="M60 ${y - 8}v16M1540 ${y - 8}v16" stroke="${INK.sumi}" stroke-width="1" opacity="0.5"/>`;
-    return {
-      ground: 'washi',
-      body: [
-        guide(140),
-        guide(420),
-        guide(770),
-        `<g fill="${INK.shu}" transform="translate(64 30)">${k}</g>`,
-        `<g fill="${INK.sumi}">${k}</g>`,
-        // construction marks: an on-curve node and its handle
-        `<g stroke="${INK.sumi}" stroke-width="1.5"><path d="M930 455L1020 384"/></g>`,
-        `<rect x="1013" y="377" width="14" height="14" fill="${INK.washi}" stroke="${INK.sumi}" stroke-width="1.5"/>`,
-        `<circle cx="930" cy="455" r="9" fill="${INK.washi}" stroke="${INK.shu}" stroke-width="2.5"/>`,
-      ].join(''),
-    };
-  },
-};
-
-/** 05 — Low Tide Records: a sun half sunk, the sea as a printed waveform. */
-const lowtide: Plate = {
-  width: 800,
-  height: 1000,
-  detail: [140, 420, 520, 390],
-  draw: () => {
-    const water = 480;
-    const sun = { cx: 400, cy: water, r: 178 };
-    const random = rng(17);
-    const rows: { reflect: string[]; sea: string[] } = { reflect: [], sea: [] };
-    for (let y = water + 16, j = 0; y < 968; y += 15, j++) {
-      const freq = 0.012 + random() * 0.02;
-      const phase = random() * Math.PI * 2;
-      const depth = (y - water) / 500;
-      const width = sun.r * (1 - depth * 0.45);
-      for (let x = 12; x < 800; x += 12) {
-        const swell = 0.5 + 0.5 * Math.sin(x * freq + phase + j * 0.4);
-        const r = 5.4 * swell * (1 - depth * 0.55);
-        if (r < 0.6) continue;
-        const dot = `<circle cx="${x}" cy="${y}" r="${round(r, 2)}"/>`;
-        (Math.abs(x - sun.cx) < width ? rows.reflect : rows.sea).push(dot);
-      }
-    }
-    return {
-      ground: 'sumi',
-      defs: `<clipPath id="sky"><rect width="800" height="${water}"/></clipPath>`,
-      body: [
-        `<circle cx="${sun.cx + 6}" cy="${sun.cy + 4}" r="${sun.r}" fill="${INK.enji}" clip-path="url(#sky)"/>`,
-        `<circle cx="${sun.cx}" cy="${sun.cy}" r="${sun.r}" fill="${INK.shu}" clip-path="url(#sky)"/>`,
-        `<rect x="40" y="${water - 1.5}" width="720" height="3" fill="${INK.gofun}"/>`,
-        `<g fill="${INK.shu}">${rows.reflect.join('')}</g>`,
-        `<g fill="${INK.gofun}" opacity="0.62">${rows.sea.join('')}</g>`,
-      ].join(''),
-    };
-  },
-};
-
-/** Chapter 04 — a self-portrait, as a sunrise through haze. */
+/** Chapter 01 portrait, until a photo is set in profile.ts: a sunrise through haze. */
 const sunrise: Plate = {
   width: 800,
   height: 1000,
@@ -214,7 +200,7 @@ const sunrise: Plate = {
   },
 };
 
-export const plates = { meridian, salt, folds, kage, lowtide, sunrise } satisfies Record<string, Plate>;
+export const plates = { greenup, scriptly, hamon, sunrise } satisfies Record<string, Plate>;
 export type PlateName = keyof typeof plates;
 
 export const plateUrl = (name: PlateName, variant: 'a' | 'b' = 'a') => `/plates/${name}-${variant}.svg`;

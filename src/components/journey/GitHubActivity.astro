@@ -1,0 +1,400 @@
+---
+/**
+ * Commits to public repositories over the last 52 weeks, from the GitHub API
+ * at build time. A single series, so: thin columns from one baseline, no
+ * legend, recessive axis, a tooltip on hover and keyboard focus, and the same
+ * numbers in a table. When the data isn't there, it says so instead of guessing.
+ */
+import Arrow from '../ui/Arrow.astro';
+import { formatDate } from '../../lib/content';
+import type { GitHubData } from '../../lib/github';
+
+interface Props {
+  github: GitHubData;
+}
+
+const { github } = Astro.props;
+const weeks = github.status === 'ok' ? github.weeks : null;
+const total = weeks?.reduce((sum, w) => sum + w.commits, 0) ?? 0;
+const peak = weeks ? Math.max(...weeks.map((w) => w.commits)) : 0;
+const active = weeks?.filter((w) => w.commits > 0).length ?? 0;
+
+// A clean top tick: 1, 2, 5, 10, 20, 50…
+const niceCeil = (n: number) => {
+  if (n <= 1) return 1;
+  const p = 10 ** Math.floor(Math.log10(n));
+  return [1, 2, 5, 10].map((m) => m * p).find((v) => v >= n) ?? 10 * p;
+};
+const top = niceCeil(peak);
+const peakWeek = weeks?.find((w) => w.commits === peak);
+
+const monthFormat = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
+const months = (weeks ?? [])
+  .map((w, i) => ({ i, month: new Date(w.start).getUTCMonth(), label: monthFormat.format(new Date(w.start)) }))
+  .filter((m, i, all) => i === 0 || m.month !== all[i - 1].month)
+  .slice(1);
+
+const summary = weeks
+  ? total > 0
+    ? `${total} commits across ${active} of the last 52 weeks. Busiest week: ${peak} commits, from ${formatDate(peakWeek?.start ?? '')}.`
+    : 'No commits to public repositories in the last 52 weeks.'
+  : '';
+---
+
+<figure class="activity" data-draw>
+  <figcaption class="activity__caption">
+    <span class="meta">On GitHub · last 52 weeks</span>
+    <span class="activity__title">Commits to my public repositories, by week</span>
+  </figcaption>
+
+  {
+    weeks && total > 0 && (
+      <>
+        <div
+          class="activity__plot"
+          data-activity
+          tabindex="0"
+          role="group"
+          aria-label={`${summary} Use the left and right arrow keys to read each week.`}
+        >
+          <div class="activity__axis" aria-hidden="true">
+            <span>{top}</span>
+            <span>0</span>
+          </div>
+          <ol class="activity__bars" aria-hidden="true">
+            {weeks.map((w, i) => (
+              <li
+                class="activity__week"
+                style={`--v: ${(w.commits / top).toFixed(3)}; --i: ${i}`}
+                data-label={`Week of ${formatDate(w.start)}`}
+                data-value={`${w.commits} commit${w.commits === 1 ? '' : 's'}`}
+              >
+                <span class="activity__bar" />
+              </li>
+            ))}
+          </ol>
+          <ol class="activity__months" aria-hidden="true">
+            {months.map((m) => (
+              <li style={`grid-column: ${m.i + 1}`}>{m.label}</li>
+            ))}
+          </ol>
+          <p class="activity__tip" data-activity-tip hidden>
+            <strong data-tip-value />
+            <span data-tip-label />
+          </p>
+          <p class="vh" aria-live="polite" data-activity-live />
+        </div>
+        <p class="activity__summary">{summary}</p>
+        <details class="activity__table">
+          <summary class="meta">Show the numbers as a table</summary>
+          <table>
+            <caption class="vh">Commits per week</caption>
+            <thead>
+              <tr>
+                <th scope="col">Week starting</th>
+                <th scope="col">Commits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {weeks
+                .filter((w) => w.commits > 0)
+                .map((w) => (
+                  <tr>
+                    <td>{formatDate(w.start)}</td>
+                    <td>{w.commits}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </details>
+      </>
+    )
+  }
+
+  {
+    weeks && total === 0 && (
+      <p class="activity__state">
+        No commits to public repositories in the last 52 weeks. Private work doesn’t show up here.
+      </p>
+    )
+  }
+
+  {
+    github.status === 'ok' && !weeks && (
+      <p class="activity__state">
+        GitHub was still counting commits when this page was built, so there’s no chart this time. It fills in on the next
+        build.
+      </p>
+    )
+  }
+
+  {
+    github.status === 'unavailable' && (
+      <p class="activity__state">
+        GitHub couldn’t be reached when this page was built, so there’s nothing here to show.
+        {github.profileUrl && ' The profile itself is one click away.'}
+      </p>
+    )
+  }
+
+  {
+    github.profileUrl && (
+      <a class="activity__profile" href={github.profileUrl} target="_blank" rel="me noopener">
+        github.com/{github.user} <Arrow dir="out" />
+        <span class="vh">(opens in a new tab)</span>
+      </a>
+    )
+  }
+</figure>
+
+<script>
+  // Tooltip on hover and keyboard focus; values are inserted with textContent.
+  document.querySelectorAll<HTMLElement>('[data-activity]').forEach((plot) => {
+    const weeks = [...plot.querySelectorAll<HTMLElement>('.activity__week')];
+    const tip = plot.querySelector<HTMLElement>('[data-activity-tip]');
+    const live = plot.querySelector<HTMLElement>('[data-activity-live]');
+    const value = tip?.querySelector<HTMLElement>('[data-tip-value]');
+    const label = tip?.querySelector<HTMLElement>('[data-tip-label]');
+    if (!tip || !value || !label) return;
+    let index = weeks.length - 1;
+
+    const show = (i: number, announce = false) => {
+      index = Math.max(0, Math.min(weeks.length - 1, i));
+      const week = weeks[index];
+      weeks.forEach((w) => w.classList.toggle('is-active', w === week));
+      value.textContent = week.dataset.value ?? '';
+      label.textContent = week.dataset.label ?? '';
+      tip.hidden = false;
+      const plotBox = plot.getBoundingClientRect();
+      const box = week.getBoundingClientRect();
+      const x = box.left + box.width / 2 - plotBox.left;
+      tip.style.setProperty('--x', `${Math.max(70, Math.min(plotBox.width - 70, x))}px`);
+      if (announce && live) live.textContent = `${week.dataset.label}: ${week.dataset.value}`;
+    };
+    const hide = () => {
+      tip.hidden = true;
+      weeks.forEach((w) => w.classList.remove('is-active'));
+    };
+
+    weeks.forEach((week, i) => week.addEventListener('pointerenter', () => show(i)));
+    plot.addEventListener('pointerleave', () => {
+      if (document.activeElement !== plot) hide();
+    });
+    plot.addEventListener('focus', () => show(index, true));
+    plot.addEventListener('blur', hide);
+    plot.addEventListener('keydown', (event) => {
+      const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, Home: -Infinity, End: Infinity };
+      if (!(event.key in moves)) return;
+      event.preventDefault();
+      const step = moves[event.key];
+      show(Number.isFinite(step) ? index + step : step < 0 ? 0 : weeks.length - 1, true);
+    });
+  });
+</script>
+
+<style>
+  .activity__caption {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .activity__title {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+  }
+
+  .activity__plot {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-rows: 9rem auto;
+    column-gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-2);
+  }
+
+  .activity__plot:focus-visible {
+    outline-offset: 8px;
+  }
+
+  .activity__axis {
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--color-text-muted);
+    transform: translateY(-0.35em);
+  }
+
+  .activity__axis span:last-child {
+    transform: translateY(0.7em);
+  }
+
+  .activity__bars {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: repeat(52, minmax(0, 1fr));
+    align-items: end;
+    gap: 2px;
+    /* recessive hairlines at the top tick and the baseline */
+    background:
+      linear-gradient(var(--color-rule), var(--color-rule)) top / 100% 1px no-repeat,
+      linear-gradient(var(--color-rule-strong), var(--color-rule-strong)) bottom / 100% 1px no-repeat;
+  }
+
+  .activity__week {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .activity__bar {
+    width: 100%;
+    max-width: 24px;
+    height: calc(var(--v) * 100%);
+    /* 4px rounded data end, square at the baseline */
+    border-radius: 4px 4px 0 0;
+    background: var(--shu);
+    transform-origin: bottom;
+    transition:
+      transform 900ms var(--ease-out),
+      background-color var(--dur-1) linear;
+    transition-delay: calc(var(--i, 0) * 12ms);
+  }
+
+  :global(.js) .activity:not(.is-in) .activity__bar {
+    transform: scaleY(0);
+  }
+
+  .activity__week.is-active .activity__bar {
+    background: var(--enji);
+  }
+
+  .activity__months {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(52, minmax(0, 1fr));
+    margin-top: var(--space-2);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .activity__tip {
+    position: absolute;
+    left: var(--x, 50%);
+    top: -2.6rem;
+    z-index: 2;
+    display: grid;
+    gap: 0.1rem;
+    padding: var(--space-2) var(--space-3);
+    background: var(--sumi);
+    color: var(--washi);
+    font-size: var(--text-xs);
+    line-height: 1.3;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .activity__tip[hidden] {
+    display: none;
+  }
+
+  .activity__tip strong {
+    font-size: var(--text-s);
+  }
+
+  .activity__tip span {
+    font-family: var(--type-mono);
+    color: var(--usuzumi);
+  }
+
+  .activity__summary {
+    margin-top: var(--space-5);
+    max-width: 36rem;
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .activity__table {
+    margin-top: var(--space-3);
+  }
+
+  .activity__table summary {
+    cursor: pointer;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text);
+  }
+
+  .activity__table table {
+    margin-top: var(--space-2);
+    border-collapse: collapse;
+    font-size: var(--text-s);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .activity__table th,
+  .activity__table td {
+    padding: var(--space-1) var(--space-6) var(--space-1) 0;
+    text-align: left;
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .activity__table th {
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .activity__state {
+    margin-top: var(--space-5);
+    padding: var(--space-5);
+    max-width: 36rem;
+    border: 1px dashed var(--color-rule-strong);
+    color: var(--color-text-muted);
+  }
+
+  .activity__profile {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    margin-top: var(--space-4);
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .activity__profile .arrow {
+    width: 0.75rem;
+    height: 0.6rem;
+  }
+
+  @media (max-width: 47.99rem) {
+    .activity__bars {
+      gap: 1px;
+    }
+
+    .activity__months li:nth-child(even) {
+      visibility: hidden;
+    }
+  }
+</style>

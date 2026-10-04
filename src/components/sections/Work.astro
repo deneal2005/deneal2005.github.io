@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import ChapterOpener from '../ui/ChapterOpener.astro';
 import ProjectSpread from '../work/ProjectSpread.astro';
 import { chapterById } from '../../data/chapters';
+import { getWorks } from '../../lib/content';
 
 const chapter = chapterById('work');
-const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const works = await getWorks();
 ---
 
 <section
@@ -17,7 +17,7 @@ const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data
 >
   <ChapterOpener
     id="work"
-    epigraph="Five commissions, one to a chapter. Each began with a brief and turned on a single decision."
+    epigraph="What I’ve built and put in public. Each one has its own case study, and its source on GitHub where it’s open."
   />
   <ol class="work__list">
     {

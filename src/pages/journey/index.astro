@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Arrow from '../../components/ui/Arrow.astro';
+import NowPanel from '../../components/journey/NowPanel.astro';
+import Timeline from '../../components/journey/Timeline.astro';
+import GitHubActivity from '../../components/journey/GitHubActivity.astro';
+import RepoList from '../../components/journey/RepoList.astro';
+import { chapterById } from '../../data/chapters';
+import { site } from '../../data/site';
+import { formatDate, getJourney } from '../../lib/content';
+import { getGitHub } from '../../lib/github';
+
+const chapter = chapterById('journey');
+const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
+const first = journey.at(-1);
+---
+
+<BaseLayout
+  title="Journey"
+  description={`The running record of what ${site.name} is learning, building and trying, newest first.`}
+  running={{ label: chapter.label, title: chapter.title }}
+>
+  <article class="jp" data-chapter-label={chapter.label} data-chapter-title={chapter.title} aria-labelledby="jp-title">
+    <header class="jp__head wrap">
+      <div class="jp__trail">
+        <a class="jp__back meta" href="/#journey"><Arrow dir="left" /> Back to the volume</a>
+        <p class="meta">{chapter.label}</p>
+      </div>
+      <div class="jp__title-row">
+        <h1 id="jp-title" class="jp__title display" data-reveal="rise">
+          <span class="rise"><span>{chapter.title}</span></span>
+        </h1>
+        <p class="jp__ja tate" lang="ja" aria-hidden="true">{chapter.ja}</p>
+      </div>
+      <p class="jp__intro lede" data-reveal="fade" style="--i: 2">
+        Shugyō is the long practice of getting better at something. This is mine, kept as it happens: what I learned,
+        what I built, what I tried and what didn’t work.
+      </p>
+      <p class="jp__count meta">
+        {journey.length} entries{first && ` since ${formatDate(first.data.date)}`}
+      </p>
+    </header>
+
+    <div class="jp__body wrap">
+      <aside class="jp__aside">
+        <NowPanel headingLevel="h2" />
+      </aside>
+      <div class="jp__timeline">
+        <h2 class="vh">All entries</h2>
+        {
+          journey.length > 0 ? (
+            <Timeline entries={journey} byYear />
+          ) : (
+            <p class="jp__empty">Nothing here yet. The first entry is always the hardest one to write.</p>
+          )
+        }
+      </div>
+    </div>
+
+    <section class="jp__github wrap" aria-labelledby="jp-github">
+      <h2 id="jp-github" class="jp__github-title meta">The public record</h2>
+      <div class="jp__github-grid">
+        <GitHubActivity github={github} />
+        <RepoList github={github} />
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .jp {
+    padding-top: calc(var(--masthead-h) + var(--space-6));
+    padding-bottom: var(--space-section);
+  }
+
+  .jp__trail {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--panel-border) solid var(--sumi);
+  }
+
+  .jp__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    margin-block: -0.75rem;
+    color: var(--color-text);
+  }
+
+  .jp__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+  }
+
+  .jp__title {
+    font-size: var(--text-giga);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .jp__ja {
+    font-size: clamp(2.5rem, 1.6rem + 3vw, 5rem);
+    color: var(--shu);
+  }
+
+  .jp__intro {
+    margin: var(--space-6) 0 0 auto;
+    max-width: 38rem;
+    font-style: italic;
+  }
+
+  .jp__count {
+    margin: var(--space-5) 0 0 auto;
+    max-width: 38rem;
+    color: var(--color-text);
+  }
+
+  .jp__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-8);
+    margin-top: var(--space-section);
+    align-items: start;
+  }
+
+  .jp__aside {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+  }
+
+  .jp__timeline {
+    grid-column: 6 / -1;
+  }
+
+  .jp__empty {
+    padding: var(--space-6);
+    border: 1px dashed var(--color-rule-strong);
+    color: var(--color-text-muted);
+  }
+
+  .jp__github {
+    margin-top: var(--space-section);
+  }
+
+  .jp__github-title {
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
+    border-bottom: var(--panel-border) solid var(--sumi);
+    color: var(--color-text);
+  }
+
+  .jp__github-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: var(--space-8) calc(var(--gutter) * 2);
+    align-items: start;
+  }
+
+  @media (max-width: 63.99rem) {
+    .jp__aside,
+    .jp__timeline {
+      grid-column: 1 / -1;
+    }
+
+    .jp__aside {
+      position: static;
+    }
+
+    .jp__github-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

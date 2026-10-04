@@ -1,12 +1,23 @@
 ---
 /**
- * Chapter 03 — Keiko (稽古), daily practice. Three working studies; their
- * scripts load only when the chapter approaches (see src/scripts/lab.ts).
+ * Chapter 05 — Keiko (稽古), daily practice. Experiments, not products: they
+ * come from src/content/experiments. Entries with a `demo` mount a live study
+ * (scripts load only when the chapter approaches, see src/scripts/lab.ts);
+ * the rest are listed as lab notes.
  */
 import ChapterOpener from '../ui/ChapterOpener.astro';
+import Arrow from '../ui/Arrow.astro';
 import { chapterById } from '../../data/chapters';
+import { formatDate, getExperiments } from '../../lib/content';
 
 const chapter = chapterById('keiko');
+const experiments = await getExperiments();
+// Live studies keep a fixed reading order; everything else is a lab note, newest first.
+const STUDY_ORDER = ['sumi', 'ten', 'hanko'];
+const studies = experiments
+  .filter((e) => e.data.demo)
+  .sort((a, b) => STUDY_ORDER.indexOf(a.data.demo ?? '') - STUDY_ORDER.indexOf(b.data.demo ?? ''));
+const notes = experiments.filter((e) => !e.data.demo);
 ---
 
 <section
@@ -20,70 +31,140 @@ const chapter = chapterById('keiko');
   <div class="wrap">
     <ChapterOpener
       id="keiko"
-      epigraph="Keiko is the practice you do every day so the work on the day looks easy. Three studies, all running in your browser."
+      epigraph="Keiko is the practice you do every day so the work on the day looks easy. Experiments, not products: these run in your browser."
     />
 
     <div class="lab">
-      <article class="study" data-lab="sumi" aria-labelledby="study-sumi">
-        <header class="study__head">
-          <p class="study__ja" lang="ja" aria-hidden="true">墨</p>
-          <div>
-            <h3 class="study__title" id="study-sumi">Sumi</h3>
-            <p class="meta">Ink · Canvas 2D</p>
-          </div>
-        </header>
-        <div class="study__stage study__stage--paper">
-          <canvas class="study__canvas study__canvas--draw" role="img" aria-label="A sheet of paper you can draw ink strokes on with a mouse, pen or finger."></canvas>
-          <p class="study__hint meta" aria-hidden="true" data-sumi-hint>Draw here</p>
-        </div>
-        <p class="study__desc">Ink that behaves like ink. Move slowly for a heavy, wet line; quickly for a thin, dry one.</p>
-        <button class="btn" type="button" data-sumi-clear>Wash the sheet</button>
-      </article>
+      {
+        studies.map((study, i) => (
+          <article
+            class:list={['study', { 'study--offset': i === 1 }]}
+            id={`study-${study.id}`}
+            data-lab={study.data.demo}
+            aria-labelledby={`study-${study.id}-title`}
+          >
+            <header class="study__head">
+              {study.data.ja && (
+                <p class="study__ja" lang="ja" aria-hidden="true">
+                  {study.data.ja}
+                </p>
+              )}
+              <div>
+                <h3 class="study__title" id={`study-${study.id}-title`}>
+                  {study.data.title}
+                </h3>
+                <p class="meta">{study.data.stack.slice(0, 2).join(' · ')}</p>
+              </div>
+            </header>
 
-      <article class="study study--offset" data-lab="ten" aria-labelledby="study-ten">
-        <header class="study__head">
-          <p class="study__ja" lang="ja" aria-hidden="true">点</p>
-          <div>
-            <h3 class="study__title" id="study-ten">Ten</h3>
-            <p class="meta">Halftone · Canvas 2D</p>
-          </div>
-        </header>
-        <div class="study__stage">
-          <canvas class="study__canvas" role="img" aria-label="A vermilion sun drawn as a live halftone screen. The dots swell toward your pointer."></canvas>
-        </div>
-        <p class="study__desc">A sun printed as a live halftone screen. Your pointer is a light source: the dots swell toward it.</p>
-        <button class="btn" type="button" data-ten-toggle aria-pressed="false">Pause</button>
-      </article>
+            {study.data.demo === 'sumi' && (
+              <>
+                <div class="study__stage study__stage--paper">
+                  <canvas
+                    class="study__canvas study__canvas--draw"
+                    role="img"
+                    aria-label="A sheet of paper you can draw ink strokes on with a mouse, pen or finger."
+                  />
+                  <p class="study__hint meta" aria-hidden="true" data-sumi-hint>
+                    Draw here
+                  </p>
+                </div>
+                <p class="study__desc">{study.data.summary}</p>
+                <button class="btn" type="button" data-sumi-clear>
+                  Wash the sheet
+                </button>
+              </>
+            )}
 
-      <article class="study" data-lab="hanko" aria-labelledby="study-hanko">
-        <header class="study__head">
-          <p class="study__ja" lang="ja" aria-hidden="true">判</p>
-          <div>
-            <h3 class="study__title" id="study-hanko">Hanko</h3>
-            <p class="meta">Seal · Canvas 2D</p>
-          </div>
-        </header>
-        <div class="study__stage study__stage--paper">
-          <canvas class="study__canvas" role="img" aria-label="A vermilion seal carved with your initials." data-hanko-canvas></canvas>
-        </div>
-        <form class="hanko__form" data-hanko-form>
-          <label class="meta" for="hanko-initials">Your initials, up to four</label>
-          <div class="hanko__row">
-            <input
-              id="hanko-initials"
-              class="hanko__input"
-              name="initials"
-              type="text"
-              maxlength="4"
-              autocomplete="off"
-              spellcheck="false"
-              value="REN"
-            />
-            <button class="btn" type="submit" data-hanko-download>Download PNG</button>
-          </div>
-        </form>
-      </article>
+            {study.data.demo === 'ten' && (
+              <>
+                <div class="study__stage">
+                  <canvas
+                    class="study__canvas"
+                    role="img"
+                    aria-label="A vermilion sun drawn as a live halftone screen. The dots swell toward your pointer."
+                  />
+                </div>
+                <p class="study__desc">{study.data.summary}</p>
+                <button class="btn" type="button" data-ten-toggle aria-pressed="false">
+                  Pause
+                </button>
+              </>
+            )}
+
+            {study.data.demo === 'hanko' && (
+              <>
+                <div class="study__stage study__stage--paper">
+                  <canvas class="study__canvas" role="img" aria-label="A vermilion seal carved with your initials." data-hanko-canvas />
+                </div>
+                <p class="study__desc">{study.data.summary}</p>
+                <form class="hanko__form" data-hanko-form>
+                  <label class="meta" for="hanko-initials">
+                    Your initials, up to four
+                  </label>
+                  <div class="hanko__row">
+                    <input
+                      id="hanko-initials"
+                      class="hanko__input"
+                      name="initials"
+                      type="text"
+                      maxlength="4"
+                      autocomplete="off"
+                      spellcheck="false"
+                      value="DT"
+                    />
+                    <button class="btn" type="submit" data-hanko-download>
+                      Download PNG
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </article>
+        ))
+      }
     </div>
+
+    {
+      notes.length > 0 && (
+        <div class="notes">
+          <h3 class="notes__heading meta">Lab notes</h3>
+          <ol class="notes__list">
+            {notes.map((note) => (
+              <li class="note" id={`study-${note.id}`}>
+                <time class="meta" datetime={note.data.date.toISOString().slice(0, 10)}>
+                  {formatDate(note.data.date)}
+                </time>
+                <div>
+                  <p class="note__title">
+                    {note.data.ja && (
+                      <span lang="ja" aria-hidden="true">
+                        {note.data.ja}{' '}
+                      </span>
+                    )}
+                    {note.data.title}
+                  </p>
+                  <p class="note__summary">{note.data.summary}</p>
+                </div>
+                <p class="meta">{note.data.status}</p>
+                <div class="note__links">
+                  {note.data.links.live && (
+                    <a class="link" href={note.data.links.live} target="_blank" rel="noopener">
+                      Try it <Arrow dir="out" />
+                    </a>
+                  )}
+                  {note.data.links.repo && (
+                    <a class="link" href={note.data.links.repo} target="_blank" rel="noopener">
+                      Source <Arrow dir="out" />
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -207,6 +288,50 @@ const chapter = chapterById('keiko');
 
   .hanko__input:focus-visible {
     outline-offset: 2px;
+  }
+
+  .notes {
+    margin-top: var(--space-9);
+  }
+
+  .notes__heading {
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+    color: var(--color-text);
+  }
+
+  .note {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) 7rem auto;
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .note__title {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+  }
+
+  .note__summary {
+    margin-top: var(--space-1);
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .note__links {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--text-s);
+  }
+
+  @media (max-width: 47.99rem) {
+    .note {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
   }
 
   @media (max-width: 63.99rem) {

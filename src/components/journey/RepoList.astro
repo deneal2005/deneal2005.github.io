@@ -1,0 +1,126 @@
+---
+/** Public repositories from the build-time GitHub data, newest push first. */
+import Arrow from '../ui/Arrow.astro';
+import { formatDate, getWorks } from '../../lib/content';
+import type { GitHubData } from '../../lib/github';
+
+interface Props {
+  github: GitHubData;
+  limit?: number;
+}
+
+const { github, limit } = Astro.props;
+const works = await getWorks();
+const repos = github.status === 'ok' ? github.repos.slice(0, limit) : [];
+// Repositories that have a case study in this volume link to it as well.
+const caseStudy = (url: string) => works.find((w) => w.data.links.repo?.toLowerCase() === url.toLowerCase());
+---
+
+{
+  repos.length > 0 && (
+    <ol class="repos">
+      {repos.map((repo) => {
+        const work = caseStudy(repo.url);
+        return (
+          <li class="repo">
+            <p class="repo__name">{repo.name}</p>
+            {repo.description && <p class="repo__desc">{repo.description}</p>}
+            <p class="repo__meta meta">
+              {repo.language && <span>{repo.language}</span>}
+              <span>
+                Pushed <time datetime={repo.pushedAt}>{formatDate(repo.pushedAt)}</time>
+              </span>
+              {repo.stars > 0 && <span>{repo.stars} ★</span>}
+            </p>
+            <p class="repo__links">
+              <a class="repo__link" href={repo.url} target="_blank" rel="noopener">
+                Repository <Arrow dir="out" />
+                <span class="vh">{repo.name}, opens in a new tab</span>
+              </a>
+              {repo.homepage && (
+                <a class="repo__link" href={repo.homepage} target="_blank" rel="noopener">
+                  Live <Arrow dir="out" />
+                  <span class="vh">{repo.name}, opens in a new tab</span>
+                </a>
+              )}
+              {work && (
+                <a class="repo__link" href={`/work/${work.id}/`}>
+                  Case study <Arrow />
+                  <span class="vh">for {work.data.title}</span>
+                </a>
+              )}
+            </p>
+          </li>
+        );
+      })}
+    </ol>
+  )
+}
+
+<style>
+  .repos {
+    display: grid;
+  }
+
+  .repo {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .repo:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .repo:last-child {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .repo__name {
+    font-family: var(--type-mono);
+    font-size: var(--text-s);
+    font-weight: 500;
+  }
+
+  .repo__desc {
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .repo__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .repo__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-5);
+  }
+
+  .repo__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.25rem;
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .repo__link .arrow {
+    width: 0.75rem;
+    height: 0.55rem;
+  }
+
+  @media (hover: hover) {
+    .repo__link:hover {
+      color: var(--color-accent-text);
+    }
+  }
+</style>

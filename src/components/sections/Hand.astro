@@ -1,15 +1,36 @@
 ---
-/** Chapter 04 — The Hand: the person behind the work, set as an editorial profile. */
+/** Chapter 01 — The Hand: who this is, what they make, where to find them. Facts only. */
 import ChapterOpener from '../ui/ChapterOpener.astro';
 import Plate from '../ui/Plate.astro';
-import HamonLine from '../motifs/HamonLine.astro';
+import Arrow from '../ui/Arrow.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
 import { chapterById } from '../../data/chapters';
-import { capabilities, experience, method } from '../../data/practice';
 import { site } from '../../data/site';
 import { plates, plateSize, plateUrl } from '../../lib/plates';
+import { getGitHub } from '../../lib/github';
+import { getExperiments, getJourney, getWorks } from '../../lib/content';
 
 const chapter = chapterById('hand');
 const portrait = plateSize(plates.sunrise, 'a');
+const github = await getGitHub();
+const [works, experiments, journey] = await Promise.all([getWorks(), getExperiments(), getJourney()]);
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const { about } = site;
+
+const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const facts = [
+  { label: 'Based in', value: site.location.city },
+  github.status === 'ok' && { label: 'On GitHub since', value: monthYear.format(new Date(github.memberSince)) },
+  github.status === 'ok' && { label: 'Public repositories', value: String(github.publicRepos) },
+  {
+    label: 'In this volume',
+    value: [
+      count(works.length, 'project', 'projects'),
+      count(experiments.length, 'experiment', 'experiments'),
+      count(journey.length, 'journal entry', 'journal entries'),
+    ].join(' · '),
+  },
+].filter((f): f is { label: string; value: string } => Boolean(f));
 ---
 
 <section
@@ -19,77 +40,76 @@ const portrait = plateSize(plates.sunrise, 'a');
   data-chapter-title={chapter.title}
   aria-labelledby="hand-title"
 >
-  <ChapterOpener id="hand" epigraph="One person, two disciplines, and a refusal to let either one win." />
+  <ChapterOpener id="hand" epigraph="Who I am, what I make, and where to find me." />
 
   <div class="hand__profile grid">
     <figure class="hand__portrait">
-      <Plate
-        src={plateUrl('sunrise')}
-        alt="A vermilion sun rising through haze, printed entirely in halftone dots above an ink horizon."
-        width={portrait.width}
-        height={portrait.height}
-      />
-      <figcaption class="meta">Self-portrait, as a sunrise. The work should be the face.</figcaption>
+      {
+        site.portrait ? (
+          <img class="hand__photo" src={site.portrait.src} alt={site.portrait.alt} loading="lazy" decoding="async" />
+        ) : (
+          <Plate
+            src={plateUrl('sunrise')}
+            alt="A vermilion sun rising through haze, printed entirely in halftone dots above an ink horizon."
+            width={portrait.width}
+            height={portrait.height}
+          />
+        )
+      }
+      <figcaption class="meta">{site.portrait ? site.name : 'Self-portrait, as a sunrise.'}</figcaption>
     </figure>
 
     <div class="hand__intro">
-      <p class="hand__lede lede" data-reveal="fade">
-        I’m {site.person}. Designer by training, engineer by stubbornness. For twelve years I’ve worked in the narrow
-        gap between how a thing looks and how it behaves.
-      </p>
-      <div class="prose hand__prose" data-reveal="fade" style="--i: 2">
-        <p>
-          I take on few projects, stay close to every decision and write the production code myself. Nothing gets lost
-          in the handover, because there isn’t one.
-        </p>
-        <p>
-          The best briefs I get are short and slightly uncomfortable. The best results usually come from removing the
-          second idea so the first one can be heard.
-        </p>
-      </div>
-    </div>
-  </div>
+      <p class="hand__lede lede" data-reveal="fade">{about.who}</p>
+      <p class="hand__what" data-reveal="fade" style="--i: 2">{about.what}</p>
 
-  <div class="hand__method">
-    <h3 class="hand__heading meta">The method, borrowed from the forge</h3>
-    <ol class="method">
-      {
-        method.map((step, i) => (
-          <li class="method__step" data-reveal="fade" style={`--i: ${i * 2}`}>
-            <p class="method__ja" lang="ja" aria-hidden="true">
-              {step.ja}
-            </p>
-            <p class="method__n meta">{String(i + 1).padStart(2, '0')}</p>
-            <h4 class="method__name">{step.name}</h4>
-            <p class="method__body">{step.body}</p>
-          </li>
-        ))
-      }
-    </ol>
-  </div>
-
-  <HamonLine seed={12} />
-
-  <div class="hand__lists grid">
-    <div class="hand__col hand__col--caps">
-      <h3 class="hand__heading meta">Capabilities</h3>
-      <ul class="caps">
-        {capabilities.map((item) => <li>{item}</li>)}
-      </ul>
-    </div>
-    <div class="hand__col hand__col--exp">
-      <h3 class="hand__heading meta">Selected experience</h3>
-      <ol class="exp">
+      <dl class="hand__facts" data-reveal="fade" style="--i: 3">
         {
-          experience.map((row) => (
-            <li class="exp__row">
-              <span class="exp__years meta">{row.years}</span>
-              <span class="exp__place">{row.place}</span>
-              <span class="exp__role">{row.role}</span>
-            </li>
+          facts.map((fact) => (
+            <div>
+              <dt class="meta">{fact.label}</dt>
+              <dd>{fact.value}</dd>
+            </div>
           ))
         }
-      </ol>
+      </dl>
+
+      {
+        (about.exploring.length > 0 || about.learning.length > 0) && (
+          <div class="hand__lists">
+            {about.exploring.length > 0 && (
+              <div>
+                <h3 class="meta">Exploring</h3>
+                <ul>
+                  {about.exploring.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {about.learning.length > 0 && (
+              <div>
+                <h3 class="meta">Learning</h3>
+                <ul>
+                  {about.learning.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      <p class="hand__think">
+        <a class="hand__think-link" href="#precepts">
+          <span class="meta">How I think</span>
+          <span class="hand__think-text">Four precepts, each shown in real work, in Chapter 04</span>
+          <Arrow />
+        </a>
+      </p>
+
+      <ProfileLinks variant="rows" class="hand__links" />
     </div>
   </div>
 </section>
@@ -100,12 +120,21 @@ const portrait = plateSize(plates.sunrise, 'a');
   }
 
   .hand__profile {
-    align-items: end;
+    align-items: start;
     row-gap: var(--space-7);
   }
 
   .hand__portrait {
     grid-column: 1 / span 5;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+  }
+
+  .hand__photo {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.1);
   }
 
   .hand__portrait figcaption {
@@ -114,140 +143,112 @@ const portrait = plateSize(plates.sunrise, 'a');
 
   .hand__intro {
     grid-column: 7 / -1;
-    padding-bottom: var(--space-7);
   }
 
   .hand__lede {
-    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3.25rem);
-    line-height: 1.1;
+    font-size: clamp(2rem, 1.2rem + 2.6vw, 3.75rem);
+    line-height: 1.04;
   }
 
-  .hand__prose {
+  .hand__what {
     margin-top: var(--space-6);
-    margin-left: auto;
-    max-width: 28rem;
-    color: var(--color-text-muted);
+    max-width: 34rem;
+    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+    line-height: 1.65;
   }
 
-  .hand__heading {
-    color: var(--color-text);
-    padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--color-rule);
-  }
-
-  /* The method is a true sequence, so it's numbered */
-  .hand__method {
-    margin-block: var(--space-9) var(--space-8);
-  }
-
-  .method {
+  .hand__facts {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--gutter);
-    margin-top: var(--space-6);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--gutter);
+    margin-top: var(--space-7);
+    max-width: 34rem;
   }
 
-  .method__step {
-    position: relative;
-    padding-top: var(--space-4);
+  .hand__facts div {
+    padding-top: var(--space-3);
+    border-top: var(--panel-border) solid var(--sumi);
   }
 
-  .method__ja {
-    font-family: var(--type-jp);
-    font-weight: 800;
-    font-size: clamp(4rem, 3rem + 3vw, 6.5rem);
-    line-height: 1;
-    color: var(--washi-deep);
-    margin-bottom: calc(var(--space-6) * -1);
-  }
-
-  .method__n {
-    position: relative;
-    color: var(--color-accent-text);
-  }
-
-  .method__name {
-    position: relative;
-    margin-top: var(--space-2);
-    font-family: var(--type-display);
-    font-size: clamp(2.25rem, 1.6rem + 2vw, 3.5rem);
-    font-weight: 400;
-    font-stretch: 70%;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  .method__body {
-    margin-top: var(--space-3);
-    max-width: 22rem;
-    font-size: var(--text-s);
-    color: var(--color-text-muted);
-  }
-
-  .hand__lists {
-    margin-top: var(--space-8);
-    row-gap: var(--space-8);
-    align-items: start;
-  }
-
-  .hand__col--caps {
-    grid-column: 1 / span 5;
-  }
-
-  .hand__col--exp {
-    grid-column: 7 / -1;
-  }
-
-  .caps li {
-    padding-block: var(--space-3);
-    border-bottom: 1px solid var(--color-rule);
+  .hand__facts dd {
+    margin: var(--space-2) 0 0;
     font-family: var(--type-display);
     font-size: var(--text-m);
     font-stretch: 85%;
+    line-height: 1.2;
   }
 
-  .exp__row {
+  .hand__lists {
     display: grid;
-    grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+    margin-top: var(--space-7);
+    max-width: 34rem;
+  }
+
+  .hand__lists ul {
+    margin-top: var(--space-3);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .hand__think {
+    margin-top: var(--space-7);
+    max-width: 34rem;
+  }
+
+  .hand__think-link {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr) auto;
     gap: var(--space-4);
     align-items: baseline;
-    padding-block: var(--space-4);
-    border-bottom: 1px solid var(--color-rule);
+    padding: var(--space-4) var(--space-4);
+    background: var(--washi-deep);
+    transition: background-color var(--dur-1) linear;
   }
 
-  .exp__years {
-    color: var(--color-text);
+  .hand__think-text {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-style: italic;
+    font-stretch: 85%;
+    line-height: 1.2;
   }
 
-  .exp__place {
-    font-weight: 600;
+  @media (hover: hover) {
+    .hand__think-link:hover {
+      background: var(--gofun);
+    }
+
+    .hand__think-link:hover .arrow {
+      transform: translateX(0.25rem);
+    }
   }
 
-  .exp__role {
-    font-size: var(--text-s);
-    color: var(--color-text-muted);
+  .hand__intro :global(.hand__links) {
+    margin-top: var(--space-7);
+    max-width: 34rem;
   }
 
   @media (max-width: 63.99rem) {
     .hand__portrait,
-    .hand__intro,
-    .hand__col--caps,
-    .hand__col--exp {
+    .hand__intro {
       grid-column: 1 / -1;
     }
 
     .hand__portrait {
-      max-width: 26rem;
+      position: static;
+      max-width: 24rem;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .hand__think-link {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
 
-    .method {
-      grid-template-columns: minmax(0, 1fr);
-      row-gap: var(--space-7);
-    }
-
-    .exp__row {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-1);
+    .hand__think-link .meta {
+      grid-column: 1 / -1;
     }
   }
 </style>

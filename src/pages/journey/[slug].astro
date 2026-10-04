@@ -1,0 +1,263 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Arrow from '../../components/ui/Arrow.astro';
+import { formatDate, getJourney, getWorks, hasPage } from '../../lib/content';
+
+/** Only entries with a body get their own page; the rest live on the timeline. */
+export async function getStaticPaths() {
+  const journey = await getJourney();
+  return journey.filter(hasPage).map((entry) => {
+    const i = journey.indexOf(entry);
+    return { params: { slug: entry.id }, props: { entry, newer: journey[i - 1], older: journey[i + 1] } };
+  });
+}
+
+interface Props {
+  entry: CollectionEntry<'journey'>;
+  newer?: CollectionEntry<'journey'>;
+  older?: CollectionEntry<'journey'>;
+}
+
+const { entry, newer, older } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+const project = data.project ? (await getWorks()).find((w) => w.id === data.project?.id) : undefined;
+const date = data.date.toISOString().slice(0, 10);
+const neighbour = (e?: CollectionEntry<'journey'>) => e && { href: hasPage(e) ? `/journey/${e.id}/` : `/journey/#${e.id}`, title: e.data.title };
+const prev = neighbour(older);
+const next = neighbour(newer);
+---
+
+<BaseLayout title={data.title} description={data.summary} running={{ label: 'Journey', title: formatDate(data.date) }}>
+  <article class="je wrap" data-chapter-label="Journey" data-chapter-title={formatDate(data.date)} aria-labelledby="je-title">
+    <div class="je__trail">
+      <a class="je__back meta" href="/journey/"><Arrow dir="left" /> All entries</a>
+      <p class="meta"><time datetime={date}>{formatDate(data.date)}</time></p>
+    </div>
+
+    <header class="je__head">
+      <p class="je__labels">
+        <span class="je__category">{data.category}</span>
+        {data.status && <span class="meta">{data.status}</span>}
+      </p>
+      <h1 id="je-title" class="je__title display">{data.title}</h1>
+      <p class="je__summary lede">{data.summary}</p>
+    </header>
+
+    <div class="je__body">
+      <aside class="je__aside">
+        <dl class="je__meta">
+          <div><dt class="meta">Date</dt><dd><time datetime={date}>{formatDate(data.date)}</time></dd></div>
+          {data.stack.length > 0 && <div><dt class="meta">Stack</dt><dd>{data.stack.join(', ')}</dd></div>}
+          {project && (
+            <div>
+              <dt class="meta">Project</dt>
+              <dd><a class="je__ref" href={`/work/${project.id}/`}>{project.data.title}</a></dd>
+            </div>
+          )}
+          {data.links.github && (
+            <div>
+              <dt class="meta">Code</dt>
+              <dd>
+                <a class="je__ref" href={data.links.github} target="_blank" rel="noopener">GitHub <span class="vh">(opens in a new tab)</span></a>
+              </dd>
+            </div>
+          )}
+          {data.links.external && (
+            <div>
+              <dt class="meta">Link</dt>
+              <dd>
+                <a class="je__ref" href={data.links.external} target="_blank" rel="noopener">{new URL(data.links.external).hostname} <span class="vh">(opens in a new tab)</span></a>
+              </dd>
+            </div>
+          )}
+          {data.learned && <div><dt class="meta">Learned</dt><dd>{data.learned}</dd></div>}
+          {data.next && <div><dt class="meta">Next</dt><dd>{data.next}</dd></div>}
+        </dl>
+      </aside>
+
+      <div class="je__main">
+        {data.image && (
+          <figure class="je__figure">
+            <Image src={data.image} alt={data.imageAlt ?? ''} widths={[640, 1280]} sizes="(min-width: 64rem) 50vw, 100vw" />
+          </figure>
+        )}
+        <div class="longform">
+          <Content />
+        </div>
+      </div>
+    </div>
+
+    <nav class="je__pager" aria-label="More entries">
+      {prev ? (
+        <a class="je__page" href={prev.href}>
+          <span class="meta"><Arrow dir="left" /> Earlier</span>
+          <span class="je__page-title">{prev.title}</span>
+        </a>
+      ) : <span />}
+      {next && (
+        <a class="je__page je__page--next" href={next.href}>
+          <span class="meta">Later <Arrow /></span>
+          <span class="je__page-title">{next.title}</span>
+        </a>
+      )}
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .je {
+    padding-top: calc(var(--masthead-h) + var(--space-6));
+    padding-bottom: var(--space-section);
+  }
+
+  .je__trail {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--panel-border) solid var(--sumi);
+  }
+
+  .je__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    margin-block: -0.75rem;
+    color: var(--color-text);
+  }
+
+  .je__head {
+    max-width: 52rem;
+    margin-top: var(--space-8);
+  }
+
+  .je__labels {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .je__category {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--color-rule-strong);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .je__title {
+    margin-top: var(--space-4);
+    font-size: clamp(3rem, 1.6rem + 5vw, 7rem);
+    font-weight: 350;
+  }
+
+  .je__summary {
+    margin-top: var(--space-5);
+    font-style: italic;
+  }
+
+  .je__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-7);
+    margin-top: var(--space-9);
+    align-items: start;
+  }
+
+  .je__aside {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+  }
+
+  .je__meta {
+    display: grid;
+    gap: var(--space-3);
+    font-size: var(--text-s);
+  }
+
+  .je__meta div {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .je__meta dd {
+    margin: 0;
+  }
+
+  .je__ref {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .je__main {
+    grid-column: 6 / -1;
+  }
+
+  .je__figure {
+    margin-bottom: var(--space-7);
+  }
+
+  .je__figure :global(img) {
+    width: 100%;
+    height: auto;
+    border: var(--panel-border) solid var(--sumi);
+  }
+
+  .je__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+    margin-top: var(--space-section);
+    padding-top: var(--space-5);
+    border-top: var(--panel-border) solid var(--sumi);
+  }
+
+  .je__page {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .je__page .meta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .je__page--next {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .je__page-title {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+  }
+
+  @media (hover: hover) {
+    .je__page:hover .je__page-title {
+      color: var(--color-accent-text);
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .je__aside,
+    .je__main {
+      grid-column: 1 / -1;
+    }
+
+    .je__aside {
+      position: static;
+    }
+  }
+</style>

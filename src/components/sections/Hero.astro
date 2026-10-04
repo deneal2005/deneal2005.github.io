@@ -1,5 +1,7 @@
 ---
 import HeroScene from '../motifs/HeroScene.astro';
+import Arrow from '../ui/Arrow.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
 import { brushStroke } from '../../lib/draw';
 import { chapterById } from '../../data/chapters';
 import { site } from '../../data/site';
@@ -37,21 +39,29 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     </div>
 
     <p class="hero__vol meta" data-reveal="fade" style="--i: 14">
-      {site.volume} · Selected works {site.span}
+      {site.volume} · {site.volumeTitle}
     </p>
 
     <div class="hero__copy">
-      <p class="hero__eyebrow meta" data-reveal="fade" style="--i: 12">Plate 00 · The cut</p>
-      <h1 id="hero-title" class="hero__title display" data-reveal="rise" style="--delay: 1450ms">
-        <span class="rise" style="--line: 0"><span>Every line</span></span>
-        <span class="rise hero__title-2" style="--line: 1"><span><em>is final</em><span class="hero__stop">.</span></span></span>
+      <h1 id="hero-title" class="hero__heading">
+        <span class="hero__name" data-reveal="fade" style="--i: 12">
+          {site.name}<span class="hero__role">{site.role}, {site.location.city}</span>
+        </span>
+        <span class="hero__title display" data-reveal="rise" style="--delay: 1450ms">
+          <span class="rise" style="--line: 0"><span>Every line</span></span>
+          <span class="rise hero__title-2" style="--line: 1"><span><em>is final</em><span class="hero__stop">.</span></span></span>
+        </span>
       </h1>
     </div>
 
-    <p class="hero__intro" data-reveal="fade" style="--i: 20">
-      <strong>{site.brand}</strong> is the independent practice of {site.person}. Art direction, interface design
-      and creative engineering for brands that would rather be remembered than noticed.
-    </p>
+    <div class="hero__intro" data-reveal="fade" style="--i: 20">
+      <p>{site.statement} This volume holds what I’ve built, what I’m testing and what I’m learning.</p>
+      <div class="hero__actions">
+        <a class="btn btn--ink" href="#work">See the work <Arrow /></a>
+        <a class="btn" href="/journey/">Follow the journey</a>
+      </div>
+      <ProfileLinks exclude={['email']} class="hero__links" />
+    </div>
 
     <a class="hero__next meta" href="#hamon" data-reveal="fade" style="--i: 22">
       <span>Read on</span>
@@ -69,7 +79,7 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
   .hero__panel {
     position: relative;
     height: calc(100svh - var(--masthead-h) - var(--margin) * 0.6);
-    min-height: 38rem;
+    min-height: 34rem;
     max-height: 68rem;
     border: var(--panel-border) solid var(--sumi);
     isolation: isolate;
@@ -133,14 +143,17 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     inset: 0;
   }
 
+  /* On wide screens the horizon starts at the sun and fades in, so it never strikes through the headline. */
   .hero__horizon {
     position: absolute;
     top: calc(85% - 14px);
-    left: -400%;
-    width: 900%;
+    left: 8%;
+    width: 300%;
     max-width: none;
     height: 28px;
     fill: var(--sumi);
+    transform-origin: 12% 50%;
+    mask-image: linear-gradient(90deg, transparent 0, #000 5%);
   }
 
   :global(.js) .hero__horizon {
@@ -191,13 +204,34 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
     bottom: calc(var(--pad) * 1.2);
   }
 
-  .hero__eyebrow {
+  .hero__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
     margin-bottom: var(--space-4);
-    padding-left: 0.25em;
+    padding-left: 0.2em;
+    font-family: var(--type-sans);
+    font-size: clamp(0.95rem, 0.8rem + 0.45vw, 1.2rem);
+    font-stretch: 125%;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    line-height: 1.2;
+    text-transform: uppercase;
     color: var(--sumi);
   }
 
+  .hero__role {
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-stretch: 100%;
+    font-weight: 400;
+    letter-spacing: var(--tracking-meta);
+    color: var(--nibi);
+  }
+
   .hero__title {
+    display: block;
     font-size: clamp(3.6rem, min(10.5vw, 21svh), 13.5rem);
     font-weight: 380;
     line-height: 0.84;
@@ -224,24 +258,28 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
 
   .hero__intro {
     position: absolute;
-    top: clamp(6rem, 21%, 12rem);
+    top: clamp(5.5rem, 18%, 11rem);
     left: calc(var(--pad) + 4.75rem);
-    max-width: 20rem;
+    max-width: 25.5rem;
     font-size: var(--text-s);
     line-height: 1.55;
   }
 
-  .hero__intro strong {
-    font-weight: 700;
-    font-stretch: 125%;
-    font-size: 0.82em;
-    letter-spacing: 0.14em;
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .hero__intro :global(.hero__links) {
+    margin-top: var(--space-2);
   }
 
   .hero__next {
     position: absolute;
     right: var(--pad);
-    bottom: calc(var(--pad) * 1.2);
+    bottom: var(--space-3);
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -302,6 +340,13 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
       margin-inline: calc(var(--pad) * -1);
     }
 
+    .hero__horizon {
+      left: -400%;
+      width: 900%;
+      mask-image: none;
+      transform-origin: 50% 50%;
+    }
+
     .hero__stage {
       top: calc(var(--art-h) * -0.2);
       right: auto;
@@ -338,8 +383,11 @@ const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5
 
     .hero__intro {
       margin-top: var(--space-5);
-      max-width: 26rem;
-      padding-right: 3.5rem;
+      max-width: 30rem;
+    }
+
+    .hero__intro p {
+      padding-right: 3rem;
     }
 
     .hero__next {

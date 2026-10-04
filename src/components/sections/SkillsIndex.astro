@@ -1,0 +1,222 @@
+---
+/**
+ * Chapter 02 — Index (索引). Skills set the way a book sets its index: each
+ * term, then where it appears. Built from the content, so nothing is listed
+ * that hasn't been used somewhere in this volume.
+ */
+import ChapterOpener from '../ui/ChapterOpener.astro';
+import { chapterById } from '../../data/chapters';
+import { learning } from '../../data/skills';
+import { buildSkillsIndex } from '../../lib/content';
+
+const chapter = chapterById('index');
+const groups = await buildSkillsIndex();
+---
+
+<section
+  id={chapter.id}
+  class="index wrap"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="index-title"
+>
+  <ChapterOpener id="index" epigraph="What I know, filed the way a book files it: by where it was used." />
+
+  <div class="index__grid grid">
+    <div class="index__note">
+      <p>
+        Every term here comes from the stack of something in this volume and points back to it. If a tool isn’t used
+        anywhere yet, it isn’t listed.
+      </p>
+      <dl class="index__key" aria-label="How references are set">
+        <div><dt class="index__ref index__ref--project">Roman</dt><dd class="meta">Project</dd></div>
+        <div><dt class="index__ref index__ref--experiment">Italic</dt><dd class="meta">Experiment</dd></div>
+        <div><dt class="index__ref index__ref--journey">Mono</dt><dd class="meta">Journal entry</dd></div>
+      </dl>
+    </div>
+
+    <div class="index__groups">
+      {
+        groups.map((group) => (
+          <section class="index__group" aria-labelledby={`index-${group.name.toLowerCase().replace(/\W+/g, '-')}`}>
+            <h3 class="index__heading meta" id={`index-${group.name.toLowerCase().replace(/\W+/g, '-')}`}>
+              {group.name}
+            </h3>
+            <ul>
+              {group.terms.map(({ term, refs }) => (
+                <li class="index__entry">
+                  <span class="index__term">{term}</span>
+                  <span class="index__leader" aria-hidden="true" />
+                  <span class="index__refs">
+                    {refs.map((ref, i) => (
+                      <>
+                        <a class:list={['index__ref', `index__ref--${ref.kind.toLowerCase()}`]} href={ref.href}>
+                          {ref.label}
+                          <span class="vh"> ({ref.kind.toLowerCase()})</span>
+                        </a>
+                        {i < refs.length - 1 && <span aria-hidden="true">, </span>}
+                      </>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      {
+        learning.length > 0 && (
+          <section class="index__group" aria-labelledby="index-learning">
+            <h3 class="index__heading meta" id="index-learning">
+              In progress
+            </h3>
+            <ul>
+              {learning.map((term) => (
+                <li class="index__entry">
+                  <span class="index__term">{term}</span>
+                  <span class="index__leader" aria-hidden="true" />
+                  <span class="index__refs meta">Learning</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .index {
+    padding-block: var(--space-section) 0;
+  }
+
+  .index__grid {
+    align-items: start;
+    row-gap: var(--space-7);
+  }
+
+  .index__note {
+    grid-column: 1 / span 3;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .index__key {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .index__key div {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    align-items: baseline;
+  }
+
+  .index__key dd {
+    margin: 0;
+  }
+
+  .index__groups {
+    grid-column: 5 / -1;
+    columns: 2;
+    column-gap: calc(var(--gutter) * 2.5);
+  }
+
+  .index__group {
+    break-inside: avoid;
+    margin-bottom: var(--space-7);
+  }
+
+  .index__heading {
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-2);
+    border-bottom: var(--panel-border) solid var(--sumi);
+    color: var(--color-text);
+  }
+
+  .index__entry {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-block: 0.35rem;
+  }
+
+  .index__term {
+    font-family: var(--type-display);
+    font-size: 1.3rem;
+    font-stretch: 85%;
+    line-height: 1.2;
+  }
+
+  .index__leader {
+    flex: 1;
+    min-width: 1.5rem;
+    height: 1px;
+    align-self: center;
+    margin-top: 0.4em;
+    background-image: radial-gradient(circle, var(--color-text-muted) 0.8px, transparent 1.2px);
+    background-size: 6px 2px;
+    background-repeat: repeat-x;
+    opacity: 0.7;
+  }
+
+  .index__refs {
+    max-width: 60%;
+    text-align: right;
+    font-size: var(--text-s);
+    line-height: 1.4;
+  }
+
+  .index__ref {
+    transition: color var(--dur-1) linear;
+  }
+
+  a.index__ref {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.2em;
+  }
+
+  .index__ref--experiment {
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.05em;
+  }
+
+  .index__ref--journey {
+    font-family: var(--type-mono);
+    font-size: 0.85em;
+  }
+
+  @media (hover: hover) {
+    a.index__ref:hover {
+      color: var(--color-accent-text);
+      text-decoration-color: currentColor;
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .index__note,
+    .index__groups {
+      grid-column: 1 / -1;
+    }
+
+    .index__note {
+      position: static;
+      max-width: 34rem;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .index__groups {
+      columns: 1;
+    }
+  }
+</style>

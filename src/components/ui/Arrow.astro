@@ -1,0 +1,20 @@
+---
+/** The volume's one arrow, drawn as a hairline. */
+interface Props {
+  dir?: 'right' | 'left' | 'out' | 'down';
+  class?: string;
+}
+
+const { dir = 'right', class: className } = Astro.props;
+const paths = {
+  right: 'M0 5h16M12 1l4 4-4 4',
+  left: 'M18 5H2M6 1L2 5l4 4',
+  out: 'M3 13L15 1M6 1h9v9',
+  down: 'M9 0v16M5 12l4 4 4-4',
+};
+const box = { right: '0 0 18 10', left: '0 0 18 10', out: '0 0 18 14', down: '0 0 18 17' };
+---
+
+<svg class:list={['arrow', `arrow--${dir}`, className]} viewBox={box[dir]} aria-hidden="true" focusable="false">
+  <path d={paths[dir]} fill="none" stroke="currentColor" stroke-width="1.3"></path>
+</svg>

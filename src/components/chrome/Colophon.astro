@@ -1,41 +1,72 @@
 ---
 /** 奥付 — the colophon a Japanese book carries on its last page. Every line is true. */
 import HamonLine from '../motifs/HamonLine.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
+import { chapters } from '../../data/chapters';
 import { site } from '../../data/site';
 
 const year = new Date().getFullYear();
+const built = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+const nav = [
+  ...chapters.filter((c) => ['work', 'keiko', 'journey', 'invitation'].includes(c.id)).map((c) => ({ label: c.title, href: `/#${c.id}` })),
+  { label: 'Full journey', href: '/journey/' },
+];
 ---
 
 <footer class="colophon" data-tone="ink">
   <HamonLine seed={21} class="colophon__hamon" />
   <div class="colophon__grid grid">
-    <p class="colophon__ja tate" lang="ja" aria-hidden="true">奥付</p>
-    <h2 class="colophon__heading meta">Colophon</h2>
-    <dl class="colophon__facts">
-      <div>
-        <dt class="meta">Title</dt>
-        <dd>{site.brand}: Selected Works, {site.volume}</dd>
-      </div>
-      <div>
-        <dt class="meta">Edition</dt>
-        <dd>{site.edition}</dd>
-      </div>
-      <div>
-        <dt class="meta">Type</dt>
-        <dd>Noto Serif Display, Archivo, IBM Plex Mono and Shippori Mincho B1</dd>
-      </div>
-      <div>
-        <dt class="meta">Plates</dt>
-        <dd>Drawn in code and printed at build time. No stock imagery.</dd>
-      </div>
-      <div>
-        <dt class="meta">Privacy</dt>
-        <dd>No cookies, no trackers, nothing to accept.</dd>
-      </div>
-    </dl>
+    <div class="colophon__who">
+      <p class="colophon__name">{site.name}</p>
+      <p class="colophon__statement">{site.statement}</p>
+      <ProfileLinks class="colophon__links" />
+    </div>
+
+    <nav class="colophon__nav" aria-label="Footer">
+      <p class="meta">In this volume</p>
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a class="link" href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="colophon__book">
+      <p class="colophon__ja tate" lang="ja" aria-hidden="true">奥付</p>
+      <h2 class="colophon__heading meta">Colophon</h2>
+      <dl class="colophon__facts">
+        <div>
+          <dt class="meta">Title</dt>
+          <dd>{site.volumeTitle}, {site.volume}</dd>
+        </div>
+        <div>
+          <dt class="meta">Edition</dt>
+          <dd>{site.edition}. This printing {built}.</dd>
+        </div>
+        <div>
+          <dt class="meta">Type</dt>
+          <dd>Noto Serif Display, Archivo, IBM Plex Mono and Shippori Mincho B1</dd>
+        </div>
+        <div>
+          <dt class="meta">Plates</dt>
+          <dd>Drawn in code and printed at build time. No stock imagery.</dd>
+        </div>
+        <div>
+          <dt class="meta">Privacy</dt>
+          <dd>No cookies, no trackers, nothing to accept.</dd>
+        </div>
+      </dl>
+    </div>
+
     <div class="colophon__end">
       <a class="link" href="/#top">Back to the first page</a>
-      <p class="meta">© {year} {site.brand}. Every line is final.</p>
+      <p class="meta">© {year} {site.name}. Every line is final.</p>
     </div>
   </div>
 </footer>
@@ -51,33 +82,73 @@ const year = new Date().getFullYear();
   }
 
   .colophon__grid {
-    row-gap: var(--space-6);
+    row-gap: var(--space-8);
     align-items: start;
   }
 
+  .colophon__who {
+    grid-column: 1 / span 4;
+  }
+
+  .colophon__name {
+    font-family: var(--type-sans);
+    font-size: 1rem;
+    font-stretch: 125%;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .colophon__statement {
+    margin-top: var(--space-3);
+    max-width: 22rem;
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .colophon__who :global(.colophon__links) {
+    margin-top: var(--space-4);
+  }
+
+  .colophon__nav {
+    grid-column: 6 / span 2;
+  }
+
+  .colophon__nav ul {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    font-size: var(--text-s);
+  }
+
+  .colophon__book {
+    grid-column: 9 / -1;
+    position: relative;
+  }
+
   .colophon__ja {
-    grid-column: 1 / span 1;
-    grid-row: 1 / span 2;
-    font-size: 1.5rem;
+    position: absolute;
+    top: 0;
+    left: -2.5rem;
+    font-size: 1.25rem;
     color: var(--shu);
   }
 
   .colophon__heading {
-    grid-column: 2 / span 3;
     color: var(--color-text);
   }
 
   .colophon__facts {
-    grid-column: 5 / span 6;
     display: grid;
     gap: var(--space-3);
+    margin-top: var(--space-3);
     font-size: var(--text-s);
   }
 
   .colophon__facts div {
     display: grid;
-    grid-template-columns: 6rem 1fr;
-    gap: var(--space-4);
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--space-3);
     align-items: baseline;
     padding-bottom: var(--space-3);
     border-bottom: 1px solid var(--color-rule);
@@ -88,23 +159,37 @@ const year = new Date().getFullYear();
   }
 
   .colophon__end {
-    grid-column: 5 / -1;
+    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-4);
-    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-rule);
     font-size: var(--text-s);
   }
 
-  @media (max-width: 47.99rem) {
+  @media (max-width: 63.99rem) {
+    .colophon__who {
+      grid-column: 1 / -1;
+    }
+
+    .colophon__nav {
+      grid-column: 1 / span 4;
+    }
+
+    .colophon__book {
+      grid-column: 5 / -1;
+    }
+
     .colophon__ja {
       display: none;
     }
+  }
 
-    .colophon__heading,
-    .colophon__facts,
-    .colophon__end {
+  @media (max-width: 47.99rem) {
+    .colophon__nav,
+    .colophon__book {
       grid-column: 1 / -1;
     }
 

@@ -2,19 +2,24 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
 import Definition from '../components/sections/Definition.astro';
+import Hand from '../components/sections/Hand.astro';
+import SkillsIndex from '../components/sections/SkillsIndex.astro';
 import Work from '../components/sections/Work.astro';
 import Precepts from '../components/sections/Precepts.astro';
 import Keiko from '../components/sections/Keiko.astro';
-import Hand from '../components/sections/Hand.astro';
+import Journey from '../components/sections/Journey.astro';
 import Invitation from '../components/sections/Invitation.astro';
 ---
 
-<BaseLayout>
+<!-- Who I am → what I know → what I've built → how I think → what I'm testing → how I'm growing → contact -->
+<BaseLayout person>
   <Hero />
   <Definition />
+  <Hand />
+  <SkillsIndex />
   <Work />
   <Precepts />
   <Keiko />
-  <Hand />
+  <Journey />
   <Invitation />
 </BaseLayout>

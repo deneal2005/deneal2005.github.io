@@ -12,9 +12,10 @@ const { label, title } = Astro.props;
 ---
 
 <header class="masthead" data-masthead data-tone-auto>
-  <a class="masthead__brand" href="/" aria-label={`${site.brand}, back to the first page`}>
+  <a class="masthead__brand" href="/" aria-label={`${site.name}, back to the first page`}>
     <CutSunMark size={20} />
-    <span class="masthead__word">{site.brand}</span>
+    <span class="masthead__word masthead__word--full">{site.name}</span>
+    <span class="masthead__word masthead__word--short" aria-hidden="true">{site.shortName}</span>
   </a>
 
   <p class="masthead__running meta" aria-hidden="true">
@@ -68,11 +69,44 @@ const { label, title } = Astro.props;
 
   .masthead__word {
     font-family: var(--type-sans);
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-stretch: 125%;
     font-weight: 800;
-    letter-spacing: 0.32em;
-    margin-right: -0.32em;
+    letter-spacing: 0.24em;
+    margin-right: -0.24em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .masthead__word--short {
+    display: none;
+  }
+
+  @media (max-width: 30rem) {
+    .masthead__word--full {
+      display: none;
+    }
+
+    .masthead__word--short {
+      display: inline;
+      letter-spacing: 0.18em;
+    }
+  }
+
+  /* Smallest phones: the seal alone is the button; "Contents" stays as its accessible name. */
+  @media (max-width: 26rem) {
+    .masthead__contents-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .masthead__contents {
+      margin-right: 0;
+    }
   }
 
   @media (hover: hover) {
@@ -135,7 +169,8 @@ const { label, title } = Astro.props;
     }
   }
 
-  @media (max-width: 47.99rem) {
+  /* The running head needs the full width; below laptop size the name and contents button share the bar. */
+  @media (max-width: 63.99rem) {
     .masthead {
       grid-template-columns: 1fr auto;
     }

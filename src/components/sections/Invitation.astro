@@ -1,12 +1,21 @@
 ---
 /**
  * Final chapter — The Invitation. The volume opened on a sun cut in two;
- * it closes on a whole one, rising.
+ * it closes on a whole one, rising. Leads with email when one is set in
+ * profile.ts, otherwise with GitHub.
  */
+import Arrow from '../ui/Arrow.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
 import { chapterById } from '../../data/chapters';
+import { githubUrl } from '../../data/profile';
 import { site } from '../../data/site';
 
 const chapter = chapterById('invitation');
+const primary = site.email
+  ? { id: 'email', href: `mailto:${site.email}`, text: site.email, newTab: false }
+  : githubUrl
+    ? { id: 'github', href: githubUrl, text: `github.com/${site.links.github}`, newTab: true }
+    : null;
 ---
 
 <section
@@ -29,45 +38,46 @@ const chapter = chapterById('invitation');
 
     <h2 id="invitation-title" class="invite__title display" data-reveal="rise">
       <span class="rise" style="--line: 0"><span>The next chapter</span></span>
-      <span class="rise" style="--line: 1"><span><em>starts with a letter.</em></span></span>
+      <span class="rise" style="--line: 1"><span><em>starts with a {site.email ? 'letter' : 'message'}.</em></span></span>
     </h2>
 
     <div class="invite__grid">
       <p class="invite__body" data-reveal="fade">
-        {site.brand} takes on two commissions a season. If you have something that deserves one decisive idea, write and
-        tell me what it is, and why now.
+        A question about something in this volume, a thing you’d like to build together, or a bug you found in it: write
+        to me.
       </p>
 
       <div class="invite__contact" data-reveal="fade" style="--i: 2">
-        <a class="invite__email" href={`mailto:${site.email}`} data-magnetic="0.18">
-          <span>{site.email}</span>
-          <svg class="arrow" viewBox="0 0 18 10" aria-hidden="true"><path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
-        </a>
+        {
+          primary && (
+            <a
+              class="invite__email"
+              href={primary.href}
+              data-magnetic="0.18"
+              target={primary.newTab ? '_blank' : undefined}
+              rel={primary.newTab ? 'me noopener' : undefined}
+            >
+              <span>{primary.text}</span>
+              <Arrow dir={primary.newTab ? 'out' : 'right'} />
+              {primary.newTab && <span class="vh">(opens in a new tab)</span>}
+            </a>
+          )
+        }
         <div class="invite__actions">
-          <button class="btn" type="button" data-copy={site.email}><span data-copy-label>Copy address</span></button>
+          {
+            site.email && (
+              <button class="btn" type="button" data-copy={site.email}>
+                <span data-copy-label>Copy email</span>
+              </button>
+            )
+          }
           <p class="meta invite__meta">
-            {site.location.city}
+            Local time in {site.location.city}
             <time data-local-time={site.location.timeZone}>—</time>
           </p>
         </div>
         <p class="vh" aria-live="polite" data-copy-status></p>
-        <dl class="invite__facts">
-          <div><dt class="meta">Availability</dt><dd>{site.availability}</dd></div>
-          <div><dt class="meta">Response</dt><dd>{site.responseTime}</dd></div>
-        </dl>
-        {
-          site.socials.length > 0 && (
-            <ul class="invite__socials">
-              {site.socials.map((social) => (
-                <li>
-                  <a class="link" href={social.href} rel="me noopener">
-                    {social.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )
-        }
+        <ProfileLinks variant="rows" exclude={primary ? [primary.id] : []} class="invite__links" />
       </div>
     </div>
   </div>
@@ -202,29 +212,15 @@ const chapter = chapterById('invitation');
     font-variant-numeric: tabular-nums;
   }
 
-  .invite__facts {
-    display: grid;
-    gap: var(--space-2);
+  .invite__contact :global(.invite__links) {
     margin-top: var(--space-7);
-    max-width: 30rem;
-    font-size: var(--text-s);
+    max-width: 36rem;
   }
 
-  .invite__facts div {
-    display: grid;
-    grid-template-columns: 8rem 1fr;
-    gap: var(--space-4);
-  }
-
-  .invite__facts dd {
-    margin: 0;
-  }
-
-  .invite__socials {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-    margin-top: var(--space-6);
+  .invite__actions :global(.btn.is-copied) {
+    background-color: var(--shu);
+    border-color: var(--shu);
+    color: var(--gofun);
   }
 
   @media (max-width: 63.99rem) {
@@ -237,10 +233,6 @@ const chapter = chapterById('invitation');
       font-size: clamp(2.9rem, 13vw, 6rem);
     }
 
-    .invite__facts div {
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

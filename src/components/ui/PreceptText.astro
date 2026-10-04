@@ -1,0 +1,93 @@
+---
+/** The text block inside a precept panel: the idea, then where it shows up in real work. */
+import type { Precept } from '../../data/precepts';
+
+interface Props {
+  precept: Precept;
+  class?: string;
+}
+
+const { precept, class: className } = Astro.props;
+---
+
+<div class:list={['precept', className]}>
+  <p class="precept__ja" lang="ja" aria-hidden="true">{precept.ja}</p>
+  <h3 class="precept__name meta">{precept.name}</h3>
+  <p class="precept__rule">{precept.rule}</p>
+  <p class="precept__body">{precept.body}</p>
+  <p class="precept__seen">
+    <span class="meta">Seen in</span>
+    <a class="precept__seen-link" href={precept.seenIn.href}>{precept.seenIn.project}</a>
+    <span class="precept__seen-note">{precept.seenIn.note}</span>
+  </p>
+</div>
+
+<style>
+  .precept {
+    position: relative;
+    align-self: end;
+    padding: clamp(1.25rem, 2.5vw, 2.25rem);
+    max-width: 30rem;
+  }
+
+  .precept__ja {
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 1.6rem + 1.8vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: 0.06em;
+  }
+
+  .precept__name {
+    margin-top: var(--space-4);
+    color: var(--color-accent-text);
+  }
+
+  .precept__rule {
+    margin-top: var(--space-2);
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-style: italic;
+    font-weight: 400;
+    font-stretch: 85%;
+    line-height: 1.2;
+  }
+
+  .precept__body {
+    margin-top: var(--space-3);
+    font-size: var(--text-s);
+    line-height: 1.55;
+    color: var(--color-text-muted);
+  }
+
+  .precept__seen {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.15rem var(--space-3);
+    align-items: baseline;
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-rule);
+    font-size: var(--text-s);
+    line-height: 1.45;
+  }
+
+  .precept__seen-link {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--color-rule);
+  }
+
+  .precept__seen-note {
+    grid-column: 1 / -1;
+    color: var(--color-text-muted);
+  }
+
+  @media (hover: hover) {
+    .precept__seen-link:hover {
+      color: var(--color-accent-text);
+      text-decoration-color: currentColor;
+    }
+  }
+</style>
