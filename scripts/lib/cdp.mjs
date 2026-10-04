@@ -72,8 +72,8 @@ export async function launch() {
   return {
     send,
     errors,
-    async viewport(width, height, { mobile = false, reducedMotion = true } = {}) {
-      await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
+    async viewport(width, height, { mobile = false, reducedMotion = true, dpr = 1 } = {}) {
+      await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: dpr, mobile });
       await send('Emulation.setTouchEmulationEnabled', { enabled: mobile, maxTouchPoints: mobile ? 5 : 1 });
       await send('Emulation.setEmulatedMedia', {
         features: [{ name: 'prefers-reduced-motion', value: reducedMotion ? 'reduce' : 'no-preference' }],

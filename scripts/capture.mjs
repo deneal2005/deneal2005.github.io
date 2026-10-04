@@ -2,7 +2,7 @@
 // Emulates a real viewport (true phone widths included), scrolls and saves one
 // PNG per screen. Reduced motion is on unless --motion is passed.
 //
-// Usage: node scripts/capture.mjs <url> <outPrefix|file.png> [width=1440] [height=900] [screens=6] [--mobile] [--motion] [--from=#id]
+// Usage: node scripts/capture.mjs <url> <outPrefix|file.png> [width=1440] [height=900] [screens=6] [--mobile] [--motion] [--from=#id] [--dpr=2]
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { launch, sleep } from './lib/cdp.mjs';
@@ -13,9 +13,10 @@ const [url = 'http://localhost:4321/', prefix = 'capture', w = '1440', h = '900'
 const height = Number(h);
 const motion = flags.includes('--motion');
 const from = flags.find((f) => f.startsWith('--from='))?.slice(7);
+const dpr = Number(flags.find((f) => f.startsWith('--dpr='))?.slice(6) ?? 1);
 
 const page = await launch();
-await page.viewport(Number(w), height, { mobile: flags.includes('--mobile'), reducedMotion: !motion });
+await page.viewport(Number(w), height, { mobile: flags.includes('--mobile'), reducedMotion: !motion, dpr });
 await page.goto(url, 4500);
 
 const total = await page.eval('document.documentElement.scrollHeight');

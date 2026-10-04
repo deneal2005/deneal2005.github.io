@@ -17,14 +17,22 @@ export const precepts = {
     name: 'Ma',
     rule: 'The pause is part of the sentence.',
     body: 'Empty space isn’t what’s left over. It’s where the eye rests, so it gets designed first.',
-    seenIn: { project: 'Scriptly', href: '/work/scriptly/', note: 'Plain text by default. Timestamps only when you ask for them.' },
+    seenIn: {
+      project: 'GreenUP',
+      href: '/work/greenup/',
+      note: 'The twenty minutes between the before and after photo are designed for: the draft survives sleep, refreshes and dropped connections.',
+    },
   },
   kata: {
     ja: '型',
     name: 'Kata',
     rule: 'Form first. Then freedom.',
     body: 'Tokens, themes and type scales, settled early, so every screen after them can move faster.',
-    seenIn: { project: 'GreenUP', href: '/work/greenup/', note: 'One stylesheet is the design system, light and dark themes included.' },
+    seenIn: {
+      project: 'RentMate',
+      href: '/work/rentmate/',
+      note: 'Every network call goes through one module, so the whole interface was finished on mock data before the API existed.',
+    },
   },
   shuhari: {
     ja: '守破離',
@@ -44,9 +52,9 @@ export const precepts = {
     rule: 'The cut doesn’t end when the blade stops.',
     body: 'Shipping is the midpoint. What happens after the click is part of the work.',
     seenIn: {
-      project: 'GreenUP',
-      href: '/work/greenup/',
-      note: 'The before photo can’t be lost: it’s stored the moment you pick it, and the upload resumes after a crash.',
+      project: 'RentMate',
+      href: '/work/rentmate/',
+      note: 'Money moves inside database transactions, and admin actions are written to an audit log.',
     },
   },
 } satisfies Record<string, Precept & Record<string, unknown>>;

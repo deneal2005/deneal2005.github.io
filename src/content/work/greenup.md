@@ -1,5 +1,5 @@
 ---
-order: 1
+order: 2
 title: GreenUP
 titleLines: ['Green', 'UP']
 summary: A student sustainability tracker. Log trees and clean-ups with photo and GPS proof, and watch them appear on a live world map.

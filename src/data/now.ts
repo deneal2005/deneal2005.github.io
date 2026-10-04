@@ -9,10 +9,13 @@ export interface NowItem {
 
 export const now = {
   updated: '2026-10-05',
-  building: [{ text: 'This portfolio, set as a manga volume', href: '/work/hamon/' }] as NowItem[],
+  building: [
+    { text: 'RentMate', href: '/work/rentmate/' },
+    { text: 'This portfolio, set as a manga volume', href: '/journey/2026-10-05-hamon-vol-01/' },
+  ] as NowItem[],
   learning: [] as NowItem[],
   exploring: [] as NowItem[],
   /** One sentence: what you're trying to get done. */
-  goal: '',
+  goal: 'Becoming a software backend engineer in Japan.',
   reading: [] as NowItem[],
 };

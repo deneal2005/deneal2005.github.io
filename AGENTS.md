@@ -4,7 +4,9 @@ Delin Thangjam's portfolio, set as a manga volume. Astro 7, static output, no cl
 
 ## Ground rules
 
-- **Never invent personal information.** No made-up projects, clients, metrics, dates, skills or quotes. Facts come from `src/data/profile.ts`, the Markdown content, or public repositories. A missing field stays empty and its UI hides itself.
+- **Never invent personal information.** No made-up projects, clients, metrics, dates, skills or quotes. Facts come from `src/data/profile.ts`, the Markdown content, or the projects themselves. A missing field stays empty and its UI hides itself.
+- **Projects are only RentMate and GreenUP** (`src/content/work`). Don't add GitHub repositories as projects. RentMate's repo is private: link the live site only.
+- **Skills are the roadmap in `src/data/path.ts`**, as the owner wrote it. Don't add skills. Only add a `usedIn` link when the project's code really uses the skill.
 - Keep the visual system: tokens in `src/styles/tokens.css`, motion in `src/styles/motion.css`. Red (`--shu`) is for the sun and the occasional accent, never body text on paper (use `--enji`).
 - Every animation must respect `prefers-reduced-motion`, and content must be readable without JavaScript (hidden states only apply under `html.js`).
 
@@ -14,7 +16,7 @@ Delin Thangjam's portfolio, set as a manga volume. Astro 7, static output, no cl
 | --- | --- |
 | Name, role, statement, links, résumé | `src/data/profile.ts` |
 | "Currently" panel | `src/data/now.ts` |
-| Skill groups (terms come from content stacks) | `src/data/skills.ts` |
+| Skills roadmap (Chapter 02) | `src/data/path.ts` |
 | Precepts (Chapter 04) | `src/data/precepts.ts` |
 | Projects | `src/content/work/*.md` |
 | Experiments | `src/content/experiments/*.md` |

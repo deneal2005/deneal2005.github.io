@@ -4,7 +4,6 @@ import Arrow from '../../components/ui/Arrow.astro';
 import NowPanel from '../../components/journey/NowPanel.astro';
 import Timeline from '../../components/journey/Timeline.astro';
 import GitHubActivity from '../../components/journey/GitHubActivity.astro';
-import RepoList from '../../components/journey/RepoList.astro';
 import { chapterById } from '../../data/chapters';
 import { site } from '../../data/site';
 import { formatDate, getJourney } from '../../lib/content';
@@ -61,7 +60,6 @@ const first = journey.at(-1);
       <h2 id="jp-github" class="jp__github-title meta">The public record</h2>
       <div class="jp__github-grid">
         <GitHubActivity github={github} />
-        <RepoList github={github} />
       </div>
     </section>
   </article>
@@ -158,10 +156,7 @@ const first = journey.at(-1);
   }
 
   .jp__github-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-    gap: var(--space-8) calc(var(--gutter) * 2);
-    align-items: start;
+    max-width: 52rem;
   }
 
   @media (max-width: 63.99rem) {
@@ -174,8 +169,5 @@ const first = journey.at(-1);
       position: static;
     }
 
-    .jp__github-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
   }
 </style>

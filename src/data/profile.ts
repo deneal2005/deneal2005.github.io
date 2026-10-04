@@ -23,7 +23,7 @@ export const profile = {
   /** Who I am / What I do, for Chapter 01. Keep each to a few sentences. */
   about: {
     who: 'I’m Delin Thangjam, a developer in Tokyo.',
-    what: 'Most of what I make is for the web and ships without ceremony. GreenUP runs on plain HTML, CSS and JavaScript with no build step; Scriptly is a small Express server wrapped around yt-dlp. Look closely and the work keeps returning to the unglamorous parts: an upload queue that survives a dropped connection, a cache that makes the second request instant, a README that says plainly what is still simulated.',
+    what: 'I build for the web end to end. RentMate is a Next.js app running on its own NestJS and PostgreSQL API, with payments, chat and a trust-and-safety console; GreenUP runs on plain HTML, CSS and JavaScript with Supabase underneath. The work keeps returning to the unglamorous parts: an upload queue that survives a dropped connection, a payment path that stays consistent under concurrent requests, a README that says plainly what is still simulated. Next on my path: backend engineering in Japan.',
     /** Short phrases. Empty lists are hidden. */
     exploring: [] as string[],
     learning: [] as string[],
@@ -45,7 +45,7 @@ export const profile = {
     other: [] as { label: string; href: string }[],
   },
 
-  /** Public repositories to leave out of the GitHub section. */
+  /** Public repositories left out of the commit activity chart. */
   hiddenRepos: ['test'],
 };
 

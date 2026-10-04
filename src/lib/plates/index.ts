@@ -1,5 +1,4 @@
 import { brushStroke, halftone, rng, round, smoothstep } from '../draw';
-import { computeScene } from '../scene';
 import { INK, type Plate } from './shared';
 
 export { renderPlate, plateSize, type Plate, type Variant } from './shared';
@@ -98,76 +97,84 @@ const greenup: Plate = {
   },
 };
 
-/** Scriptly: a waveform, printed in vermilion, becoming lines of transcript. */
-const scriptly: Plate = {
+/** RentMate: the verification seal, six checks, over a city at night. */
+const rentmate: Plate = {
   width: 1200,
   height: 800,
-  detail: [150, 300, 640, 400],
+  detail: [560, 70, 540, 360],
   draw: () => {
-    const random = rng(29);
-    const wave: string[] = [];
-    const mid = 196;
-    for (let x = 120; x <= 1080; x += 12) {
-      const envelope = 0.35 + 0.65 * Math.abs(Math.sin(x * 0.0065 + 0.6));
-      const amp = 66 * envelope * (0.55 + 0.45 * Math.abs(Math.sin(x * 0.07) * Math.cos(x * 0.023)));
-      for (let y = mid - amp; y <= mid + amp; y += 10) {
-        const fade = 1 - Math.abs(y - mid) / (amp + 1);
-        wave.push(`<circle cx="${x}" cy="${round(y)}" r="${round(1.4 + 2.6 * fade, 2)}"/>`);
+    const seal = { cx: 800, cy: 330, r: 205 };
+    const ground = 712;
+    const random = rng(41);
+    const polar = (r: number, deg: number) => {
+      const a = ((deg - 90) * Math.PI) / 180;
+      return [round(seal.cx + Math.cos(a) * r), round(seal.cy + Math.sin(a) * r)] as const;
+    };
+
+    // Six checks, one notch each, like the seal in the product.
+    const notches = Array.from({ length: 6 }, (_, i) => {
+      const [x1, y1] = polar(seal.r, i * 60 + 4);
+      const [x2, y2] = polar(seal.r, i * 60 + 56);
+      return `<path d="M${x1} ${y1} A${seal.r} ${seal.r} 0 0 1 ${x2} ${y2}"/>`;
+    }).join('');
+    const ticks = Array.from({ length: 72 }, (_, i) => {
+      const [x1, y1] = polar(seal.r + 26, i * 5);
+      const [x2, y2] = polar(seal.r + (i % 6 === 0 ? 40 : 32), i * 5);
+      return `<path d="M${x1} ${y1}L${x2} ${y2}"/>`;
+    }).join('');
+
+    // A low glow around the seal, printed as a halftone screen.
+    const reach = seal.r + 200;
+    const glow = halftone({
+      x: seal.cx - reach,
+      y: Math.max(0, seal.cy - reach),
+      width: reach * 2,
+      height: ground - Math.max(0, seal.cy - reach),
+      step: 13,
+      angle: 45,
+      value: (x, y) => {
+        const d = Math.hypot(x - seal.cx, y - seal.cy);
+        if (d < seal.r + 46) return 0;
+        return Math.max(0, 1 - (d - seal.r - 46) / 154) ** 1.4 * 0.42;
+      },
+    });
+
+    // The city: blocks along the ground, a few windows lit, one in vermilion.
+    const blocks: string[] = [];
+    const windows: string[] = [];
+    let lit = '';
+    for (let x = 30; x < 1170; ) {
+      const w = 46 + Math.floor(random() * 80);
+      const h = (90 + Math.floor(random() * 230)) * (Math.abs(x + w / 2 - seal.cx) < 260 ? 0.55 : 1);
+      blocks.push(`<rect x="${x}" y="${round(ground - h)}" width="${w - 6}" height="${round(h)}"/>`);
+      for (let wy = ground - h + 14; wy < ground - 18; wy += 22) {
+        for (let wx = x + 9; wx < x + w - 16; wx += 15) {
+          const r = random();
+          if (r > 0.9 && !lit && wy < ground - 80) lit = `<rect x="${wx}" y="${round(wy)}" width="7" height="11" fill="${INK.shu}"/>`;
+          else if (r > 0.72) windows.push(`<rect x="${wx}" y="${round(wy)}" width="7" height="11"/>`);
+        }
       }
+      x += w;
     }
-    const lines: string[] = [];
-    const stamps: string[] = [];
-    let highlight = '';
-    for (let i = 0, y = 334; y < 720; i++, y += 36) {
-      stamps.push(`<rect x="120" y="${y - 3}" width="58" height="6" rx="3"/>`);
-      if (i === 4) highlight = `<rect x="440" y="${y - 13}" width="168" height="26" fill="${INK.shu}"/>`;
-      lines.push(`<rect x="232" y="${y - 4}" width="${round(360 + random() * 520)}" height="8" rx="4"/>`);
-    }
+
+    const check = [
+      brushStroke({ from: [seal.cx - 88, seal.cy + 2], to: [seal.cx - 22, seal.cy + 70], width: 26, peak: 0.55, seed: 3, wobble: 0.25, segments: 16 }),
+      brushStroke({ from: [seal.cx - 30, seal.cy + 70], to: [seal.cx + 104, seal.cy - 92], width: 30, peak: 0.3, seed: 6, wobble: 0.3, segments: 24 }),
+    ];
+
     return {
       ground: 'sumi',
       body: [
-        `<g fill="${INK.shu}">${wave.join('')}</g>`,
-        `<path d="M520 104V288" stroke="${INK.gofun}" stroke-width="1.5"/>`,
-        `<circle cx="520" cy="104" r="5" fill="${INK.gofun}"/>`,
-        `<g fill="${INK.usuzumi}" opacity="0.7">${stamps.join('')}</g>`,
-        highlight,
-        `<g fill="${INK.gofun}" opacity="0.82">${lines.join('')}</g>`,
-      ].join(''),
-    };
-  },
-};
-
-/** Hamon, Vol. 01 (this site): the opening plate, The Cut, at rest. */
-const hamon: Plate = {
-  width: 1600,
-  height: 900,
-  detail: [620, 120, 680, 450],
-  draw: () => {
-    const s = computeScene({ sun: { cx: 1000, cy: 400, r: 330 }, ground: 755, figureX: 970, figureScale: 0.69 });
-    const horizon = brushStroke({ from: [0, s.ground], to: [1600, s.ground], width: 5, peak: 0.5, seed: 5, wobble: 0.5, segments: 80 });
-    const sunBody = (shift: { x: number; y: number }, clip: string) =>
-      `<g transform="translate(${shift.x} ${shift.y})"><g clip-path="url(#${clip})">` +
-      `<circle cx="${s.sun.cx + 6}" cy="${s.sun.cy + 5}" r="${s.sun.r}" fill="${INK.enji}" mask="url(#ghost)"/>` +
-      `<circle cx="${s.sun.cx}" cy="${s.sun.cy}" r="${s.sun.r}" fill="${INK.shu}" clip-path="url(#solid)"/>` +
-      `<g fill="${INK.shu}" clip-path="url(#disc)">${s.sunDots}</g></g></g>`;
-    const f = s.figure;
-    return {
-      ground: 'washi',
-      defs: [
-        `<clipPath id="upper"><polygon points="${s.halves.upper}"/></clipPath>`,
-        `<clipPath id="lower"><polygon points="${s.halves.lower}"/></clipPath>`,
-        `<clipPath id="solid"><rect width="1600" height="${round(s.fadeTop + 26)}"/></clipPath>`,
-        `<clipPath id="disc"><circle cx="${s.sun.cx}" cy="${s.sun.cy}" r="${s.sun.r}"/></clipPath>`,
-        `<linearGradient id="ghost-fade" gradientUnits="userSpaceOnUse" x1="0" y1="${s.sun.cy - 60}" x2="0" y2="${round(s.fadeTop)}"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>`,
-        `<mask id="ghost" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900"><rect width="1600" height="900" fill="url(#ghost-fade)"/></mask>`,
-      ].join(''),
-      body: [
-        sunBody(s.upperShift, 'upper'),
-        sunBody(s.lowerShift, 'lower'),
-        `<path d="${s.cut}" fill="${INK.sumi}"/>`,
-        `<path d="${horizon}" fill="${INK.sumi}"/>`,
-        `<g fill="${INK.sumi}">${s.shadowDots}</g>`,
-        `<g fill="${INK.sumi}" transform="${s.figureTransform}"><path d="${f.ribbon}"/><path d="${f.saya}"/><path d="${f.body}"/><path d="${f.tsuka}"/><path d="${f.tsuba}"/><path d="${f.blade}" fill="${INK.keshizumi}"/></g>`,
+        `<g fill="${INK.shu}" opacity="0.85">${glow}</g>`,
+        `<g fill="${INK.keshizumi}">${blocks.join('')}</g>`,
+        `<g fill="${INK.gofun}" opacity="0.5">${windows.join('')}</g>`,
+        lit,
+        `<rect x="0" y="${ground}" width="1200" height="2" fill="${INK.usuzumi}" opacity="0.6"/>`,
+        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="${INK.sumi}"/>`,
+        `<g fill="none" stroke="${INK.shu}" stroke-width="30">${notches}</g>`,
+        `<g fill="none" stroke="${INK.usuzumi}" stroke-width="1.5" opacity="0.7">${ticks}</g>`,
+        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="none" stroke="${INK.gofun}" stroke-width="1" opacity="0.35"/>`,
+        `<g fill="${INK.gofun}">${check.map((d) => `<path d="${d}"/>`).join('')}</g>`,
       ].join(''),
     };
   },
@@ -200,7 +207,7 @@ const sunrise: Plate = {
   },
 };
 
-export const plates = { greenup, scriptly, hamon, sunrise } satisfies Record<string, Plate>;
+export const plates = { greenup, rentmate, sunrise } satisfies Record<string, Plate>;
 export type PlateName = keyof typeof plates;
 
 export const plateUrl = (name: PlateName, variant: 'a' | 'b' = 'a') => `/plates/${name}-${variant}.svg`;

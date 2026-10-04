@@ -30,7 +30,6 @@ export type GitHubData =
       user: string;
       profileUrl: string;
       memberSince: string;
-      publicRepos: number;
       repos: Repo[];
       /** Last 52 weeks, oldest first. Null when GitHub was still computing stats. */
       weeks: Week[] | null;
@@ -72,7 +71,7 @@ async function load(): Promise<GitHubData> {
   if (GITHUB_OFFLINE) return { status: 'unavailable', user, profileUrl, reason: 'GitHub requests were switched off for this build.' };
 
   try {
-    type RawUser = { created_at: string; public_repos: number };
+    type RawUser = { created_at: string };
     type RawRepo = {
       name: string;
       html_url: string;
@@ -127,7 +126,6 @@ async function load(): Promise<GitHubData> {
       user,
       profileUrl,
       memberSince: account.created_at,
-      publicRepos: account.public_repos,
       repos,
       weeks,
       fetchedAt: new Date().toISOString(),

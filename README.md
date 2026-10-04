@@ -2,7 +2,7 @@
 
 The portfolio of **Delin Thangjam**, set as a manga volume: a prologue, chapters, a contents page with live page numbers, and a colophon at the back. The design borrows from Japanese print rather than anime: halftone screens, misregistered ink, panel borders, lots of empty paper.
 
-Everything on the site is either a public fact (GitHub profile, public repositories and their READMEs) or something written for the site. Nothing is invented. Fields that aren't filled in yet hide themselves instead of showing placeholders.
+Everything on the site is either a fact from the projects themselves (their code, READMEs and live sites) or something written for the site. Nothing is invented. Fields that aren't filled in yet hide themselves instead of showing placeholders.
 
 **Stack:** Astro 7 (static output) · TypeScript · plain CSS with design tokens · no client framework · under 5 KB of JavaScript (gzipped) on first load, plus the lab studies, which load only when you scroll to them.
 
@@ -69,9 +69,14 @@ Each project also needs a `plate`, its generated cover image. Plates live in `sr
 
 Copy `_template.md`. Experiments are exploration, not product. Without a `demo` they're listed as lab notes in Chapter 05, with optional repository and live links.
 
-### Skills
+### Skills: `src/data/path.ts`
 
-There's no list of skills to maintain. The index in Chapter 02 is built from the `stack` field of every project, experiment and journey entry, and each term links to where it was used. `src/data/skills.ts` only decides which group a term is filed under (anything unknown lands in "Also used") and holds an optional "in progress" list for things you're learning but haven't used anywhere yet.
+Chapter 02, The Path, is the roadmap toward software backend engineering in Japan: eleven areas, from Java fundamentals to Japanese, exactly as in the roadmap. Each skill can carry:
+
+- `usedIn: ['rentmate']`: the file name of a project or journey entry where the skill really shows up. It renders as a link, and the build fails if the name doesn't exist.
+- `status: 'learning'` or `'comfortable'`: a small label, shown only when set.
+
+The Japanese area has a JLPT ladder (`ladder.current` marks where you are now; the target is N3).
 
 ### Japanese characters
 
@@ -81,7 +86,7 @@ The mincho font is subset at build time to exactly the characters used under `sr
 
 ## GitHub data
 
-At build time the site asks the GitHub API for your public repositories and weekly commit counts. That powers the activity chart, the repository list and the "last pushed" line. No token is needed. If GitHub can't be reached, those areas say so instead of showing anything made up. For offline builds set `GITHUB_OFFLINE=true`. Setting `GITHUB_TOKEN` only raises the rate limit. It stays on the build server and never reaches the browser.
+At build time the site asks the GitHub API for weekly commit counts across your public repositories, which powers the activity chart in the journey. Repositories are never listed as projects: only the files in `src/content/work` are. The "last pushed" line in the Currently panel only considers repositories that belong to a project. No token is needed. If GitHub can't be reached, those areas say so instead of showing anything made up. For offline builds set `GITHUB_OFFLINE=true`. Setting `GITHUB_TOKEN` only raises the rate limit. It stays on the build server and never reaches the browser.
 
 The data is a snapshot from the last build. To keep it current, redeploy regularly (see below).
 
@@ -117,12 +122,12 @@ CI (`.github/workflows/ci.yml`) runs the type and content checks, the build and 
 
 ```
 src/
-  data/          profile, now, skills groups, precepts, chapter list
+  data/          profile, now, the skills path, precepts, chapter list
   content/       work/, experiments/, journey/ (Markdown, with _template.md files)
   components/
     chrome/      masthead, contents dialog, folio rail, colophon
     sections/    the homepage chapters, in reading order
-    journey/     Currently panel, timeline, GitHub activity chart, repository list
+    journey/     Currently panel, timeline, GitHub activity chart
     motifs/      the opening scene, temper-line divider, cut-sun mark
     ui/          shared pieces: plate frame, chapter opener, links, arrow
     work/        the exhibition spread
@@ -148,8 +153,9 @@ Things only you can provide. Each one is a single field, and nothing shows until
 - [ ] LinkedIn URL (`profile.links.linkedin`)
 - [ ] A public email (`profile.links.email` or `PUBLIC_CONTACT_EMAIL`)
 - [ ] Résumé PDF (`public/resume.pdf` + `profile.links.resume`)
-- [ ] What you're learning and exploring (`profile.about`, `now.ts`, `skills.ts`)
-- [ ] Screenshots of GreenUP and Scriptly (`screens:` in their project files)
+- [ ] What you're learning and exploring (`profile.about`, `now.ts`), and `status` on the skills you're working on (`path.ts`)
+- [ ] Your current JLPT level (`ladder.current` in `path.ts`)
+- [ ] Screenshots of GreenUP (`screens:` in `greenup.md`; RentMate's are in)
 - [ ] "What I learned" sections in the case studies
 - [ ] `PUBLIC_SITE_URL` once the site is deployed, then `npm run og`
 

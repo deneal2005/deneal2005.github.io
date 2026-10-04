@@ -21,7 +21,7 @@ const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numer
 const facts = [
   { label: 'Based in', value: site.location.city },
   github.status === 'ok' && { label: 'On GitHub since', value: monthYear.format(new Date(github.memberSince)) },
-  github.status === 'ok' && { label: 'Public repositories', value: String(github.publicRepos) },
+  { label: 'Working toward', value: 'Software backend engineering in Japan' },
   {
     label: 'In this volume',
     value: [

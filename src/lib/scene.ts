@@ -1,7 +1,7 @@
 /**
  * Geometry for "The Cut": a vermilion sun split by one stroke, and the
- * swordsman on the horizon beneath it. Shared by the hero (animated) and the
- * portfolio's own plate (static), so both always draw the same picture.
+ * swordsman on the horizon beneath it. Parameterised so the same picture can
+ * be drawn at other sizes and positions.
  */
 import { FIGURE } from './figure';
 import { brushStroke, halftone, round, smoothstep, splitCircle, type Point } from './draw';

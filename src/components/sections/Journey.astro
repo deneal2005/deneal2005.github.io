@@ -1,7 +1,7 @@
 ---
 /**
  * Chapter 06 — Journey (修行), the homepage preview: what's on the desk now,
- * the latest entries, the newest experiment and GitHub activity. The whole
+ * the latest entries, the newest experiment and commit activity. The whole
  * record lives at /journey/.
  */
 import ChapterOpener from '../ui/ChapterOpener.astro';
@@ -9,7 +9,6 @@ import Arrow from '../ui/Arrow.astro';
 import NowPanel from '../journey/NowPanel.astro';
 import Timeline from '../journey/Timeline.astro';
 import GitHubActivity from '../journey/GitHubActivity.astro';
-import RepoList from '../journey/RepoList.astro';
 import { chapterById } from '../../data/chapters';
 import { getExperiments, getJourney } from '../../lib/content';
 import { getGitHub } from '../../lib/github';
@@ -68,14 +67,6 @@ const latestExperiment = experiments[0];
     <div class="journey__activity">
       <GitHubActivity github={github} />
     </div>
-    {
-      github.status === 'ok' && github.repos.length > 0 && (
-        <div class="journey__repos">
-          <h3 class="journey__heading meta">Recently pushed</h3>
-          <RepoList github={github} limit={3} />
-        </div>
-      )
-    }
   </div>
 </section>
 
@@ -170,18 +161,13 @@ const latestExperiment = experiments[0];
   }
 
   .journey__activity {
-    grid-column: 1 / span 7;
-  }
-
-  .journey__repos {
-    grid-column: 9 / -1;
+    grid-column: 1 / span 8;
   }
 
   @media (max-width: 63.99rem) {
     .journey__side,
     .journey__recent,
-    .journey__activity,
-    .journey__repos {
+    .journey__activity {
       grid-column: 1 / -1;
     }
   }

@@ -1,0 +1,409 @@
+---
+/**
+ * Chapter 02 — The Path (道). The roadmap toward software backend engineering
+ * in Japan (src/data/path.ts). Skills that already show up in real work link
+ * there; the rest are the road ahead. Nothing here claims a level unless a
+ * `status` is set.
+ */
+import ChapterOpener from '../ui/ChapterOpener.astro';
+import { chapterById } from '../../data/chapters';
+import { goal, path, type SkillStatus } from '../../data/path';
+import { getJourney, getWorks, journeyHref } from '../../lib/content';
+
+const chapter = chapterById('path');
+const [works, journey] = await Promise.all([getWorks(), getJourney()]);
+const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+// Resolve `usedIn` ids to links, failing the build on a typo rather than shipping a broken claim.
+const refs = new Map<string, { label: string; href: string }>([
+  ...works.map((w) => [w.id, { label: w.data.title, href: `/work/${w.id}/` }] as const),
+  ...journey.map((j) => [j.id, { label: `Journal, ${monthYear.format(j.data.date)}`, href: journeyHref(j) }] as const),
+]);
+const resolve = (id: string) => {
+  const ref = refs.get(id);
+  if (!ref) throw new Error(`src/data/path.ts: "${id}" is not a project or journey entry`);
+  return ref;
+};
+
+const total = path.reduce((n, area) => n + area.skills.length, 0);
+const inWork = path.reduce((n, area) => n + area.skills.filter((s) => s.usedIn?.length).length, 0);
+const statusLabel: Record<SkillStatus, string> = { comfortable: 'Comfortable', learning: 'Learning' };
+const usesStatus = path.some((area) => area.skills.some((s) => s.status));
+---
+
+<section
+  id={chapter.id}
+  class="path wrap"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="path-title"
+>
+  <ChapterOpener
+    id="path"
+    epigraph="Where I’m headed, and what it takes to get there. When a skill already shows up in my work, it links there."
+  />
+
+  <div class="path__grid grid">
+    <aside class="path__aside">
+      <p class="path__motto tate" lang="ja">{goal.motto.ja}</p>
+      <div class="path__aside-text">
+        <p class="meta path__motto-en">Keizoku wa chikara nari · {goal.motto.en}</p>
+        <p class="meta path__goal-label">The goal</p>
+        <p class="path__goal">{goal.title}</p>
+        <dl class="path__count">
+          <div><dt class="meta">Areas</dt><dd>{path.length}</dd></div>
+          <div><dt class="meta">Skills</dt><dd>{total}</dd></div>
+          <div><dt class="meta">Already in my work</dt><dd>{inWork}</dd></div>
+        </dl>
+        <p class="path__key">
+          <span class="path__mark path__mark--used" aria-hidden="true"></span> Used in a project, linked
+          <br />
+          <span class="path__mark" aria-hidden="true"></span> On the road ahead
+          {usesStatus && <><br /><span class="path__status">Learning</span> marks what I’m working on now</>}
+        </p>
+      </div>
+    </aside>
+
+    <ol class="path__areas">
+      {
+        path.map((area, i) => (
+          <li class="area" data-reveal="fade">
+            <h3 class="area__title">
+              <span class="area__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="area__name">
+                {area.title}
+                {area.ja && (
+                  <span class="area__ja" lang="ja">
+                    {area.ja}
+                  </span>
+                )}
+              </span>
+            </h3>
+            <p class="area__note meta">{area.note}</p>
+
+            {area.ladder && (
+              <ol class="ladder" aria-label={`${area.ladder.label} levels, aiming for ${area.ladder.target}`}>
+                {area.ladder.steps.map((step) => (
+                  <li class:list={['ladder__step', { 'is-target': step === area.ladder?.target, 'is-current': step === area.ladder?.current }]}>
+                    <span>{step}</span>
+                    {step === area.ladder?.current ? (
+                      <span class="ladder__tag meta">Now</span>
+                    ) : (
+                      step === area.ladder?.target && <span class="ladder__tag meta">Target</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            <ul class="area__skills">
+              {area.skills.map((skill) => (
+                <li class:list={['skill', { 'skill--used': skill.usedIn?.length }]}>
+                  <span class="path__mark" aria-hidden="true" />
+                  <span class="skill__text">
+                    <span class="skill__name">{skill.name}</span>
+                    {skill.detail && <span class="skill__detail">{skill.detail}</span>}
+                    {skill.status && <span class="path__status">{statusLabel[skill.status]}</span>}
+                  </span>
+                  {skill.usedIn?.length ? (
+                    <span class="skill__used">
+                      <span class="vh">Used in </span>
+                      {skill.usedIn.map(resolve).map((ref, j, all) => (
+                        <>
+                          <a href={ref.href}>{ref.label}</a>
+                          {j < all.length - 1 && <span aria-hidden="true">, </span>}
+                        </>
+                      ))}
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .path {
+    padding-block: var(--space-section) 0;
+  }
+
+  .path__grid {
+    align-items: start;
+    row-gap: var(--space-7);
+  }
+
+  /* ── The goal, set beside the road ───────────────── */
+  .path__aside {
+    grid-column: 1 / span 3;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .path__motto {
+    font-size: clamp(2rem, 1.4rem + 1.6vw, 3rem);
+    color: var(--shu);
+    letter-spacing: 0.08em;
+  }
+
+  .path__aside-text {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+
+  .path__motto-en {
+    color: var(--color-text);
+  }
+
+  .path__goal-label {
+    margin-top: var(--space-4);
+  }
+
+  .path__goal {
+    font-family: var(--type-display);
+    font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.4rem);
+    font-style: italic;
+    font-weight: 350;
+    font-stretch: 80%;
+    line-height: 1.05;
+  }
+
+  .path__count {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: var(--panel-border) solid var(--sumi);
+  }
+
+  .path__count div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+
+  .path__count dd {
+    margin: 0;
+    font-family: var(--type-display);
+    font-size: 1.5rem;
+    font-stretch: 80%;
+    line-height: 1;
+  }
+
+  .path__key {
+    margin-top: var(--space-3);
+    font-size: var(--text-s);
+    line-height: 1.9;
+    color: var(--color-text-muted);
+  }
+
+  /* Markers: a filled vermilion diamond where the skill is proven in work, a hairline where it's ahead */
+  .path__mark {
+    display: inline-block;
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.35rem;
+    border: 1px solid var(--color-text-muted);
+    transform: rotate(45deg) translateY(-0.1rem);
+  }
+
+  .path__mark--used,
+  .skill--used .path__mark {
+    background: var(--shu);
+    border-color: var(--shu);
+  }
+
+  .path__status {
+    display: inline-block;
+    margin-left: var(--space-2);
+    padding: 0 0.35rem;
+    border: 1px solid currentColor;
+    font-family: var(--type-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+    vertical-align: 0.15em;
+  }
+
+  /* ── The areas ───────────────────────────────────── */
+  .path__areas {
+    grid-column: 5 / -1;
+    columns: 2;
+    column-gap: calc(var(--gutter) * 2.5);
+  }
+
+  .area {
+    break-inside: avoid;
+    margin-bottom: var(--space-8);
+  }
+
+  .area__title {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--panel-border) solid var(--sumi);
+  }
+
+  .area__n {
+    font-family: var(--type-display);
+    font-size: 2.25rem;
+    font-weight: 200;
+    font-stretch: 70%;
+    line-height: 0.9;
+    color: var(--color-accent-text);
+  }
+
+  .area__name {
+    font-family: var(--type-display);
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-stretch: 80%;
+    line-height: 1.1;
+  }
+
+  .area__ja {
+    margin-left: var(--space-2);
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: 0.85em;
+  }
+
+  .area__note {
+    margin-top: var(--space-2);
+  }
+
+  .area__skills {
+    margin-top: var(--space-3);
+  }
+
+  .skill {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-block: 0.4rem;
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .skill__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .skill__name {
+    font-size: var(--text-base);
+  }
+
+  .skill__detail {
+    margin-left: var(--space-2);
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .skill__used {
+    flex: none;
+    max-width: 45%;
+    text-align: right;
+    font-family: var(--type-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .skill__used a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.2em;
+  }
+
+  @media (hover: hover) {
+    .skill__used a:hover {
+      color: var(--color-accent-text);
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* ── Level ladder (JLPT) ─────────────────────────── */
+  .ladder {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .ladder__step {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    border: 1.5px solid var(--sumi);
+    font-family: var(--type-display);
+    font-size: 1.15rem;
+    font-stretch: 80%;
+  }
+
+  .ladder__step:nth-child(1) {
+    height: 2.25rem;
+  }
+
+  .ladder__step:nth-child(2) {
+    height: 3rem;
+  }
+
+  .ladder__step:nth-child(3) {
+    height: 3.75rem;
+  }
+
+  .ladder__step.is-target {
+    border-color: var(--shu);
+    color: var(--enji);
+  }
+
+  .ladder__step.is-current {
+    background: var(--sumi);
+    color: var(--washi);
+  }
+
+  .ladder__tag {
+    position: absolute;
+    left: calc(100% + var(--space-2));
+    bottom: 0.2rem;
+    color: var(--color-accent-text);
+  }
+
+  @media (max-width: 63.99rem) {
+    .path__aside,
+    .path__areas {
+      grid-column: 1 / -1;
+    }
+
+    .path__aside {
+      position: static;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .path__areas {
+      columns: 1;
+    }
+
+    .skill {
+      flex-wrap: wrap;
+    }
+
+    .skill__used {
+      max-width: none;
+      width: 100%;
+      padding-left: calc(0.5rem + 0.35rem + var(--space-2));
+      text-align: left;
+    }
+  }
+</style>

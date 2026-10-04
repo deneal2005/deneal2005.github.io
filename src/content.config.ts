@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /** Generated plates available under /plates/{name}-{a|b}.svg (see src/lib/plates). */
-export const PLATES = ['greenup', 'scriptly', 'hamon', 'sunrise'] as const;
+export const PLATES = ['greenup', 'rentmate', 'sunrise'] as const;
 
 /** Files starting with "_" (like _template.md) are ignored, so templates can live beside entries. */
 const entries = (base: string) => glob({ pattern: '**/[^_]*.md', base });

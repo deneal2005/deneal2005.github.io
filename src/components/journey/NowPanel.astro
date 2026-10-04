@@ -1,10 +1,11 @@
 ---
 /**
  * 今 Currently. Hand-written fields from src/data/now.ts, plus the latest
- * push from GitHub when the build could reach it. Empty fields are hidden.
+ * push to a project's public repository, when the build could reach GitHub.
+ * Empty fields are hidden.
  */
 import { now, type NowItem } from '../../data/now';
-import { formatDate } from '../../lib/content';
+import { formatDate, getWorks } from '../../lib/content';
 import { getGitHub } from '../../lib/github';
 
 interface Props {
@@ -13,8 +14,10 @@ interface Props {
 
 const { headingLevel = 'h3' } = Astro.props;
 const Heading = headingLevel;
-const github = await getGitHub();
-const latest = github.status === 'ok' ? github.repos[0] : undefined;
+const [github, works] = await Promise.all([getGitHub(), getWorks()]);
+// Only repositories that are projects in this volume (repos come newest push first).
+const projectRepos = new Set(works.map((w) => w.data.links.repo?.toLowerCase()).filter(Boolean));
+const latest = github.status === 'ok' ? github.repos.find((r) => projectRepos.has(r.url.toLowerCase())) : undefined;
 
 const rows: { label: string; items: NowItem[] }[] = [
   { label: 'Building', items: now.building },

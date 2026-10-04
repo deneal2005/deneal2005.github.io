@@ -114,9 +114,7 @@ const meta = [
             <dd>
               <ul class="case__stack">
                 {data.stack.map((term) => (
-                  <li>
-                    <a href="/#index">{term}</a>
-                  </li>
+                  <li>{term}</li>
                 ))}
               </ul>
             </dd>
@@ -178,12 +176,20 @@ const meta = [
     {
       data.screens.length > 0 && (
         <section class="case__screens wrap" aria-label="Screenshots">
-          {data.screens.map((screen) => (
-            <figure>
-              <Image src={screen.src} alt={screen.alt} widths={[640, 1280, 1920]} sizes="(min-width: 64rem) 80vw, 100vw" />
-              {screen.caption && <figcaption class="meta">{screen.caption}</figcaption>}
-            </figure>
-          ))}
+          {data.screens.map((screen) => {
+            const phone = screen.src.height > screen.src.width;
+            return (
+              <figure class:list={['case__screen', phone ? 'case__screen--phone' : 'case__screen--wide']}>
+                <Image
+                  src={screen.src}
+                  alt={screen.alt}
+                  widths={phone ? [390, 780] : [800, 1440, 2160]}
+                  sizes={phone ? '(min-width: 64rem) 22vw, 70vw' : '(min-width: 64rem) 66vw, 100vw'}
+                />
+                {screen.caption && <figcaption class="meta">{screen.caption}</figcaption>}
+              </figure>
+            );
+          })}
         </section>
       )
     }
@@ -373,12 +379,6 @@ const meta = [
     gap: var(--space-1) var(--space-3);
   }
 
-  .case__stack a {
-    text-decoration: underline;
-    text-decoration-color: var(--color-rule);
-    text-underline-offset: 0.18em;
-  }
-
   .case__toc ol {
     display: grid;
     gap: var(--space-2);
@@ -420,20 +420,53 @@ const meta = [
   }
 
   /* ── Screens & detail ─────────────────────────────── */
+  /* Desktop captures run wide; phone captures sit beside them, at phone scale. */
   .case__screens {
     display: grid;
-    gap: var(--space-8);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-8);
     margin-top: var(--space-section);
+    align-items: start;
   }
 
-  .case__screens img {
+  .case__screen--wide {
+    grid-column: 1 / span 9;
+  }
+
+  .case__screen--wide:nth-of-type(odd) {
+    grid-column: 4 / -1;
+  }
+
+  .case__screen--phone {
+    grid-column: span 3;
+  }
+
+  .case__screens :global(img) {
     width: 100%;
     height: auto;
     border: var(--panel-border) solid var(--sumi);
   }
 
+  .case__screen--phone :global(img) {
+    border-radius: 1.5rem;
+  }
+
   .case__screens figcaption {
     margin-top: var(--space-3);
+  }
+
+  @media (max-width: 63.99rem) {
+    .case__screen--wide,
+    .case__screen--wide:nth-of-type(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .case__screen--phone {
+      grid-column: 2 / span 10;
+      max-width: 22rem;
+      justify-self: center;
+    }
   }
 
   .case__detail {
