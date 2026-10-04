@@ -1,0 +1,121 @@
+---
+/** A chapter's title page: label, title, its Japanese name set vertically, and an epigraph. */
+import { chapterById } from '../../data/chapters';
+
+interface Props {
+  id: string;
+  epigraph: string;
+}
+
+const { id, epigraph } = Astro.props;
+const chapter = chapterById(id);
+---
+
+<header class="opener">
+  <span class="opener__rule" data-reveal="fade" aria-hidden="true"></span>
+  <p class="opener__label meta">{chapter.label}</p>
+  <h2 class="opener__title display" id={`${id}-title`} data-reveal="rise">
+    <span class="rise"><span>{chapter.title}</span></span>
+  </h2>
+  <div class="opener__ja" aria-hidden="true">
+    <p class="tate" lang="ja">{chapter.ja}</p>
+    <p class="opener__romaji meta">{chapter.romaji}</p>
+  </div>
+  <p class="opener__epigraph" data-reveal="fade" style="--i: 3">{epigraph}</p>
+</header>
+
+<style>
+  .opener {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: end;
+    padding-bottom: var(--space-9);
+  }
+
+  .opener__rule {
+    grid-column: 1 / -1;
+    height: var(--panel-border);
+    background: var(--color-rule-strong);
+    margin-bottom: var(--space-4);
+  }
+
+  :global(.js) .opener__rule[data-reveal] {
+    opacity: 1;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-4) var(--ease-in-out);
+  }
+
+  :global(.js) .opener__rule[data-reveal].is-in {
+    transform: none;
+  }
+
+  .opener__label {
+    grid-column: 1 / span 4;
+    grid-row: 2;
+    align-self: start;
+    color: var(--color-text);
+  }
+
+  .opener__title {
+    grid-column: 1 / span 10;
+    grid-row: 3;
+    margin-top: var(--space-6);
+    font-size: var(--text-giga);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .opener__ja {
+    grid-column: 12;
+    grid-row: 2 / span 2;
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .opener__ja .tate {
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 3rem);
+  }
+
+  .opener__romaji {
+    writing-mode: vertical-rl;
+  }
+
+  .opener__epigraph {
+    grid-column: 7 / span 5;
+    grid-row: 4;
+    margin-top: var(--space-6);
+    max-width: 30rem;
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-style: italic;
+    font-weight: 350;
+    line-height: 1.3;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 47.99rem) {
+    .opener {
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding-bottom: var(--space-7);
+    }
+
+    .opener__label,
+    .opener__title,
+    .opener__epigraph {
+      grid-column: 1;
+    }
+
+    .opener__ja {
+      grid-column: 2;
+      grid-row: 2 / span 2;
+    }
+
+    .opener__title {
+      font-size: clamp(3rem, 15vw, 5rem);
+    }
+  }
+</style>

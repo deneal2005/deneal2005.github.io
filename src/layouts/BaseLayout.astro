@@ -1,0 +1,65 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/motion.css';
+import Masthead from '../components/chrome/Masthead.astro';
+import PageRail from '../components/chrome/PageRail.astro';
+import ContentsDialog from '../components/chrome/ContentsDialog.astro';
+import Colophon from '../components/chrome/Colophon.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Running head shown in the masthead before any chapter has scrolled in. */
+  running?: { label: string; title: string };
+  image?: string;
+}
+
+const { title, description = site.description, running = { label: 'Prologue', title: 'Every line is final' }, image = '/og.png' } = Astro.props;
+const pageTitle = title ? `${title} — ${site.brand}` : site.title;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const ogImage = Astro.site ? new URL(image, Astro.site).href : image;
+---
+
+<!doctype html>
+<html lang="en" id="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ebe4d6" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <Font cssVariable="--font-display" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-jp" />
+    <script is:inline>
+      // Enable reveal states only when scripting is available; content never depends on it.
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Masthead label={running.label} title={running.title} />
+    <PageRail />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Colophon />
+    <ContentsDialog />
+    <div class="grain" aria-hidden="true"></div>
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>

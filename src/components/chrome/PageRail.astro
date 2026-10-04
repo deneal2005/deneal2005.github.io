@@ -1,0 +1,65 @@
+---
+/**
+ * Folio rail: the volume number, a reading-progress spine and a live page
+ * number (one page = one screen height), set vertically in the right margin.
+ */
+import { site } from '../../data/site';
+---
+
+<div class="rail" data-rail data-tone-auto aria-hidden="true">
+  <span class="rail__vol">{site.volume}</span>
+  <span class="rail__track"><span class="rail__fill" data-rail-fill></span></span>
+  <span class="rail__page">p. <span data-rail-page>001</span></span>
+</div>
+
+<style>
+  .rail {
+    position: fixed;
+    top: 50%;
+    right: calc(var(--margin) / 2 - 0.6rem);
+    z-index: var(--z-masthead);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--color-text);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: color var(--dur-2) linear;
+  }
+
+  @media (min-width: 64rem) {
+    .rail {
+      display: flex;
+    }
+  }
+
+  .rail__vol,
+  .rail__page {
+    writing-mode: vertical-rl;
+  }
+
+  .rail__page {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail__track {
+    position: relative;
+    width: 1px;
+    height: 22vh;
+    background: var(--color-rule);
+    overflow: hidden;
+  }
+
+  .rail__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--shu);
+    transform-origin: top;
+    transform: scaleY(var(--progress, 0));
+  }
+</style>

@@ -1,0 +1,350 @@
+---
+import HeroScene from '../motifs/HeroScene.astro';
+import { brushStroke } from '../../lib/draw';
+import { chapterById } from '../../data/chapters';
+import { site } from '../../data/site';
+
+const chapter = chapterById('prologue');
+const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5, seed: 5, wobble: 0.5, segments: 80 });
+---
+
+<section
+  id={chapter.id}
+  class="hero"
+  data-hero
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="hero-title"
+>
+  <div class="hero__panel">
+    <span class="hero__crop hero__crop--tl" aria-hidden="true"></span>
+    <span class="hero__crop hero__crop--tr" aria-hidden="true"></span>
+    <span class="hero__crop hero__crop--bl" aria-hidden="true"></span>
+    <span class="hero__crop hero__crop--br" aria-hidden="true"></span>
+
+    <div class="hero__art">
+      <div class="hero__stage">
+        <svg class="hero__horizon" viewBox="0 0 2400 28" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path d={horizon}></path>
+        </svg>
+        <HeroScene />
+      </div>
+    </div>
+
+    <div class="hero__epigraph">
+      <p class="hero__ja tate" lang="ja">一筆入魂</p>
+      <p class="hero__gloss meta"><span lang="ja-Latn">Ippitsu nyūkon</span> · One stroke, whole soul</p>
+    </div>
+
+    <p class="hero__vol meta" data-reveal="fade" style="--i: 14">
+      {site.volume} · Selected works {site.span}
+    </p>
+
+    <div class="hero__copy">
+      <p class="hero__eyebrow meta" data-reveal="fade" style="--i: 12">Plate 00 · The cut</p>
+      <h1 id="hero-title" class="hero__title display" data-reveal="rise" style="--delay: 1450ms">
+        <span class="rise" style="--line: 0"><span>Every line</span></span>
+        <span class="rise hero__title-2" style="--line: 1"><span><em>is final</em><span class="hero__stop">.</span></span></span>
+      </h1>
+    </div>
+
+    <p class="hero__intro" data-reveal="fade" style="--i: 20">
+      <strong>{site.brand}</strong> is the independent practice of {site.person}. Art direction, interface design
+      and creative engineering for brands that would rather be remembered than noticed.
+    </p>
+
+    <a class="hero__next meta" href="#hamon" data-reveal="fade" style="--i: 22">
+      <span>Read on</span>
+      <svg class="hero__next-arrow" viewBox="0 0 10 28" aria-hidden="true"><path d="M5 0v26M1 22l4 5 4-5"></path></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --pad: clamp(1.25rem, 3%, 2.5rem);
+    padding: var(--masthead-h) var(--margin) 0;
+  }
+
+  .hero__panel {
+    position: relative;
+    height: calc(100svh - var(--masthead-h) - var(--margin) * 0.6);
+    min-height: 38rem;
+    max-height: 68rem;
+    border: var(--panel-border) solid var(--sumi);
+    isolation: isolate;
+  }
+
+  /* Printer's crop marks, just outside the frame */
+  .hero__crop {
+    position: absolute;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 0 solid var(--sumi);
+  }
+
+  .hero__crop--tl {
+    top: -1.2rem;
+    left: -1.2rem;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .hero__crop--tr {
+    top: -1.2rem;
+    right: -1.2rem;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  .hero__crop--bl {
+    bottom: -1.2rem;
+    left: -1.2rem;
+    border-right-width: 1px;
+    border-top-width: 1px;
+  }
+
+  .hero__crop--br {
+    bottom: -1.2rem;
+    right: -1.2rem;
+    border-left-width: 1px;
+    border-top-width: 1px;
+  }
+
+  /* ── Art ──────────────────────────────────────────── */
+  .hero__art {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: clip;
+  }
+
+  /* The stage is the scene's square; the horizon is pinned to its ground line. */
+  .hero__stage {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    height: 104%;
+    aspect-ratio: 1;
+  }
+
+  .hero__stage :global(.scene) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__horizon {
+    position: absolute;
+    top: calc(85% - 14px);
+    left: -400%;
+    width: 900%;
+    max-width: none;
+    height: 28px;
+    fill: var(--sumi);
+  }
+
+  :global(.js) .hero__horizon {
+    transform: scaleX(0);
+  }
+
+  :global(.js.is-ready) .hero__horizon {
+    animation: horizon-draw 1.8s var(--ease-in-out) 150ms forwards;
+  }
+
+  @keyframes horizon-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* ── Type ─────────────────────────────────────────── */
+  .hero__epigraph {
+    position: absolute;
+    top: var(--pad);
+    left: var(--pad);
+    display: flex;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .hero__ja {
+    font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem);
+    color: var(--sumi);
+  }
+
+  .hero__gloss {
+    writing-mode: vertical-rl;
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+  }
+
+  .hero__vol {
+    position: absolute;
+    top: var(--pad);
+    right: var(--pad);
+    color: var(--sumi);
+  }
+
+  .hero__copy {
+    position: absolute;
+    left: var(--pad);
+    bottom: calc(var(--pad) * 1.2);
+  }
+
+  .hero__eyebrow {
+    margin-bottom: var(--space-4);
+    padding-left: 0.25em;
+    color: var(--sumi);
+  }
+
+  .hero__title {
+    font-size: clamp(3.6rem, min(10.5vw, 21svh), 13.5rem);
+    font-weight: 380;
+    line-height: 0.84;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+    color: var(--sumi);
+  }
+
+  .hero__title em {
+    font-style: italic;
+    font-weight: 300;
+    text-transform: none;
+  }
+
+  .hero__title-2 {
+    padding-left: 0.62em;
+  }
+
+  .hero__stop {
+    color: var(--shu);
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .hero__intro {
+    position: absolute;
+    top: clamp(6rem, 21%, 12rem);
+    left: calc(var(--pad) + 4.75rem);
+    max-width: 20rem;
+    font-size: var(--text-s);
+    line-height: 1.55;
+  }
+
+  .hero__intro strong {
+    font-weight: 700;
+    font-stretch: 125%;
+    font-size: 0.82em;
+    letter-spacing: 0.14em;
+  }
+
+  .hero__next {
+    position: absolute;
+    right: var(--pad);
+    bottom: calc(var(--pad) * 1.2);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    color: var(--sumi);
+  }
+
+  .hero__next-arrow {
+    width: 0.6rem;
+    height: 1.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__next-arrow {
+      animation: nudge 2.4s var(--ease-in-out) 3.2s infinite;
+    }
+  }
+
+  @keyframes nudge {
+    0%,
+    60%,
+    100% {
+      transform: none;
+    }
+    30% {
+      transform: translateY(5px);
+    }
+  }
+
+  /* ── Portrait screens ─────────────────────────────────
+   * Its own composition, not a shrunk one: the sun rises off the right edge,
+   * the horizon sits under it, and the type stacks on the ground below.
+   */
+  @media (max-aspect-ratio: 5/4) {
+    .hero {
+      --pad: clamp(1rem, 4.5vw, 2.5rem);
+    }
+
+    .hero__panel {
+      height: auto;
+      min-height: calc(100svh - var(--masthead-h) - var(--margin));
+      max-height: none;
+      display: flex;
+      flex-direction: column;
+      padding: 0 var(--pad) var(--pad);
+    }
+
+    .hero__art {
+      --art-h: min(104vw, 47svh);
+      position: relative;
+      inset: auto;
+      flex: none;
+      height: var(--art-h);
+      margin-inline: calc(var(--pad) * -1);
+    }
+
+    .hero__stage {
+      top: calc(var(--art-h) * -0.2);
+      right: auto;
+      left: calc(70% - var(--art-h) * 0.6);
+      height: calc(var(--art-h) * 1.15);
+    }
+
+    .hero__copy,
+    .hero__intro {
+      position: relative;
+      inset: auto;
+    }
+
+    .hero__copy {
+      margin-top: auto;
+      padding-top: var(--space-5);
+    }
+
+    .hero__vol {
+      display: none;
+    }
+
+    .hero__gloss {
+      display: none;
+    }
+
+    .hero__title {
+      font-size: clamp(3.4rem, 17.5vw, 9rem);
+    }
+
+    .hero__title-2 {
+      padding-left: 0.4em;
+    }
+
+    .hero__intro {
+      margin-top: var(--space-5);
+      max-width: 26rem;
+      padding-right: 3.5rem;
+    }
+
+    .hero__next {
+      right: calc(var(--pad) - var(--space-2));
+      bottom: calc(var(--pad) - var(--space-2));
+    }
+  }
+</style>

@@ -1,0 +1,260 @@
+---
+/**
+ * Plate 00 — The Cut. A vermilion sun split by a single stroke, and the
+ * swordsman who made it. Drawn in a 1000 × 1000 box; the horizon line is a
+ * separate element so it can run the full width of the panel.
+ */
+import { FIGURE } from '../../lib/figure';
+import { brushStroke, halftone, round, smoothstep, splitCircle } from '../../lib/draw';
+
+const sun = { cx: 520, cy: 430, r: 390 };
+const ground = 850;
+const scale = 0.82;
+const figureX = 485;
+const figureY = ground - FIGURE.height * scale;
+
+// The cut passes high, clear of the swordsman: the stroke is already over and
+// his blade is lowered. The sun only comes apart afterwards.
+const angle = 24;
+const through = [520, 362] as const;
+const halves = splitCircle({ ...sun, through, angle, reach: 2000 });
+const [ux, uy] = halves.direction;
+const [nx, ny] = halves.normal;
+const cutFrom = [through[0] - ux * 520, through[1] - uy * 520] as const;
+const cutTo = [through[0] + ux * 500, through[1] + uy * 500] as const;
+const cut = brushStroke({ from: cutFrom, to: cutTo, width: 11, peak: 0.36, seed: 11, wobble: 0.35, segments: 40 });
+
+// After the cut: the cap slides down its own face, the body of the sun settles.
+const gap = 8;
+const slide = 15;
+const upperShift = { x: round(-nx * gap + ux * slide), y: round(-ny * gap + uy * slide) };
+const lowerShift = { x: round(nx * gap * 0.5), y: round(ny * gap * 0.5) };
+
+// The lower edge of the sun dissolves into a halftone screen above the horizon.
+const fadeTop = 610;
+const fadeBottom = sun.cy + sun.r;
+const sunDots = halftone({
+  x: sun.cx - sun.r,
+  y: fadeTop - 30,
+  width: sun.r * 2,
+  height: fadeBottom - fadeTop + 50,
+  step: 17,
+  angle: 45,
+  value: (x, y) =>
+    (x - sun.cx) ** 2 + (y - sun.cy) ** 2 > sun.r ** 2 ? 0 : 1 - smoothstep(fadeTop + 10, fadeBottom - 4, y),
+});
+
+// The figure's shadow falls toward the reader, printed as a coarse screen.
+const feet = { left: figureX + 58 * scale, right: figureX + 226 * scale };
+const shadowDots = halftone({
+  x: feet.left - 10,
+  y: ground + 4,
+  width: 260,
+  height: 150,
+  step: 8,
+  angle: 15,
+  value: (x, y) => {
+    const t = (y - ground) / 150;
+    const left = feet.left + 6 + t * 30;
+    const right = feet.right - 10 + t * 70;
+    if (x < left || x > right) return 0;
+    return (1 - smoothstep(ground, ground + 120, y)) * 0.34;
+  },
+});
+
+const figureTransform = `translate(${round(figureX)} ${round(figureY)}) scale(${scale})`;
+---
+
+<svg
+  class="scene"
+  viewBox="0 0 1000 1000"
+  role="img"
+  aria-labelledby="scene-title"
+  style={`--upper-x:${upperShift.x};--upper-y:${upperShift.y};--lower-x:${lowerShift.x};--lower-y:${lowerShift.y}`}
+>
+  <title id="scene-title">A lone swordsman stands before a vermilion sun that has been split in two by a single stroke.</title>
+  <defs>
+    <clipPath id="scene-upper"><polygon points={halves.upper}></polygon></clipPath>
+    <clipPath id="scene-lower"><polygon points={halves.lower}></polygon></clipPath>
+    <clipPath id="scene-solid"><rect x="0" y="0" width="1000" height={fadeTop + 30}></rect></clipPath>
+    <linearGradient id="scene-ghost-fade" gradientUnits="userSpaceOnUse" x1="0" y1="360" x2="0" y2={fadeTop}>
+      <stop offset="0" stop-color="#fff"></stop>
+      <stop offset="1" stop-color="#000"></stop>
+    </linearGradient>
+    <mask id="scene-ghost-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
+      <rect width="1000" height="1000" fill="url(#scene-ghost-fade)"></rect>
+    </mask>
+    <clipPath id="scene-disc"><circle cx={sun.cx} cy={sun.cy} r={sun.r}></circle></clipPath>
+    <g id="scene-sun">
+      <circle class="scene__ghost" cx={sun.cx + 6} cy={sun.cy + 5} r={sun.r} mask="url(#scene-ghost-mask)"></circle>
+      <circle class="scene__disc" cx={sun.cx} cy={sun.cy} r={sun.r} clip-path="url(#scene-solid)"></circle>
+      <g class="scene__disc" clip-path="url(#scene-disc)" set:html={sunDots} />
+    </g>
+    <mask id="scene-cut-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
+      <path
+        class="scene__cut-mask"
+        d={`M${round(cutFrom[0])} ${round(cutFrom[1])} L${round(cutTo[0])} ${round(cutTo[1])}`}
+        pathLength="1"
+        stroke="#fff"
+        stroke-width="60"
+        fill="none"></path>
+    </mask>
+    <filter id="scene-ink" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4" result="noise"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </defs>
+
+  <g class="scene__drift scene__drift--sun">
+    <g class="scene__sun">
+      <g class="scene__half scene__half--upper">
+        <g clip-path="url(#scene-upper)"><use href="#scene-sun"></use></g>
+      </g>
+      <g class="scene__half scene__half--lower">
+        <g clip-path="url(#scene-lower)"><use href="#scene-sun"></use></g>
+      </g>
+    </g>
+  </g>
+
+  <g class="scene__drift scene__drift--cut">
+    <path class="scene__cut" d={cut} mask="url(#scene-cut-reveal)"></path>
+  </g>
+
+  <g class="scene__drift scene__drift--figure">
+    <g class="scene__shadow" set:html={shadowDots} />
+    <g class="scene__figure" filter="url(#scene-ink)">
+      <g transform={figureTransform}>
+        <path d={FIGURE.ribbon}></path>
+        <path d={FIGURE.saya}></path>
+        <path d={FIGURE.body}></path>
+        <path d={FIGURE.tsuka}></path>
+        <path d={FIGURE.tsuba}></path>
+        <path class="scene__blade" d={FIGURE.blade}></path>
+      </g>
+    </g>
+  </g>
+</svg>
+
+<style>
+  .scene {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .scene__disc {
+    fill: var(--shu);
+  }
+
+  .scene__ghost {
+    fill: var(--enji);
+  }
+
+  .scene__cut {
+    fill: var(--sumi);
+  }
+
+  .scene__figure,
+  .scene__shadow {
+    fill: var(--sumi);
+  }
+
+  .scene__blade {
+    fill: var(--keshizumi);
+  }
+
+  .scene__half--upper {
+    transform: translate(calc(var(--upper-x) * 1px), calc(var(--upper-y) * 1px));
+  }
+
+  .scene__half--lower {
+    transform: translate(calc(var(--lower-x) * 1px), calc(var(--lower-y) * 1px));
+  }
+
+  /* Ambient depth: driven by --px/--py (pointer) and --hp (hero scroll progress) on .hero */
+  .scene__drift {
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .scene__drift--sun {
+    transform: translate(calc(var(--px, 0) * -10px), calc(var(--hp, 0) * 120px + var(--py, 0) * -6px));
+  }
+
+  .scene__drift--cut {
+    transform: translate(calc(var(--px, 0) * -6px), calc(var(--hp, 0) * 90px + var(--py, 0) * -4px));
+  }
+
+  .scene__drift--figure {
+    transform: translate(calc(var(--px, 0) * 6px), calc(var(--hp, 0) * 30px + var(--py, 0) * 3px));
+  }
+
+  /* ── Opening scene ─────────────────────────────────────
+   * 0.1s  sun rises  ·  0.4s figure resolves  ·  1.0s the cut  ·  1.4s the halves part
+   */
+  :global(.js) .scene__sun,
+  :global(.js) .scene__figure,
+  :global(.js) .scene__shadow {
+    opacity: 0;
+  }
+
+  :global(.js) .scene__cut-mask {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+
+  :global(.js.is-ready) .scene__sun {
+    animation: scene-rise var(--dur-4) var(--ease-out) 100ms both;
+  }
+
+  :global(.js.is-ready) .scene__figure,
+  :global(.js.is-ready) .scene__shadow {
+    animation: scene-resolve 1.2s var(--ease-out) 400ms both;
+  }
+
+  :global(.js.is-ready) .scene__cut-mask {
+    animation: scene-cut 420ms var(--ease-in-out) 1000ms both;
+  }
+
+  :global(.js.is-ready) .scene__half {
+    animation: scene-part 1.1s var(--ease-out) 1380ms both;
+  }
+
+  @keyframes scene-rise {
+    from {
+      opacity: 0;
+      transform: translateY(36px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes scene-resolve {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scene-cut {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes scene-part {
+    from {
+      transform: translate(0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene__drift {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>

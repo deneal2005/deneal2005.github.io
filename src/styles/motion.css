@@ -1,0 +1,159 @@
+/*
+ * Motion system. Hidden starting states only apply once JS has confirmed it can
+ * reveal them (html.js), so content is always readable without scripting.
+ */
+
+/* Fade + lift for small blocks */
+.js [data-reveal='fade'] {
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+  transition:
+    opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+.js [data-reveal='fade'].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Lines of display type rise out of their own baseline */
+.rise {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 0.04em;
+  padding-block: 0.06em 0.1em;
+  margin-block: -0.06em -0.1em;
+  padding-inline-end: 0.12em;
+}
+
+.rise > span {
+  display: inline-block;
+}
+
+.js [data-reveal='rise'] .rise > span {
+  transform: translate3d(0, 108%, 0);
+  transition: transform var(--dur-4) var(--ease-out);
+  transition-delay: calc(var(--line, 0) * 110ms + var(--delay, 0ms));
+}
+
+.js [data-reveal='rise'].is-in .rise > span {
+  transform: none;
+}
+
+/* Panels ink in from the top edge, like a frame being filled */
+.js [data-reveal='panel'] {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path var(--dur-4) var(--ease-in-out);
+  transition-delay: calc(var(--i, 0) * 140ms);
+}
+
+.js [data-reveal='panel'].is-in {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Brush lines draw themselves (paths use pathLength="1") */
+.js [data-draw] .draw {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2.4s var(--ease-brush);
+  transition-delay: var(--delay, 0ms);
+}
+
+.js [data-draw].is-in .draw {
+  stroke-dashoffset: 0;
+}
+
+/* Film grain over the paper. Moves at 8fps, like a projector, not a screensaver. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .07 0 0 0 0 .06 0 0 0 0 .05 0 0 0 2.4 -1.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grain {
+    animation: grain 0.75s steps(6) infinite;
+  }
+}
+
+@keyframes grain {
+  0% { transform: translate3d(0, 0, 0); }
+  17% { transform: translate3d(-3%, 2%, 0); }
+  33% { transform: translate3d(2%, -4%, 0); }
+  50% { transform: translate3d(-4%, -2%, 0); }
+  67% { transform: translate3d(3%, 3%, 0); }
+  83% { transform: translate3d(-2%, 4%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* ── Page turns ───────────────────────────────────────────
+ * Manga is bound on the right, so a turned page reveals the next one from the
+ * left edge. Cross-document view transitions; browsers without support just navigate.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 700ms var(--ease-in-out) both vt-recede;
+}
+
+::view-transition-new(root) {
+  animation: 900ms var(--ease-in-out) both vt-turn;
+}
+
+@keyframes vt-turn {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes vt-recede {
+  to { opacity: 0.4; transform: translateX(4%); }
+}
+
+::view-transition-group(masthead) {
+  z-index: 10;
+}
+
+::view-transition-group(*) {
+  animation-duration: 900ms;
+  animation-timing-function: var(--ease-in-out);
+}
+
+/* ── Reduced motion: everything arrives, nothing travels ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .js [data-reveal] .rise > span {
+    transform: none !important;
+  }
+
+  .js [data-draw] .draw {
+    stroke-dashoffset: 0 !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

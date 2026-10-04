@@ -1,0 +1,147 @@
+---
+import CutSunMark from '../motifs/CutSunMark.astro';
+import { site } from '../../data/site';
+
+interface Props {
+  /** Initial running head; the homepage updates it as chapters scroll past. */
+  label: string;
+  title: string;
+}
+
+const { label, title } = Astro.props;
+---
+
+<header class="masthead" data-masthead data-tone-auto>
+  <a class="masthead__brand" href="/" aria-label={`${site.brand}, back to the first page`}>
+    <CutSunMark size={20} />
+    <span class="masthead__word">{site.brand}</span>
+  </a>
+
+  <p class="masthead__running meta" aria-hidden="true">
+    <span data-running-label>{label}</span>
+    <span class="masthead__rule"></span>
+    <span class="masthead__title" data-running-title>{title}</span>
+  </p>
+
+  <button class="masthead__contents" type="button" aria-haspopup="dialog" aria-controls="contents" data-contents-open>
+    <span class="masthead__contents-label">Contents</span>
+    <span class="masthead__ja" lang="ja" aria-hidden="true">目次</span>
+  </button>
+</header>
+
+<style>
+  .masthead {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-masthead);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: var(--masthead-h);
+    padding-inline: var(--margin);
+    color: var(--color-text);
+    background-color: transparent;
+    view-transition-name: masthead;
+    transition:
+      transform var(--dur-3) var(--ease-out),
+      background-color var(--dur-2) linear,
+      color var(--dur-2) linear,
+      box-shadow var(--dur-2) linear;
+  }
+
+  .masthead[data-scrolled] {
+    background-color: var(--color-bg);
+    box-shadow: 0 1px 0 var(--color-rule);
+  }
+
+  .masthead[data-hidden] {
+    transform: translateY(-100%);
+  }
+
+  .masthead__brand {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+  }
+
+  .masthead__word {
+    font-family: var(--type-sans);
+    font-size: 1rem;
+    font-stretch: 125%;
+    font-weight: 800;
+    letter-spacing: 0.32em;
+    margin-right: -0.32em;
+  }
+
+  @media (hover: hover) {
+    .masthead__brand:hover :global(.mark__half--a) {
+      transform: translate(2px, -2.8px);
+    }
+
+    .masthead__brand:hover :global(.mark__half--b) {
+      transform: translate(-2px, 2.8px);
+    }
+  }
+
+  .masthead__running {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text);
+  }
+
+  .masthead__rule {
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .masthead__title {
+    color: var(--color-text-muted);
+  }
+
+  .masthead__contents {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    padding-inline: var(--space-2);
+    margin-right: calc(var(--space-2) * -1);
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .masthead__ja {
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    padding: 0.2em 0.35em;
+    color: var(--gofun);
+    background: var(--shu);
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .masthead__contents:hover .masthead__ja {
+      transform: rotate(-4deg) scale(1.06);
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .masthead {
+      grid-template-columns: 1fr auto;
+    }
+
+    .masthead__running {
+      display: none;
+    }
+  }
+</style>

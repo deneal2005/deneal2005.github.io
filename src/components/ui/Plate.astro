@@ -1,0 +1,65 @@
+---
+/**
+ * Image container for plates and, later, real photography. Holds its aspect
+ * ratio before the image arrives, inks in on reveal and carries an optional
+ * view-transition name so a plate can travel between pages.
+ */
+interface Props {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  /** Crop to a different aspect ratio than the source, e.g. "21/9". */
+  ratio?: string;
+  transitionName?: string;
+  eager?: boolean;
+  reveal?: boolean;
+  class?: string;
+}
+
+const { src, alt, width, height, ratio, transitionName, eager = false, reveal = true, class: className } = Astro.props;
+---
+
+<div
+  class:list={['plate', className]}
+  style={`--ratio: ${ratio ?? `${width} / ${height}`}`}
+  data-reveal={reveal ? 'panel' : undefined}
+>
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
+    decoding="async"
+    style={transitionName ? `view-transition-name: ${transitionName}` : undefined}
+  />
+</div>
+
+<style>
+  .plate {
+    position: relative;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    background-color: var(--washi-deep);
+  }
+
+  .plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* reveal uses transform, hover uses scale, so they compose instead of fighting */
+    transition:
+      transform 1.8s var(--ease-out),
+      scale 1.2s var(--ease-out);
+  }
+
+  :global(.js) .plate[data-reveal='panel'] img {
+    transform: scale(1.14);
+  }
+
+  :global(.js) .plate[data-reveal='panel'].is-in img {
+    transform: none;
+  }
+</style>

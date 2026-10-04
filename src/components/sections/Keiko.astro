@@ -1,0 +1,226 @@
+---
+/**
+ * Chapter 03 — Keiko (稽古), daily practice. Three working studies; their
+ * scripts load only when the chapter approaches (see src/scripts/lab.ts).
+ */
+import ChapterOpener from '../ui/ChapterOpener.astro';
+import { chapterById } from '../../data/chapters';
+
+const chapter = chapterById('keiko');
+---
+
+<section
+  id={chapter.id}
+  class="keiko"
+  data-tone="ink"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="keiko-title"
+>
+  <div class="wrap">
+    <ChapterOpener
+      id="keiko"
+      epigraph="Keiko is the practice you do every day so the work on the day looks easy. Three studies, all running in your browser."
+    />
+
+    <div class="lab">
+      <article class="study" data-lab="sumi" aria-labelledby="study-sumi">
+        <header class="study__head">
+          <p class="study__ja" lang="ja" aria-hidden="true">墨</p>
+          <div>
+            <h3 class="study__title" id="study-sumi">Sumi</h3>
+            <p class="meta">Ink · Canvas 2D</p>
+          </div>
+        </header>
+        <div class="study__stage study__stage--paper">
+          <canvas class="study__canvas study__canvas--draw" role="img" aria-label="A sheet of paper you can draw ink strokes on with a mouse, pen or finger."></canvas>
+          <p class="study__hint meta" aria-hidden="true" data-sumi-hint>Draw here</p>
+        </div>
+        <p class="study__desc">Ink that behaves like ink. Move slowly for a heavy, wet line; quickly for a thin, dry one.</p>
+        <button class="btn" type="button" data-sumi-clear>Wash the sheet</button>
+      </article>
+
+      <article class="study study--offset" data-lab="ten" aria-labelledby="study-ten">
+        <header class="study__head">
+          <p class="study__ja" lang="ja" aria-hidden="true">点</p>
+          <div>
+            <h3 class="study__title" id="study-ten">Ten</h3>
+            <p class="meta">Halftone · Canvas 2D</p>
+          </div>
+        </header>
+        <div class="study__stage">
+          <canvas class="study__canvas" role="img" aria-label="A vermilion sun drawn as a live halftone screen. The dots swell toward your pointer."></canvas>
+        </div>
+        <p class="study__desc">A sun printed as a live halftone screen. Your pointer is a light source: the dots swell toward it.</p>
+        <button class="btn" type="button" data-ten-toggle aria-pressed="false">Pause</button>
+      </article>
+
+      <article class="study" data-lab="hanko" aria-labelledby="study-hanko">
+        <header class="study__head">
+          <p class="study__ja" lang="ja" aria-hidden="true">判</p>
+          <div>
+            <h3 class="study__title" id="study-hanko">Hanko</h3>
+            <p class="meta">Seal · Canvas 2D</p>
+          </div>
+        </header>
+        <div class="study__stage study__stage--paper">
+          <canvas class="study__canvas" role="img" aria-label="A vermilion seal carved with your initials." data-hanko-canvas></canvas>
+        </div>
+        <form class="hanko__form" data-hanko-form>
+          <label class="meta" for="hanko-initials">Your initials, up to four</label>
+          <div class="hanko__row">
+            <input
+              id="hanko-initials"
+              class="hanko__input"
+              name="initials"
+              type="text"
+              maxlength="4"
+              autocomplete="off"
+              spellcheck="false"
+              value="REN"
+            />
+            <button class="btn" type="submit" data-hanko-download>Download PNG</button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .keiko {
+    padding-block: var(--space-section);
+  }
+
+  .lab {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gutter);
+    align-items: start;
+  }
+
+  .study--offset {
+    margin-top: var(--space-9);
+  }
+
+  .study {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+
+  .study__head {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-4);
+    width: 100%;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .study__ja {
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: 2.75rem;
+    line-height: 0.9;
+    color: var(--shu);
+  }
+
+  .study__title {
+    font-family: var(--type-display);
+    font-size: 2rem;
+    font-style: italic;
+    font-weight: 350;
+    font-stretch: 80%;
+    line-height: 1;
+  }
+
+  .study__stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border: var(--panel-border) solid var(--washi);
+    background: var(--sumi);
+    overflow: hidden;
+  }
+
+  .study__stage--paper {
+    background: #f2ece0;
+  }
+
+  .study__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .study__canvas--draw {
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .study__hint {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--nibi);
+    pointer-events: none;
+    transition: opacity var(--dur-2) linear;
+  }
+
+  .study__hint.is-hidden {
+    opacity: 0;
+  }
+
+  .study__desc {
+    max-width: 24rem;
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .hanko__form {
+    display: grid;
+    gap: var(--space-2);
+    width: 100%;
+  }
+
+  .hanko__row {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .hanko__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0 var(--space-3);
+    background: transparent;
+    border: 1.5px solid var(--color-rule-strong);
+    border-radius: 0;
+    font-family: var(--type-mono);
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .hanko__input:focus-visible {
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 63.99rem) {
+    .lab {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-9);
+    }
+
+    .study--offset {
+      margin-top: 0;
+    }
+
+    .study__stage {
+      aspect-ratio: 1;
+    }
+  }
+</style>

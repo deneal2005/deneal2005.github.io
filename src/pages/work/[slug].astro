@@ -1,0 +1,405 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Plate from '../../components/ui/Plate.astro';
+import HamonLine from '../../components/motifs/HamonLine.astro';
+import { plates, plateSize, plateUrl } from '../../lib/plates';
+
+export async function getStaticPaths() {
+  const works = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  return works.map((work, i) => ({
+    params: { slug: work.id },
+    props: { work, next: works[(i + 1) % works.length], total: works.length },
+  }));
+}
+
+interface Props {
+  work: CollectionEntry<'work'>;
+  next: CollectionEntry<'work'>;
+  total: number;
+}
+
+const { work, next, total } = Astro.props;
+const { data } = work;
+const { Content, headings } = await render(work);
+const number = String(data.order).padStart(2, '0');
+const nextNumber = String(next.data.order).padStart(2, '0');
+const isFinal = data.order === total;
+
+const plate = plates[data.plate];
+const cover = { src: data.cover ?? plateUrl(data.plate, 'a'), ...plateSize(plate, 'a') };
+const detail = { src: data.detail ?? plateUrl(data.plate, 'b'), ...plateSize(plate, 'b') };
+const landscape = cover.width > cover.height;
+const nextCover = { src: next.data.cover ?? plateUrl(next.data.plate, 'a'), ...plateSize(plates[next.data.plate], 'a') };
+
+const meta = [
+  { label: 'Client', value: data.client },
+  { label: 'Year', value: String(data.year) },
+  { label: 'Role', value: data.role },
+  ...data.facts,
+];
+---
+
+<BaseLayout title={data.title} description={data.logline} running={{ label: `Chapter 01 · ${number}`, title: data.title }}>
+  <article class="case" data-chapter-label={`Chapter 01 · ${number}`} data-chapter-title={data.title} aria-labelledby="case-title">
+    <header class="case__head wrap">
+      <div class="case__trail">
+        <a class="case__back meta" href="/#work">
+          <svg class="arrow" viewBox="0 0 18 10" aria-hidden="true"><path d="M18 5H2M6 1L2 5l4 4" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
+          The Work
+        </a>
+        <p class="meta">Chapter 01 · {number} of {String(total).padStart(2, '0')}</p>
+      </div>
+
+      <p class="case__sector meta"><span class="case__no">{number}</span> {data.sector} · {data.disciplines.join(' / ')}</p>
+      <h1 id="case-title" class="case__title display" data-reveal="rise">
+        {
+          data.titleLines.map((line, i) => (
+            <span class="rise" style={`--line: ${i}`}>
+              <span>{line}</span>
+            </span>
+          ))
+        }
+      </h1>
+      <p class="case__logline lede" data-reveal="fade" style="--i: 3">{data.logline}</p>
+    </header>
+
+    <div class:list={['case__cover', landscape ? 'case__cover--wide' : 'case__cover--tall']}>
+      <Plate src={cover.src} alt={data.alt} width={cover.width} height={cover.height} transitionName={`plate-${work.id}`} eager reveal={false} />
+    </div>
+
+    <div class="case__body wrap">
+      <aside class="case__aside">
+        <dl class="case__meta">
+          {
+            meta.map((item) => (
+              <div>
+                <dt class="meta">{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <nav class="case__toc" aria-label="In this chapter">
+          <p class="meta">In this chapter</p>
+          <ol>
+            {
+              headings
+                .filter((h) => h.depth === 2)
+                .map((h) => (
+                  <li>
+                    <a class="link" href={`#${h.slug}`}>
+                      {h.text}
+                    </a>
+                  </li>
+                ))
+            }
+          </ol>
+        </nav>
+      </aside>
+
+      <div class="case__prose">
+        <Content />
+      </div>
+    </div>
+
+    <figure class="case__detail wrap">
+      <Plate src={detail.src} alt={data.detailAlt} width={detail.width} height={detail.height} />
+      <figcaption class="meta">Detail · Plate {number}, enlarged</figcaption>
+    </figure>
+
+    <HamonLine seed={data.order * 5} class="case__hamon" />
+
+    <nav class="case__next wrap" aria-label="Next chapter">
+      <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Turn">
+        <span class="next__label meta">{isFinal ? 'Back to the first chapter' : 'Next chapter'} · {nextNumber}</span>
+        <span class="next__title display">{next.data.title}</span>
+        <span class="next__logline">{next.data.logline}</span>
+        <span class="next__plate">
+          <img
+            src={nextCover.src}
+            alt=""
+            width={nextCover.width}
+            height={nextCover.height}
+            loading="lazy"
+            decoding="async"
+            style={`view-transition-name: plate-${next.id}`}
+          />
+        </span>
+      </a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .case {
+    padding-top: calc(var(--masthead-h) + var(--space-6));
+  }
+
+  .case__trail {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: var(--panel-border) solid var(--sumi);
+  }
+
+  .case__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    margin-block: -0.75rem;
+    color: var(--color-text);
+  }
+
+  @media (hover: hover) {
+    .case__back:hover .arrow {
+      transform: translateX(-0.3rem);
+    }
+  }
+
+  .case__sector {
+    margin-top: var(--space-8);
+  }
+
+  .case__no {
+    color: var(--color-accent-text);
+    margin-right: var(--space-2);
+  }
+
+  .case__title {
+    margin-top: var(--space-4);
+    font-size: clamp(3.75rem, 1.5rem + 9vw, 12rem);
+    font-weight: 350;
+    text-transform: uppercase;
+  }
+
+  .case__logline {
+    margin: var(--space-6) 0 0 auto;
+    max-width: 38rem;
+    font-style: italic;
+  }
+
+  /* ── Cover ─────────────────────────────────────────── */
+  .case__cover {
+    margin-top: var(--space-8);
+  }
+
+  .case__cover--wide :global(.plate) {
+    max-height: 88svh;
+    width: 100%;
+  }
+
+  .case__cover--tall {
+    padding-inline: var(--margin);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+
+  .case__cover--tall :global(.plate) {
+    grid-column: 4 / 10;
+  }
+
+  /* ── Body ──────────────────────────────────────────── */
+  .case__body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-8);
+    margin-top: var(--space-section);
+    align-items: start;
+  }
+
+  .case__aside {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .case__meta {
+    display: grid;
+    gap: var(--space-3);
+    font-size: var(--text-s);
+  }
+
+  .case__meta div {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .case__meta dd {
+    margin: 0;
+  }
+
+  .case__toc ol {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    font-size: var(--text-s);
+  }
+
+  .case__prose {
+    grid-column: 6 / -1;
+    max-width: 40rem;
+  }
+
+  .case__prose :global(h2) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    scroll-margin-top: calc(var(--masthead-h) + var(--space-5));
+  }
+
+  .case__prose :global(h2::after) {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-rule);
+  }
+
+  .case__prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .case__prose :global(p) {
+    margin-top: var(--space-4);
+    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+    line-height: 1.65;
+  }
+
+  .case__prose :global(h2 + p) {
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 90%;
+    line-height: 1.38;
+  }
+
+  .case__prose :global(em) {
+    font-family: var(--type-display);
+    font-style: italic;
+    font-size: 1.08em;
+    color: var(--color-accent-text);
+  }
+
+  /* ── Detail plate ─────────────────────────────────── */
+  .case__detail {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    margin-top: var(--space-section);
+  }
+
+  .case__detail :global(.plate) {
+    grid-column: 5 / -1;
+  }
+
+  .case__detail figcaption {
+    grid-column: 5 / -1;
+    margin-top: var(--space-3);
+  }
+
+  .case :global(.case__hamon) {
+    margin-top: var(--space-section);
+    padding-inline: var(--margin);
+  }
+
+  /* ── Next chapter ─────────────────────────────────── */
+  .case__next {
+    padding-block: var(--space-8) var(--space-section);
+  }
+
+  .next {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-3);
+    align-items: end;
+  }
+
+  .next__label {
+    grid-column: 1 / span 6;
+    color: var(--color-text);
+  }
+
+  .next__title {
+    grid-column: 1 / span 7;
+    font-size: var(--text-xl);
+    text-transform: uppercase;
+    transition: color var(--dur-1) linear;
+  }
+
+  .next__logline {
+    grid-column: 1 / span 5;
+    color: var(--color-text-muted);
+    font-size: var(--text-s);
+  }
+
+  .next__plate {
+    grid-column: 9 / -1;
+    grid-row: 1 / span 3;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--washi-deep);
+  }
+
+  .next__plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 1.2s var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .next:hover .next__title {
+      color: var(--enji);
+    }
+
+    .next:hover .next__plate img {
+      scale: 1.05;
+    }
+  }
+
+  @media (max-width: 63.99rem) {
+    .case__cover--tall :global(.plate) {
+      grid-column: 1 / -1;
+    }
+
+    .case__aside,
+    .case__prose,
+    .case__detail :global(.plate),
+    .case__detail figcaption {
+      grid-column: 1 / -1;
+    }
+
+    .case__aside {
+      position: static;
+    }
+
+    .next__label,
+    .next__title,
+    .next__logline,
+    .next__plate {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    .next__plate {
+      order: -1;
+      margin-bottom: var(--space-4);
+    }
+  }
+</style>

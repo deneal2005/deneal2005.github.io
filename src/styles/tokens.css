@@ -1,0 +1,100 @@
+/*
+ * HAMON design tokens.
+ * Raw colours are named after the traditional Japanese pigments they stand in for;
+ * components only ever reference the semantic aliases below them.
+ */
+:root {
+  /* ── Pigments ─────────────────────────────────────────── */
+  --sumi: #13110f; /* 墨 ink black */
+  --keshizumi: #2a2622; /* 消炭 charcoal */
+  --nibi: #625b53; /* 鈍 muted grey, text-safe on washi (5.1:1) */
+  --usuzumi: #a39b90; /* 薄墨 diluted ink, rules & text on sumi */
+  --washi: #ebe4d6; /* 和紙 warm paper */
+  --washi-deep: #ddd4c2; /* shaded paper */
+  --gofun: #f6f2ea; /* 胡粉 shell white */
+  --shu: #da3b22; /* 朱 vermilion: the sun. Large type & graphics only on washi */
+  --shu-light: #f0634b; /* vermilion tuned for small text on sumi (5.6:1) */
+  --enji: #8f1d21; /* 臙脂 deep crimson: small red text on washi (6.8:1) */
+  --kin: #b48a4e; /* 金 warm metallic, decorative only */
+
+  /* ── Semantic: paper tone (default) ───────────────────── */
+  --color-bg: var(--washi);
+  --color-bg-alt: var(--washi-deep);
+  --color-text: var(--sumi);
+  --color-text-muted: var(--nibi);
+  --color-accent: var(--shu);
+  --color-accent-text: var(--enji);
+  --color-rule: rgb(19 17 15 / 0.16);
+  --color-rule-strong: var(--sumi);
+  --color-focus: var(--enji);
+
+  /* ── Type families (font faces registered via Astro Fonts) ─ */
+  --type-display: var(--font-display), 'Noto Serif Display', Georgia, serif;
+  --type-sans: var(--font-sans), 'Archivo', Arial, sans-serif;
+  --type-mono: var(--font-mono), 'IBM Plex Mono', ui-monospace, monospace;
+  --type-jp: var(--font-jp), 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+
+  /* ── Type scale (fluid) ───────────────────────────────── */
+  --text-mega: clamp(4.25rem, 2.2rem + 9.6vw, 13.5rem); /* the opening headline */
+  --text-giga: clamp(3.4rem, 1.9rem + 6.8vw, 9.5rem); /* chapter titles */
+  --text-xl: clamp(2.6rem, 1.6rem + 4.2vw, 6.25rem); /* project titles */
+  --text-l: clamp(1.6rem, 1.15rem + 1.9vw, 2.9rem); /* ledes, set in display */
+  --text-m: clamp(1.2rem, 1.05rem + 0.6vw, 1.55rem);
+  --text-base: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
+  --text-s: 0.9375rem;
+  --text-xs: 0.75rem; /* metadata, always mono + uppercase */
+
+  --leading-tight: 0.86;
+  --leading-snug: 1.12;
+  --leading-body: 1.6;
+  --tracking-meta: 0.14em;
+  --stretch-condensed: 62.5%; /* display face at its narrowest: tall like a vertical column */
+
+  /* ── Space (4px base) ─────────────────────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+  --space-section: clamp(6rem, 3rem + 10vw, 13rem);
+
+  /* ── Layout ───────────────────────────────────────────── */
+  --margin: clamp(1rem, 0.4rem + 3vw, 3.5rem);
+  --gutter: clamp(0.75rem, 0.4rem + 1.4vw, 2rem);
+  --measure: 34rem;
+  --masthead-h: 4.25rem;
+  --panel-border: 3px;
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* reveals settle like ink soaking in */
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* panel wipes and page turns */
+  --ease-brush: cubic-bezier(0.55, 0, 0.1, 1); /* fast attack, long lift-off */
+  --dur-1: 180ms; /* hover feedback */
+  --dur-2: 420ms; /* UI state */
+  --dur-3: 900ms; /* scroll reveals */
+  --dur-4: 1500ms; /* scene-level moments */
+  --stagger: 90ms;
+
+  --z-grain: 60;
+  --z-masthead: 50;
+  --z-cursor: 70;
+}
+
+/* Inverted chapters: ink ground, paper type. Fixed chrome (masthead, rail)
+   takes [data-on-ink] while it floats over an ink chapter. */
+[data-tone='ink'],
+[data-on-ink] {
+  --color-bg: var(--sumi);
+  --color-bg-alt: var(--keshizumi);
+  --color-text: var(--washi);
+  --color-text-muted: var(--usuzumi);
+  --color-accent-text: var(--shu-light);
+  --color-rule: rgb(235 228 214 / 0.18);
+  --color-rule-strong: var(--washi);
+  --color-focus: var(--shu-light);
+}

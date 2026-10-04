@@ -1,0 +1,251 @@
+---
+/**
+ * Final chapter — The Invitation. The volume opened on a sun cut in two;
+ * it closes on a whole one, rising.
+ */
+import { chapterById } from '../../data/chapters';
+import { site } from '../../data/site';
+
+const chapter = chapterById('invitation');
+---
+
+<section
+  id={chapter.id}
+  class="invite"
+  data-tone="ink"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="invitation-title"
+>
+  <div class="invite__sky" aria-hidden="true">
+    <div class="invite__sun" data-depth="0.22"></div>
+  </div>
+
+  <div class="invite__inner wrap">
+    <div class="invite__head">
+      <p class="meta invite__label">{chapter.label} · {chapter.title}</p>
+      <p class="invite__ja tate" lang="ja" aria-hidden="true">{chapter.ja}</p>
+    </div>
+
+    <h2 id="invitation-title" class="invite__title display" data-reveal="rise">
+      <span class="rise" style="--line: 0"><span>The next chapter</span></span>
+      <span class="rise" style="--line: 1"><span><em>starts with a letter.</em></span></span>
+    </h2>
+
+    <div class="invite__grid">
+      <p class="invite__body" data-reveal="fade">
+        {site.brand} takes on two commissions a season. If you have something that deserves one decisive idea, write and
+        tell me what it is, and why now.
+      </p>
+
+      <div class="invite__contact" data-reveal="fade" style="--i: 2">
+        <a class="invite__email" href={`mailto:${site.email}`} data-magnetic="0.18">
+          <span>{site.email}</span>
+          <svg class="arrow" viewBox="0 0 18 10" aria-hidden="true"><path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.2"></path></svg>
+        </a>
+        <div class="invite__actions">
+          <button class="btn" type="button" data-copy={site.email}><span data-copy-label>Copy address</span></button>
+          <p class="meta invite__meta">
+            {site.location.city}
+            <time data-local-time={site.location.timeZone}>—</time>
+          </p>
+        </div>
+        <p class="vh" aria-live="polite" data-copy-status></p>
+        <dl class="invite__facts">
+          <div><dt class="meta">Availability</dt><dd>{site.availability}</dd></div>
+          <div><dt class="meta">Response</dt><dd>{site.responseTime}</dd></div>
+        </dl>
+        {
+          site.socials.length > 0 && (
+            <ul class="invite__socials">
+              {site.socials.map((social) => (
+                <li>
+                  <a class="link" href={social.href} rel="me noopener">
+                    {social.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .invite {
+    position: relative;
+    min-height: 100svh;
+    padding-block: var(--space-section) 0;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  .invite__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* The whole sun, rising as the chapter scrolls into place. */
+  .invite__sun {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: min(120vw, 82rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--shu);
+    box-shadow: 0.6rem 0.4rem 0 var(--enji);
+    transform: translate(-50%, calc(62% + var(--depth, 0px)));
+  }
+
+  .invite__inner {
+    position: relative;
+    padding-bottom: clamp(18rem, 42vw, 36rem);
+  }
+
+  .invite__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: var(--space-4);
+    border-top: var(--panel-border) solid var(--washi);
+  }
+
+  .invite__label {
+    color: var(--color-text);
+  }
+
+  .invite__ja {
+    font-size: clamp(2.5rem, 1.5rem + 3vw, 5rem);
+    color: var(--shu-light);
+  }
+
+  .invite__title {
+    margin-top: var(--space-6);
+    font-size: var(--text-giga);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .invite__title em {
+    font-style: italic;
+    text-transform: none;
+    color: var(--shu-light);
+  }
+
+  .invite__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-7);
+    margin-top: var(--space-8);
+    align-items: start;
+  }
+
+  .invite__body {
+    grid-column: 1 / span 4;
+    color: var(--color-text-muted);
+  }
+
+  .invite__contact {
+    grid-column: 6 / -1;
+  }
+
+  .invite__email {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 100%;
+    font-family: var(--type-display);
+    font-size: clamp(1.9rem, 1rem + 3.4vw, 4.5rem);
+    font-stretch: 75%;
+    font-weight: 400;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 100% 2px;
+    padding-bottom: 0.1em;
+    transition:
+      transform 0.5s var(--ease-out),
+      color var(--dur-1) linear;
+  }
+
+  .invite__email .arrow {
+    width: 0.6em;
+    height: 0.4em;
+  }
+
+  @media (hover: hover) {
+    .invite__email:hover {
+      color: var(--shu-light);
+    }
+
+    .invite__email:hover .arrow {
+      transform: translateX(0.2em);
+    }
+  }
+
+  .invite__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+
+  .invite__meta time {
+    margin-left: var(--space-2);
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .invite__facts {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-7);
+    max-width: 30rem;
+    font-size: var(--text-s);
+  }
+
+  .invite__facts div {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-4);
+  }
+
+  .invite__facts dd {
+    margin: 0;
+  }
+
+  .invite__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 63.99rem) {
+    .invite__body,
+    .invite__contact {
+      grid-column: 1 / -1;
+    }
+
+    .invite__title {
+      font-size: clamp(2.9rem, 13vw, 6rem);
+    }
+
+    .invite__facts div {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .invite__sun {
+      transform: translate(-50%, 62%);
+    }
+  }
+</style>

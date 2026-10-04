@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page not found" description="This page isn't in the volume." running={{ label: 'Page 404', title: 'Torn out' }}>
+  <section class="missing wrap" data-chapter-label="Page 404" data-chapter-title="Torn out" aria-labelledby="missing-title">
+    <div class="missing__panel">
+      <p class="missing__ja tate" lang="ja" aria-hidden="true">落丁</p>
+      <p class="meta">Page 404 · Rakuchō, a missing page</p>
+      <h1 id="missing-title" class="missing__title display">
+        This page was<br /><em>torn out.</em>
+      </h1>
+      <p class="missing__body">
+        The address doesn’t match any page in this volume. It may have moved, or the link may be mistyped.
+      </p>
+      <div class="missing__actions">
+        <a class="btn" href="/">Go to the first page</a>
+        <a class="btn" href="/#work">See the work</a>
+      </div>
+      <svg class="missing__tear" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 40V18l40 9 32-14 41 11 29-8 47 13 36-15 44 12 31-9 48 14 27-12 50 10 34-13 45 15 30-11 52 9 28-14 44 12 37-10 49 13 26-12 51 11 33-15 46 13 30-9 50 12 29-13 43 14 38-11 47 10 31-12 52 13V40z"></path>
+      </svg>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .missing {
+    padding-top: calc(var(--masthead-h) + var(--space-5));
+    padding-bottom: var(--space-section);
+  }
+
+  .missing__panel {
+    position: relative;
+    min-height: 70svh;
+    padding: clamp(1.5rem, 5vw, 5rem);
+    padding-bottom: clamp(4rem, 8vw, 7rem);
+    border: var(--panel-border) solid var(--sumi);
+    border-bottom: 0;
+    overflow: hidden;
+  }
+
+  .missing__ja {
+    position: absolute;
+    top: clamp(1.5rem, 5vw, 5rem);
+    right: clamp(1.5rem, 5vw, 5rem);
+    font-size: clamp(2.5rem, 2rem + 3vw, 5.5rem);
+    color: var(--shu);
+  }
+
+  .missing__title {
+    margin-top: var(--space-6);
+    font-size: var(--text-giga);
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  .missing__title em {
+    font-style: italic;
+    text-transform: none;
+  }
+
+  .missing__body {
+    margin-top: var(--space-6);
+    max-width: 30rem;
+    color: var(--color-text-muted);
+  }
+
+  .missing__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  /* The torn edge where the page used to be */
+  .missing__tear {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: 2.5rem;
+    fill: var(--washi-deep);
+  }
+</style>

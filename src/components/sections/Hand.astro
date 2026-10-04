@@ -1,0 +1,253 @@
+---
+/** Chapter 04 — The Hand: the person behind the work, set as an editorial profile. */
+import ChapterOpener from '../ui/ChapterOpener.astro';
+import Plate from '../ui/Plate.astro';
+import HamonLine from '../motifs/HamonLine.astro';
+import { chapterById } from '../../data/chapters';
+import { capabilities, experience, method } from '../../data/practice';
+import { site } from '../../data/site';
+import { plates, plateSize, plateUrl } from '../../lib/plates';
+
+const chapter = chapterById('hand');
+const portrait = plateSize(plates.sunrise, 'a');
+---
+
+<section
+  id={chapter.id}
+  class="hand wrap"
+  data-chapter-label={chapter.label}
+  data-chapter-title={chapter.title}
+  aria-labelledby="hand-title"
+>
+  <ChapterOpener id="hand" epigraph="One person, two disciplines, and a refusal to let either one win." />
+
+  <div class="hand__profile grid">
+    <figure class="hand__portrait">
+      <Plate
+        src={plateUrl('sunrise')}
+        alt="A vermilion sun rising through haze, printed entirely in halftone dots above an ink horizon."
+        width={portrait.width}
+        height={portrait.height}
+      />
+      <figcaption class="meta">Self-portrait, as a sunrise. The work should be the face.</figcaption>
+    </figure>
+
+    <div class="hand__intro">
+      <p class="hand__lede lede" data-reveal="fade">
+        I’m {site.person}. Designer by training, engineer by stubbornness. For twelve years I’ve worked in the narrow
+        gap between how a thing looks and how it behaves.
+      </p>
+      <div class="prose hand__prose" data-reveal="fade" style="--i: 2">
+        <p>
+          I take on few projects, stay close to every decision and write the production code myself. Nothing gets lost
+          in the handover, because there isn’t one.
+        </p>
+        <p>
+          The best briefs I get are short and slightly uncomfortable. The best results usually come from removing the
+          second idea so the first one can be heard.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hand__method">
+    <h3 class="hand__heading meta">The method, borrowed from the forge</h3>
+    <ol class="method">
+      {
+        method.map((step, i) => (
+          <li class="method__step" data-reveal="fade" style={`--i: ${i * 2}`}>
+            <p class="method__ja" lang="ja" aria-hidden="true">
+              {step.ja}
+            </p>
+            <p class="method__n meta">{String(i + 1).padStart(2, '0')}</p>
+            <h4 class="method__name">{step.name}</h4>
+            <p class="method__body">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <HamonLine seed={12} />
+
+  <div class="hand__lists grid">
+    <div class="hand__col hand__col--caps">
+      <h3 class="hand__heading meta">Capabilities</h3>
+      <ul class="caps">
+        {capabilities.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+    <div class="hand__col hand__col--exp">
+      <h3 class="hand__heading meta">Selected experience</h3>
+      <ol class="exp">
+        {
+          experience.map((row) => (
+            <li class="exp__row">
+              <span class="exp__years meta">{row.years}</span>
+              <span class="exp__place">{row.place}</span>
+              <span class="exp__role">{row.role}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hand {
+    padding-block: var(--space-section);
+  }
+
+  .hand__profile {
+    align-items: end;
+    row-gap: var(--space-7);
+  }
+
+  .hand__portrait {
+    grid-column: 1 / span 5;
+  }
+
+  .hand__portrait figcaption {
+    margin-top: var(--space-3);
+  }
+
+  .hand__intro {
+    grid-column: 7 / -1;
+    padding-bottom: var(--space-7);
+  }
+
+  .hand__lede {
+    font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3.25rem);
+    line-height: 1.1;
+  }
+
+  .hand__prose {
+    margin-top: var(--space-6);
+    margin-left: auto;
+    max-width: 28rem;
+    color: var(--color-text-muted);
+  }
+
+  .hand__heading {
+    color: var(--color-text);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  /* The method is a true sequence, so it's numbered */
+  .hand__method {
+    margin-block: var(--space-9) var(--space-8);
+  }
+
+  .method {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gutter);
+    margin-top: var(--space-6);
+  }
+
+  .method__step {
+    position: relative;
+    padding-top: var(--space-4);
+  }
+
+  .method__ja {
+    font-family: var(--type-jp);
+    font-weight: 800;
+    font-size: clamp(4rem, 3rem + 3vw, 6.5rem);
+    line-height: 1;
+    color: var(--washi-deep);
+    margin-bottom: calc(var(--space-6) * -1);
+  }
+
+  .method__n {
+    position: relative;
+    color: var(--color-accent-text);
+  }
+
+  .method__name {
+    position: relative;
+    margin-top: var(--space-2);
+    font-family: var(--type-display);
+    font-size: clamp(2.25rem, 1.6rem + 2vw, 3.5rem);
+    font-weight: 400;
+    font-stretch: 70%;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .method__body {
+    margin-top: var(--space-3);
+    max-width: 22rem;
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  .hand__lists {
+    margin-top: var(--space-8);
+    row-gap: var(--space-8);
+    align-items: start;
+  }
+
+  .hand__col--caps {
+    grid-column: 1 / span 5;
+  }
+
+  .hand__col--exp {
+    grid-column: 7 / -1;
+  }
+
+  .caps li {
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+    font-family: var(--type-display);
+    font-size: var(--text-m);
+    font-stretch: 85%;
+  }
+
+  .exp__row {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--space-4);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .exp__years {
+    color: var(--color-text);
+  }
+
+  .exp__place {
+    font-weight: 600;
+  }
+
+  .exp__role {
+    font-size: var(--text-s);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 63.99rem) {
+    .hand__portrait,
+    .hand__intro,
+    .hand__col--caps,
+    .hand__col--exp {
+      grid-column: 1 / -1;
+    }
+
+    .hand__portrait {
+      max-width: 26rem;
+    }
+
+    .method {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-7);
+    }
+
+    .exp__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-1);
+    }
+  }
+</style>
