@@ -12,6 +12,9 @@ import { site } from '../../data/site';
   <span class="rail__page">p. <span data-rail-page>001</span></span>
 </div>
 
+<!-- Phones and tablets: the rail is hidden, so progress becomes a hairline along the top edge -->
+<span class="readbar" aria-hidden="true"><span class="readbar__fill" data-read-fill></span></span>
+
 <style>
   .rail {
     position: fixed;
@@ -61,5 +64,27 @@ import { site } from '../../data/site';
     background: var(--shu);
     transform-origin: top;
     transform: scaleY(var(--progress, 0));
+  }
+
+  .readbar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: calc(var(--z-masthead) + 1);
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .readbar__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--shu);
+    transform-origin: left;
+    transform: scaleX(var(--progress, 0));
+  }
+
+  @media (min-width: 64rem) {
+    .readbar {
+      display: none;
+    }
   }
 </style>

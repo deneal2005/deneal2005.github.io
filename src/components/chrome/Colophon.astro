@@ -193,9 +193,39 @@ const nav = [
       grid-column: 1 / -1;
     }
 
+    .colophon {
+      padding-top: var(--space-6);
+    }
+
+    .colophon :global(.colophon__hamon) {
+      margin-bottom: var(--space-6);
+    }
+
+    .colophon__grid {
+      row-gap: var(--space-7);
+    }
+
+    /* Chapter links wrap as one line of type instead of a column */
+    .colophon__nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1) var(--space-4);
+    }
+
+    .colophon__nav a {
+      display: inline-block;
+      padding-block: 0.4rem;
+    }
+
+    .colophon__facts {
+      gap: var(--space-2);
+      font-size: 0.875rem;
+    }
+
     .colophon__facts div {
-      grid-template-columns: 1fr;
-      gap: var(--space-1);
+      grid-template-columns: 4.5rem 1fr;
+      gap: var(--space-3);
+      padding-bottom: var(--space-2);
     }
   }
 </style>

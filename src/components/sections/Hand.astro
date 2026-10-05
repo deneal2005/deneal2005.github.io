@@ -248,6 +248,39 @@ const facts = [
     }
   }
 
+  /* Phones: the portrait becomes a letterbox of the sunrise, not a full screen of it */
+  @media (max-width: 47.99rem) {
+    .hand__portrait {
+      max-width: none;
+    }
+
+    .hand__portrait :global(.plate) {
+      aspect-ratio: 2 / 1;
+    }
+
+    .hand__portrait :global(.plate img),
+    .hand__photo {
+      object-position: 50% 72%;
+    }
+
+    .hand__photo {
+      aspect-ratio: 4 / 3;
+    }
+
+    .hand__lede {
+      font-size: clamp(1.75rem, 1.2rem + 3vw, 2.25rem);
+    }
+
+    .hand__facts {
+      gap: var(--space-4) var(--gutter);
+      margin-top: var(--space-6);
+    }
+
+    .hand__facts dd {
+      font-size: 1.1rem;
+    }
+  }
+
   @media (max-width: 30rem) {
     .hand__think-link {
       grid-template-columns: minmax(0, 1fr) auto;

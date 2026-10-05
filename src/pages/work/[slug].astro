@@ -609,6 +609,16 @@ const meta = [
   }
 
   @media (max-width: 47.99rem) {
+    /* On a phone the sections are a thumb-scroll apart; the in-page index is noise */
+    .case__toc {
+      display: none;
+    }
+
+    .case__body {
+      margin-top: var(--space-8);
+      row-gap: var(--space-7);
+    }
+
     .case__related-link {
       grid-template-columns: minmax(0, 1fr) auto;
     }

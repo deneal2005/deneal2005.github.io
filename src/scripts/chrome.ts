@@ -8,6 +8,7 @@ export function initChrome() {
   const masthead = document.querySelector<HTMLElement>('[data-masthead]');
   const rail = document.querySelector<HTMLElement>('[data-rail]');
   const railFill = document.querySelector<HTMLElement>('[data-rail-fill]');
+  const readFill = document.querySelector<HTMLElement>('[data-read-fill]');
   const railPage = document.querySelector<HTMLElement>('[data-rail-page]');
   const runningLabel = document.querySelector<HTMLElement>('[data-running-label]');
   const runningTitle = document.querySelector<HTMLElement>('[data-running-title]');
@@ -38,7 +39,9 @@ export function initChrome() {
     if (rail) rail.toggleAttribute('data-on-ink', isOverInk(vh / 2));
 
     const max = document.documentElement.scrollHeight - vh;
-    railFill?.style.setProperty('--progress', String(max > 0 ? clamp(y / max) : 0));
+    const progress = String(max > 0 ? clamp(y / max) : 0);
+    railFill?.style.setProperty('--progress', progress);
+    readFill?.style.setProperty('--progress', progress);
     if (railPage) railPage.textContent = String(Math.floor(y / vh) + 1).padStart(3, '0');
 
     // Running head: the last chapter whose opening has passed the upper third.

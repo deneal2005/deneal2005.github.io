@@ -34,7 +34,8 @@ const notes = experiments.filter((e) => !e.data.demo);
       epigraph="Keiko is the practice you do every day so the work on the day looks easy. Experiments, not products: these run in your browser."
     />
 
-    <div class="lab">
+    <p class="lab__hint meta" aria-hidden="true">Swipe for the next study <span>→</span></p>
+    <div class="lab" role="region" aria-label="Studies" tabindex="0">
       {
         studies.map((study, i) => (
           <article
@@ -349,6 +350,46 @@ const notes = experiments.filter((e) => !e.data.demo);
 
     .study__stage {
       aspect-ratio: 1;
+    }
+  }
+
+  .lab__hint {
+    display: none;
+  }
+
+  /* ── Phones: a swipeable row, the next study peeking in from the edge ── */
+  @media (max-width: 47.99rem) {
+    .lab__hint {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    .lab {
+      display: flex;
+      gap: var(--space-4);
+      margin-inline: calc(var(--margin) * -1);
+      padding: 0 var(--margin) var(--space-3);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--margin);
+      scrollbar-width: thin;
+      scrollbar-color: var(--shu) transparent;
+    }
+
+    .lab:focus-visible {
+      outline-offset: -2px;
+    }
+
+    .study {
+      flex: 0 0 86%;
+      scroll-snap-align: start;
+    }
+
+    .study__stage {
+      aspect-ratio: 4 / 5;
     }
   }
 </style>

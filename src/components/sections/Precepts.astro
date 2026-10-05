@@ -321,6 +321,13 @@ const kataCells = Array.from({ length: 42 }, (_, i) => i);
 
   /* ── Small screens: panels stack, gutters keep their slant ── */
   @media (max-width: 63.99rem) {
+    /* Stacked, the text fills the panel; the single mark moves to the empty corner */
+    .ma__stop {
+      top: calc(var(--space-6) + 0.5rem);
+      left: auto;
+      right: var(--space-6);
+    }
+
     .page {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: none;
