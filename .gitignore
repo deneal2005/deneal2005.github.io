@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 # local QA captures
 *.capture.png
+
+.vercel
