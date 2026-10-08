@@ -14,6 +14,8 @@ import { join } from 'node:path';
  *   reel-480.mp4     the same for phones (optional, falls back to 720)
  *   reel-poster.jpg  first frame, shown until playback starts (optional)
  *   theme.mp3        opt-in soundtrack, off until the visitor turns it on (optional)
+ *   portrait.jpg     avatar for the dossier in The Soldier, used when profile.portrait
+ *                    is empty (optional; square works best)
  */
 const dir = join(process.cwd(), 'public', 'media');
 const has = (file: string) => existsSync(join(dir, file));
@@ -27,3 +29,7 @@ export const reelMedia = has('reel-720.mp4')
   : null;
 
 export const soundtrack = has('theme.mp3') ? '/media/theme.mp3' : null;
+
+export const avatar = has('portrait.jpg')
+  ? { src: '/media/portrait.jpg', alt: 'Avatar: an anime-style figure in a long coat, backlit by a low sun.' }
+  : null;

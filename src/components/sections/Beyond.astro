@@ -1,15 +1,21 @@
 ---
 /**
- * 06 — Beyond the Wall (壁の外): contact. Seen from outside now: the wall a
- * dark line on the horizon, and a red signal flare rising from it. Contact
- * leads with LinkedIn, email and phone as icon tiles; the rest follow as rows.
+ * 06 — Beyond the Wall (壁の外): contact, set as a dispatch console. One
+ * primary action (write to me), the address one tap from the clipboard, and
+ * every other channel as a labelled row. Below it, the view from outside: the
+ * wall a dark line on the horizon, a red signal flare rising from it.
+ * Contact links render as icons and labels, never as raw addresses.
  */
-import ProfileLinks from '../ui/ProfileLinks.astro';
+import Arrow from '../ui/Arrow.astro';
+import Icon from '../ui/Icon.astro';
 import { sectionById } from '../../data/sections';
 import { site } from '../../data/site';
+import { profileLinks } from '../../lib/links';
 
 const section = sectionById('beyond');
-const contact = ['linkedin', 'email', 'phone'];
+const links = profileLinks();
+const email = links.find((l) => l.id === 'email');
+const channels = links.filter((l) => l.id !== 'email');
 ---
 
 <section
@@ -22,13 +28,6 @@ const contact = ['linkedin', 'email', 'phone'];
   data-sector-title={section.title}
   aria-labelledby="beyond-title"
 >
-  <div class="invite__sky" aria-hidden="true">
-    <div class="invite__flare" data-depth="-0.12"><span></span></div>
-    <svg class="invite__wall" viewBox="0 0 1600 200" preserveAspectRatio="none" data-depth="0.08">
-      <path d="M0 120H220V112H236V120H700V108H716V120H1180V110H1196V120H1600V200H0Z"></path>
-    </svg>
-  </div>
-
   <div class="invite__inner wrap">
     <div class="invite__head">
       <p class="meta invite__label">
@@ -44,91 +43,97 @@ const contact = ['linkedin', 'email', 'phone'];
 
     <div class="invite__grid">
       <div class="invite__body" data-reveal="fade">
-        <p class="invite__signal meta"><span lang="ja" class="jp">信号弾</span> Signal flare</p>
-        <p>A question about something on this site, a thing you’d like to build together, or a bug you found in it: write to me.</p>
+        <p class="invite__lede">
+          A question about something on this site, a thing you’d like to build together, or a bug you found in it: write
+          to me.
+        </p>
+        <ul class="invite__topics meta" aria-label="Good reasons to write">
+          <li>Projects and collaboration</li>
+          <li>Questions about my work</li>
+          <li>Bugs on this site</li>
+        </ul>
       </div>
 
-      <div class="invite__contact" data-reveal="fade" style="--i: 2">
-        <ProfileLinks variant="tiles" only={contact} class="invite__tiles" />
+      <!-- The dispatch console -->
+      <div class="dispatch" data-reveal="fade" style="--i: 2">
+        <p class="dispatch__strip meta">
+          <span><span lang="ja" class="dispatch__jp">通信</span> Dispatch</span>
+          <span class="dispatch__open"><span class="dispatch__dot" aria-hidden="true"></span>Channel open</span>
+        </p>
+
         {
-          site.email && (
-            <div class="invite__actions">
-              <button class="btn" type="button" data-copy={site.email}>
+          email && (
+            <div class="dispatch__primary">
+              <a class="btn btn--ink dispatch__write" href={email.href} data-magnetic="0.15">
+                <Icon name="mail" />
+                Write to me
+                <Arrow />
+              </a>
+              <button class="btn dispatch__copy" type="button" data-copy={site.email}>
                 <span data-copy-label>Copy email</span>
               </button>
+              <p class="vh" aria-live="polite" data-copy-status></p>
             </div>
           )
         }
-        <p class="vh" aria-live="polite" data-copy-status></p>
-        <ProfileLinks variant="rows" exclude={contact} class="invite__links" />
+
+        {
+          channels.length > 0 && (
+            <ul class="dispatch__channels">
+              {channels.map((link) => (
+                <li>
+                  <a
+                    class="channel"
+                    href={link.href}
+                    target={link.newTab ? '_blank' : undefined}
+                    rel={link.newTab ? (link.me ? 'me noopener' : 'noopener') : undefined}
+                  >
+                    <span class="channel__icon" aria-hidden="true">
+                      {link.icon ? <Icon name={link.icon} /> : <span class="channel__mono">{link.label.slice(0, 2)}</span>}
+                    </span>
+                    <span class="channel__label meta">{link.label}</span>
+                    <span class="channel__detail">{link.detail}</span>
+                    <Arrow dir={link.newTab ? 'out' : 'right'} />
+                    {link.newTab && <span class="vh">(opens in a new tab)</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
       </div>
     </div>
+  </div>
+
+  <!-- The view from outside the wall -->
+  <div class="horizon" aria-hidden="true">
+    <div class="horizon__glow"></div>
+    <div class="flare" data-depth="-0.1">
+      <span class="flare__trail"></span>
+      <span class="flare__burst"></span>
+      <span class="flare__label meta"><span lang="ja" class="dispatch__jp">信号弾</span> Signal fired</span>
+    </div>
+    <div class="horizon__smoke"></div>
+    <svg class="horizon__wall" viewBox="0 0 1600 160" preserveAspectRatio="none">
+      <path
+        d="M0 104H180V96H196V104H520V90H530V80H548V90H558V104H980V98H996V104H1240V88H1250V78H1268V88H1278V104H1600V160H0Z"
+      ></path>
+      <path class="horizon__ground" d="M0 132C300 124 520 136 800 130C1080 124 1300 134 1600 128V160H0Z"></path>
+    </svg>
   </div>
 </section>
 
 <style>
   .invite {
     position: relative;
-    min-height: 100svh;
-    padding-block: var(--space-section) 0;
+    padding-top: var(--space-section);
     overflow: clip;
     isolation: isolate;
   }
 
-  .invite__sky {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(70% 40% at 70% 100%, rgb(179 35 28 / 0.18), transparent 70%);
-  }
-
-  /* The wall, far off now: a dark line on the horizon */
-  .invite__wall {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: none;
-    height: clamp(5rem, 14vw, 11rem);
-    fill: var(--black);
-    transform: translateY(var(--depth, 0px));
-  }
-
-  /* A red signal flare, its smoke trail hanging in the air */
-  .invite__flare {
-    position: absolute;
-    right: 22%;
-    bottom: clamp(3rem, 8vw, 7rem);
-    width: 2px;
-    height: 70%;
-    transform: translateY(var(--depth, 0px));
-  }
-
-  .invite__flare::before {
-    content: '';
-    position: absolute;
-    inset: 0 -1.5rem;
-    background: linear-gradient(0deg, rgb(179 35 28 / 0.55), rgb(179 35 28 / 0.12) 60%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
-  }
-
-  .invite__flare span {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 0.6rem;
-    height: 0.6rem;
-    margin-left: -0.3rem;
-    border-radius: 50%;
-    background: var(--red-light);
-    box-shadow: 0 0 1.5rem 0.4rem rgb(226 73 61 / 0.5);
-  }
-
   .invite__inner {
     position: relative;
-    padding-bottom: clamp(16rem, 36vw, 30rem);
+    z-index: 1;
   }
 
   .invite__head {
@@ -186,41 +191,297 @@ const contact = ['linkedin', 'email', 'phone'];
   }
 
   .invite__body {
-    grid-column: 1 / span 4;
-    color: var(--color-text-muted);
+    grid-column: 1 / span 5;
   }
 
-  .invite__signal {
-    margin-bottom: var(--space-3);
+  .invite__lede {
+    max-width: 28rem;
+    font-size: var(--text-m);
+    line-height: 1.45;
+  }
+
+  .invite__topics {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+    color: var(--gray);
+  }
+
+  .invite__topics li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .invite__topics li::before {
+    content: '';
+    width: 0.5rem;
+    height: 2px;
+    background: var(--red);
+  }
+
+  /* ── Dispatch console ─────────────────────────────── */
+  .dispatch {
+    grid-column: 7 / -1;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border: 1px solid var(--color-rule-strong);
+    background:
+      linear-gradient(rgb(235 229 216 / 0.03) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgb(235 229 216 / 0.03) 1px, transparent 1px) 0 0 / 32px 32px,
+      rgb(12 11 10 / 0.85);
+    box-shadow: 0 2rem 4rem rgb(0 0 0 / 0.4);
+  }
+
+  .dispatch__strip {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+    color: var(--bone);
+  }
+
+  .dispatch__jp {
+    font-family: var(--type-jp);
+    font-weight: 700;
+    letter-spacing: 0.08em;
     color: var(--red-light);
   }
 
-  .invite__contact {
-    grid-column: 6 / -1;
+  .dispatch__open {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--gray);
   }
 
-  .invite__actions {
+  .dispatch__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #5f8f5a;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dispatch__dot {
+      animation: blink 2.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .dispatch__primary {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-5);
-    margin-top: var(--space-6);
+    gap: var(--space-3);
+    margin-top: var(--space-5);
   }
 
-  .invite__contact :global(.invite__links) {
-    margin-top: var(--space-7);
-    max-width: 36rem;
+  .dispatch__write {
+    flex: 1 1 auto;
+    justify-content: space-between;
+    min-height: 3.5rem;
+    font-size: 0.8125rem;
   }
 
-  .invite__actions :global(.btn.is-copied) {
+  .dispatch__write :global(.icon) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .dispatch__copy {
+    min-height: 3.5rem;
+  }
+
+  .dispatch :global(.btn.is-copied) {
     background-color: var(--red);
     border-color: var(--red);
     color: var(--bone);
   }
 
+  .dispatch__channels {
+    margin-top: var(--space-5);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .channel {
+    display: grid;
+    grid-template-columns: 2.75rem 6rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 3.5rem;
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--color-rule);
+    transition: background-color var(--dur-1) linear;
+  }
+
+  .channel__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-rule-strong);
+    transition:
+      background-color var(--dur-2) var(--ease-out),
+      border-color var(--dur-2) var(--ease-out);
+  }
+
+  .channel__icon :global(.icon) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .channel__mono {
+    font-family: var(--type-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .channel__label {
+    color: var(--gray);
+  }
+
+  .channel__detail {
+    font-family: var(--type-display);
+    font-stretch: 80%;
+    font-weight: 700;
+    font-size: var(--text-m);
+    overflow-wrap: anywhere;
+  }
+
+  .channel :global(.arrow) {
+    width: 0.9rem;
+    height: 0.7rem;
+  }
+
+  @media (hover: hover) {
+    .channel:hover .channel__icon {
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .channel:hover .channel__detail {
+      color: var(--red-light);
+    }
+  }
+
+  .channel:active {
+    background: rgb(235 229 216 / 0.04);
+  }
+
+  /* ── The view from outside the wall ───────────────── */
+  .horizon {
+    position: relative;
+    height: clamp(13rem, 26vw, 22rem);
+    margin-top: var(--space-8);
+    pointer-events: none;
+  }
+
+  .horizon__glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(40% 70% at 68% 100%, rgb(179 35 28 / 0.32), transparent 70%),
+      radial-gradient(80% 60% at 50% 100%, rgb(120 84 52 / 0.25), transparent 75%);
+  }
+
+  .horizon__smoke {
+    position: absolute;
+    inset: auto 0 18% 0;
+    height: 45%;
+    background:
+      radial-gradient(18% 40% at 22% 70%, rgb(110 104 98 / 0.18), transparent 70%),
+      radial-gradient(22% 45% at 74% 75%, rgb(110 104 98 / 0.2), transparent 70%),
+      radial-gradient(14% 35% at 52% 80%, rgb(110 104 98 / 0.14), transparent 70%);
+  }
+
+  .horizon__wall {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: 45%;
+    fill: #050505;
+  }
+
+  .horizon__ground {
+    fill: #030303;
+  }
+
+  /* A signal flare fired from the wall: its smoke trail, and the burning star at the top */
+  .flare {
+    position: absolute;
+    left: 68%;
+    bottom: 26%;
+    height: 72%;
+    width: 2px;
+    transform: translateY(var(--depth, 0px));
+  }
+
+  .flare__trail {
+    position: absolute;
+    inset: 0 -1.25rem;
+    background: linear-gradient(0deg, rgb(179 35 28 / 0.05), rgb(179 35 28 / 0.4) 70%, rgb(226 73 61 / 0.6));
+    mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  }
+
+  .flare__burst {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin: -0.35rem 0 0 -0.35rem;
+    border-radius: 50%;
+    background: #ffd9c4;
+    box-shadow:
+      0 0 0.6rem 0.25rem rgb(226 73 61 / 0.9),
+      0 0 3rem 1.25rem rgb(179 35 28 / 0.45);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .flare__burst {
+      animation: flicker 1.6s steps(4) infinite;
+    }
+  }
+
+  @keyframes flicker {
+    50% {
+      opacity: 0.75;
+      transform: scale(0.9);
+    }
+  }
+
+  .flare__label {
+    position: absolute;
+    top: -0.5rem;
+    left: 1.75rem;
+    display: flex;
+    gap: var(--space-2);
+    white-space: nowrap;
+    color: var(--gray);
+  }
+
+  .flare__label::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 0.4rem);
+    width: 1rem;
+    height: 1px;
+    background: var(--gray);
+  }
+
   @media (max-width: 63.99rem) {
     .invite__body,
-    .invite__contact {
+    .dispatch {
       grid-column: 1 / -1;
     }
 
@@ -228,14 +489,47 @@ const contact = ['linkedin', 'email', 'phone'];
       font-size: clamp(2.9rem, 13vw, 6rem);
     }
 
-    .invite__flare {
-      right: 12%;
+    .flare {
+      left: 72%;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .channel {
+      grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+    }
+
+    .channel__label {
+      display: none;
+    }
+
+    .dispatch__primary {
+      flex-direction: column;
+    }
+
+    .dispatch__write,
+    .dispatch__copy {
+      width: 100%;
+    }
+
+    .dispatch__copy {
+      justify-content: center;
+      min-height: 3rem;
+    }
+
+    .flare__label {
+      left: auto;
+      right: 1.75rem;
+    }
+
+    .flare__label::before {
+      right: auto;
+      left: calc(100% + 0.4rem);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .invite__wall,
-    .invite__flare {
+    .flare {
       transform: none;
     }
   }

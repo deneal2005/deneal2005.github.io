@@ -13,6 +13,7 @@ import { site } from '../../data/site';
 import { education } from '../../data/education';
 import { getGitHub } from '../../lib/github';
 import { getJourney, getWorks } from '../../lib/content';
+import { avatar } from '../../lib/media';
 
 const section = sectionById('soldier');
 const github = await getGitHub();
@@ -20,6 +21,8 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const { about } = site;
 const studying = education.find((e) => e.current);
+// A real photo from profile.ts wins; otherwise a local avatar (public/media, never deployed).
+const photo = site.portrait ? { ...site.portrait, kind: 'Photograph' } : avatar ? { ...avatar, kind: 'Avatar' } : null;
 
 const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const fields = [
@@ -55,8 +58,17 @@ const fields = [
       <div class="dossier__body">
         <figure class="dossier__photo">
           {
-            site.portrait ? (
-              <img src={site.portrait.src} alt={site.portrait.alt} loading="lazy" decoding="async" />
+            photo ? (
+              <>
+                <span class="dossier__print">
+                  <img src={photo.src} alt={photo.alt} width="720" height="720" loading="lazy" decoding="async" />
+                  <span class="dossier__tape dossier__tape--a" aria-hidden="true" />
+                  <span class="dossier__tape dossier__tape--b" aria-hidden="true" />
+                </span>
+                <figcaption class="dossier__photo-label meta">
+                  {photo.kind} on file <span lang="ja" class="jp">{photo.kind === 'Avatar' ? '似顔' : '写真'}</span>
+                </figcaption>
+              </>
             ) : (
               <div class="dossier__nophoto">
                 <Insignia size={44} />
@@ -175,15 +187,67 @@ const fields = [
     margin-top: var(--space-5);
   }
 
-  .dossier__photo img,
-  .dossier__nophoto {
+  /* A print clipped into the file: slightly washed out, square corners, taped down */
+  .dossier__print {
+    position: relative;
+    display: block;
+    padding: 0.35rem;
+    background: #efe7d4;
+    box-shadow: 0 0.35rem 0.8rem rgb(40 30 20 / 0.35);
+    transform: rotate(1.5deg);
+  }
+
+  .dossier__print img {
     width: 100%;
     aspect-ratio: 3 / 4;
     object-fit: cover;
-    filter: grayscale(1) sepia(0.3) contrast(1.1);
+    object-position: 45% 30%;
+    filter: grayscale(0.55) sepia(0.35) contrast(1.06) brightness(0.95);
+    transition: filter var(--dur-3) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .dossier:hover .dossier__print img {
+      filter: none;
+    }
+  }
+
+  .dossier__tape {
+    position: absolute;
+    width: 2.6rem;
+    height: 0.9rem;
+    background: rgb(214 200 168 / 0.75);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  }
+
+  .dossier__tape--a {
+    top: -0.4rem;
+    left: -0.6rem;
+    transform: rotate(-35deg);
+  }
+
+  .dossier__tape--b {
+    bottom: -0.35rem;
+    right: -0.6rem;
+    transform: rotate(-35deg);
+  }
+
+  .dossier__photo-label .jp {
+    white-space: nowrap;
+  }
+
+  .dossier__photo-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+    margin-top: var(--space-3);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
   }
 
   .dossier__nophoto {
+    width: 100%;
+    aspect-ratio: 3 / 4;
     display: grid;
     place-content: center;
     justify-items: center;

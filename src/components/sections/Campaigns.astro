@@ -54,7 +54,7 @@ const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
 
 <style>
   .journey {
-    padding-block: var(--space-section);
+    padding-block: var(--space-section) var(--space-9);
   }
 
   .journey__grid {
@@ -84,15 +84,13 @@ const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
   }
 
   .journey__github {
-    margin-top: var(--space-section);
-    padding-top: var(--space-6);
-    border-top: var(--panel-border) solid var(--color-rule-strong);
+    margin-top: var(--space-9);
     row-gap: var(--space-7);
     align-items: start;
   }
 
   .journey__activity {
-    grid-column: 1 / span 8;
+    grid-column: 1 / -1;
   }
 
   @media (max-width: 63.99rem) {
