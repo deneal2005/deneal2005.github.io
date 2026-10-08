@@ -1,6 +1,6 @@
 import { initChrome } from './chrome';
 import { initContents } from './contents';
-import { initCursor, initDepth, initInvitation, initMagnetic } from './interactions';
+import { initDepth, initInvitation, initMagnetic } from './interactions';
 import { initWall } from './wall';
 import { initReveals } from './reveal';
 import { initSound } from './sound';
@@ -22,5 +22,4 @@ initWall();
 initSound();
 initDepth();
 initMagnetic();
-initCursor();
 initInvitation();

@@ -16,7 +16,6 @@ features:
 links:
   repo: https://github.com/deneal2005/GreenUP
   live: https://deneal2005.github.io/GreenUP/
-layout: right
 plate: greenup
 alt: A sapling growing from the top of a globe printed in pale dots on black, with gold map pins scattered across it.
 detailAlt: Close-up of the globe's halftone dots and two of the gold pins.

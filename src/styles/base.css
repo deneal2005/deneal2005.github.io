@@ -214,15 +214,6 @@ html {
   letter-spacing: 0.08em;
 }
 
-/* Film-title setting: wide, light, generously tracked uppercase */
-.title-wide {
-  font-family: var(--type-sans);
-  font-stretch: 125%;
-  font-weight: 300;
-  letter-spacing: var(--tracking-title);
-  text-transform: uppercase;
-}
-
 .lede {
   font-family: var(--type-display);
   font-size: var(--text-l);
@@ -232,20 +223,6 @@ html {
   letter-spacing: -0.005em;
 }
 
-.prose {
-  max-width: var(--measure);
-  color: var(--color-text);
-}
-
-.prose p + p {
-  margin-top: 1em;
-}
-
-.prose em {
-  font-style: normal;
-  color: var(--color-accent-text);
-}
-
 /* 縦書き: vertical Japanese setting */
 .tate {
   writing-mode: vertical-rl;
@@ -253,10 +230,6 @@ html {
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0.12em;
-}
-
-.accent {
-  color: var(--color-accent);
 }
 
 /* ── Links & buttons ────────────────────────────────────── */
@@ -346,38 +319,51 @@ html {
   transition: transform var(--dur-2) var(--ease-out);
 }
 
-/* Contextual reading cursor (created by scripts/interactions.ts, fine pointers only) */
-.cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: var(--z-cursor);
-  display: grid;
-  place-items: center;
-  width: 4.75rem;
-  height: 4.75rem;
-  margin: -2.375rem 0 0 -2.375rem;
-  border-radius: 50%;
-  background: rgb(12 11 10 / 0.6);
-  border: 1px solid var(--red);
-  color: var(--bone);
-  backdrop-filter: blur(8px);
-  font-family: var(--type-mono);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-meta);
-  text-transform: uppercase;
-  pointer-events: none;
-  opacity: 0;
-  scale: 0.3;
-  transition:
-    opacity var(--dur-2) linear,
-    scale var(--dur-2) var(--ease-out);
+/* ── Menu icon: three bars that fold into an X ───────── */
+.burger {
+  position: relative;
+  display: inline-block;
+  width: 1.25rem;
+  height: 0.875rem;
 }
 
-.cursor.is-visible {
-  opacity: 1;
-  scale: 1;
+.burger span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    opacity var(--dur-1) linear;
+}
+
+.burger span:nth-child(1) {
+  top: 0;
+}
+
+.burger span:nth-child(2) {
+  top: calc(50% - 1px);
+  right: 35%;
+}
+
+.burger span:nth-child(3) {
+  bottom: 0;
+}
+
+[aria-expanded='true'] > .burger span:nth-child(1),
+.burger--x span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+[aria-expanded='true'] > .burger span:nth-child(2),
+.burger--x span:nth-child(2) {
+  opacity: 0;
+}
+
+[aria-expanded='true'] > .burger span:nth-child(3),
+.burger--x span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 /* ── Long-form Markdown (case studies, journal entries) ── */

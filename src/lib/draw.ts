@@ -24,13 +24,6 @@ export const round = (n: number, p = 1) => {
 
 export const clamp = (n: number, min = 0, max = 1) => Math.min(max, Math.max(min, n));
 
-export const smoothstep = (edge0: number, edge1: number, x: number) => {
-  const t = clamp((x - edge0) / (edge1 - edge0));
-  return t * t * (3 - 2 * t);
-};
-
-export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
 const deg = (d: number) => (d * Math.PI) / 180;
 
 /**
@@ -130,26 +123,3 @@ export function brushStroke(opts: {
   return smoothPath([...left, ...right.reverse()], true);
 }
 
-
-/** The two halves of a circle split by a line through `through` at `angle` degrees. */
-export function splitCircle(opts: { cx: number; cy: number; r: number; through: Point; angle: number; reach?: number }) {
-  const { through, angle } = opts;
-  const reach = opts.reach ?? opts.r * 4;
-  const ux = Math.cos(deg(angle));
-  const uy = Math.sin(deg(angle));
-  const nx = -uy;
-  const ny = ux;
-  const a: Point = [through[0] - ux * reach, through[1] - uy * reach];
-  const b: Point = [through[0] + ux * reach, through[1] + uy * reach];
-  const plane = (sign: number) =>
-    [a, b, [b[0] + nx * reach * sign, b[1] + ny * reach * sign], [a[0] + nx * reach * sign, a[1] + ny * reach * sign]]
-      .map(([x, y]) => `${round(x)},${round(y)}`)
-      .join(' ');
-  return {
-    /** Half-plane on the normal's negative side (above a downward-sloping cut). */
-    upper: plane(-1),
-    lower: plane(1),
-    direction: [ux, uy] as Point,
-    normal: [nx, ny] as Point,
-  };
-}

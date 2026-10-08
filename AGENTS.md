@@ -25,7 +25,8 @@ Delin Thangjam's portfolio, set in a dark Japanese military world: a colossal wa
 | "Currently" panel | `src/data/now.ts` |
 | Skills roadmap (Sector 03) | `src/data/path.ts` |
 | Sector names, numbers, Japanese titles | `src/data/sections.ts` |
-| Projects | `src/content/work/*.md` |
+| Projects | `src/content/work/*.md` (presented by `src/components/work/ProjectSpread.astro`) |
+| Navigation (command bar, rail, mobile dock, operations map) | `src/components/chrome/` |
 | Journey entries | `src/content/journey/*.md` (copy `_template.md`) |
 | Generated images ("plates") | `src/lib/plates/`, served from `/plates/{name}-{a,b}.svg` |
 | Build-time GitHub data | `src/lib/github.ts` |

@@ -1,8 +1,10 @@
 ---
 /**
- * Sector rail: the current sector's number and Japanese name, and a progress
- * spine for the whole page, set vertically in the right margin. Updated by
- * scripts/chrome.ts. Phones get a red hairline along the top edge instead.
+ * Where you are. Desktop: the current sector's number and Japanese name with a
+ * progress spine, set vertically in the right margin. Phones and tablets: a
+ * tactical dock at the bottom of the screen, within thumb reach: the current
+ * sector (tap to open the map), a Contact shortcut and the menu, with page
+ * progress along its top edge. Both are updated by scripts/chrome.ts.
  */
 import { sections } from '../../data/sections';
 
@@ -16,9 +18,25 @@ const first = sections[0];
   <span class="rail__ja" lang="ja" data-rail-ja>{first.ja}</span>
 </div>
 
-<span class="readbar" aria-hidden="true"><span class="readbar__fill" data-read-fill></span></span>
+<nav class="dock" aria-label="Quick navigation" data-dock>
+  <span class="dock__progress" aria-hidden="true"><span class="dock__fill" data-read-fill></span></span>
+  <button class="dock__where" type="button" aria-haspopup="dialog" aria-controls="contents" data-contents-open>
+    <span class="dock__no" data-dock-no>{first.no}</span>
+    <span class="dock__text">
+      <span class="dock__label">Sector</span>
+      <span class="dock__title" data-dock-title>{first.title}</span>
+    </span>
+    <span class="dock__ja" lang="ja" aria-hidden="true" data-dock-ja>{first.ja}</span>
+    <span class="vh">, open the operations map</span>
+  </button>
+  <a class="dock__contact" href="/#beyond">Contact</a>
+  <button class="dock__menu" type="button" aria-haspopup="dialog" aria-controls="contents" aria-label="Menu" data-contents-open>
+    <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+</nav>
 
 <style>
+  /* ── Desktop rail ─────────────────────────────────── */
   .rail {
     position: fixed;
     top: 50%;
@@ -30,7 +48,7 @@ const first = sections[0];
     gap: var(--space-3);
     color: var(--bone);
     font-family: var(--type-mono);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     letter-spacing: var(--tracking-meta);
     text-transform: uppercase;
     transform: translateY(-50%);
@@ -79,15 +97,45 @@ const first = sections[0];
     transform: scaleY(var(--progress, 0));
   }
 
-  .readbar {
+  /* ── Mobile dock ──────────────────────────────────── */
+  .dock {
     position: fixed;
-    inset: 0 0 auto;
-    z-index: calc(var(--z-masthead) + 1);
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    z-index: var(--z-masthead);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: stretch;
+    height: 3.5rem;
+    border: 1px solid var(--color-rule-strong);
+    background: rgb(12 11 10 / 0.94);
+    box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.55);
+    transform: translateY(calc(100% + 2rem));
+    transition: transform var(--dur-3) var(--ease-out);
+  }
+
+  .dock[data-shown] {
+    transform: none;
+  }
+
+  @media (min-width: 64rem) {
+    .dock {
+      display: none;
+    }
+  }
+
+  .dock__progress {
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    top: -1px;
     height: 2px;
+    overflow: hidden;
     pointer-events: none;
   }
 
-  .readbar__fill {
+  .dock__fill {
     position: absolute;
     inset: 0;
     background: var(--red);
@@ -95,9 +143,96 @@ const first = sections[0];
     transform: scaleX(var(--progress, 0));
   }
 
-  @media (min-width: 64rem) {
-    .readbar {
+  .dock__where {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    padding-inline: var(--space-4);
+    text-align: left;
+  }
+
+  .dock__no {
+    font-family: var(--type-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--red-light);
+  }
+
+  .dock__text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.15;
+  }
+
+  .dock__label {
+    font-family: var(--type-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .dock__title {
+    overflow: hidden;
+    font-family: var(--type-display);
+    font-stretch: 75%;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .dock__ja {
+    margin-left: auto;
+    font-family: var(--type-jp);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--gray);
+    white-space: nowrap;
+  }
+
+  .dock__contact {
+    display: grid;
+    place-items: center;
+    padding-inline: var(--space-4);
+    border-left: 1px solid var(--color-rule);
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .dock__menu {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    background: var(--red);
+    color: var(--bone);
+  }
+
+  .dock__where:active,
+  .dock__contact:active {
+    background: rgb(235 229 216 / 0.06);
+  }
+
+  .dock__menu:active {
+    background: var(--red-deep);
+  }
+
+  /* Phones: the sector's title needs the room more than its kanji does */
+  @media (max-width: 30rem) {
+    .dock__ja,
+    .dock__label {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dock {
+      transition: none;
     }
   }
 </style>

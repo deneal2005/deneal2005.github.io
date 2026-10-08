@@ -197,5 +197,23 @@ const built = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', 
     .foot__file {
       grid-column: 1 / -1;
     }
+
+    /* Comfortable tap targets, and room for the dock at the bottom */
+    .foot__nav ol {
+      gap: 0;
+    }
+
+    .foot__nav a {
+      display: inline-block;
+      padding-block: 0.6rem;
+    }
+
+  }
+
+  /* Room for the dock (shown below desktop width) */
+  @media (max-width: 63.99rem) {
+    .foot {
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 </style>

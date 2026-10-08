@@ -34,8 +34,6 @@ const work = defineCollection({
       links: z
         .object({ repo: z.url().optional(), live: z.url().optional(), other: z.array(link).default([]) })
         .default({ other: [] }),
-      /** Composition used for this project's spread in The Expeditions. */
-      layout: z.enum(['right', 'wide', 'left', 'offset', 'center']),
       plate: z.enum(PLATES),
       alt: z.string(),
       detailAlt: z.string(),

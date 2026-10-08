@@ -16,7 +16,6 @@ features:
   - Automatic localisation across 20 regions and 16 currencies.
 links:
   live: https://rent-mate-beryl.vercel.app/
-layout: wide
 plate: rentmate
 alt: A gold verification seal of six segments over a city at night, with a brushed check mark at its centre.
 detailAlt: Close-up of the seal's segments and the check mark, printed over a faint halftone glow.

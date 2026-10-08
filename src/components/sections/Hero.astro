@@ -85,6 +85,7 @@ const courses = Array.from({ length: 12 }, (_, row) => {
   data-sector
   data-sector-no={section.no}
   data-sector-ja={section.ja}
+  data-sector-title={section.title}
   aria-labelledby="wall-title"
 >
   <div class="wall__stage" data-wall-stage>
@@ -322,14 +323,26 @@ const courses = Array.from({ length: 12 }, (_, row) => {
     <div class="wall__hud meta" aria-hidden="true">
       <span class="wall__hud-l">
         <span class="wall__tick"></span>
-        <span lang="ja" class="jp">第{section.no}区画</span>
+        <span lang="ja" class="jp">第<span class="num">{section.no}</span>区画</span>
         <span class="wall__hud-en">Sector {section.no} · {section.title}</span>
       </span>
       <span class="wall__hud-r">
+        <span class="wall__grid-ref" data-wall-grid>Grid 08-05</span>
         <span lang="ja" class="jp">監視中</span> <span class="wall__hud-en">Surveillance</span>
         <span class="wall__readout" data-wall-readout>000</span>%
       </span>
     </div>
+
+    <!-- Boot-up: the console comes online once per visit (scripts/wall.ts sets data-boot) -->
+    <ol class="wall__boot meta" aria-hidden="true">
+      <li><span lang="ja" class="jp">起動</span> System online</li>
+      <li><span lang="ja" class="jp">壁</span> Wall integrity · 100%</li>
+      <li><span lang="ja" class="jp">監視</span> Surveillance active</li>
+    </ol>
+
+    <!-- Desktop only: a recon lamp with its survey grid follows the pointer -->
+    <div class="wall__lamp" aria-hidden="true"></div>
+    <div class="wall__scan" aria-hidden="true"></div>
 
     <p class="wall__vertical" lang="ja" aria-hidden="true">第一防衛線</p>
 
@@ -349,8 +362,8 @@ const courses = Array.from({ length: 12 }, (_, row) => {
         </p>
         <p class="wall__lede">{site.statement}</p>
         <div class="wall__actions">
-          <a class="btn btn--ink" href="#expeditions">View the expeditions <Arrow /></a>
-          <a class="btn" href="/journey/">Campaign log</a>
+          <a class="btn btn--ink" href="#expeditions" data-magnetic="0.2">View projects <Arrow /></a>
+          <a class="btn" href="#beyond" data-magnetic="0.2">Contact me</a>
         </div>
         <ProfileLinks class="wall__links" />
       </div>
@@ -419,6 +432,13 @@ const courses = Array.from({ length: 12 }, (_, row) => {
     }
   }
 
+  /* Phones get the same sequence over a shorter run: less thumb-scrolling before the content */
+  @media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
+    :global(.js) .wall {
+      height: 380vh;
+    }
+  }
+
   .wall__stage {
     position: sticky;
     top: 0;
@@ -432,7 +452,8 @@ const courses = Array.from({ length: 12 }, (_, row) => {
   .wall__camera {
     position: absolute;
     inset: 0;
-    transform: translate3d(var(--shx), var(--shy), 0) scale(calc(1.2 - var(--cam) * 0.2)) translateY(calc((1 - var(--cam)) * -5%));
+    transform: translate3d(calc(var(--shx) + var(--mx, 0) * -10px), calc(var(--shy) + var(--my, 0) * -6px), 0)
+      scale(calc(1.2 - var(--cam) * 0.2)) translateY(calc((1 - var(--cam)) * -5%));
     transform-origin: 50% 46%;
     will-change: transform;
   }
@@ -465,7 +486,9 @@ const courses = Array.from({ length: 12 }, (_, row) => {
     pointer-events: none;
   }
 
+  /* Depth: the sky drifts against the pointer more than the wall does */
   .sky {
+    translate: calc(var(--mx, 0) * 14px) calc(var(--my, 0) * 8px);
     background:
       radial-gradient(60% 50% at 52% 52%, rgb(120 84 52 / 0.45), rgb(120 84 52 / 0) 70%),
       linear-gradient(180deg, #0b0b0b 0%, #1d1b18 28%, #3a3027 46%, #1b1714 60%, #0a0909 100%);
@@ -479,6 +502,7 @@ const courses = Array.from({ length: 12 }, (_, row) => {
   }
 
   .clouds {
+    translate: calc(var(--mx, 0) * 22px) calc(var(--my, 0) * 10px);
     background:
       radial-gradient(30% 9% at 22% 20%, rgb(80 72 64 / 0.55), transparent 70%),
       radial-gradient(36% 8% at 66% 14%, rgb(70 64 58 / 0.5), transparent 70%),
@@ -707,9 +731,125 @@ const courses = Array.from({ length: 12 }, (_, row) => {
     display: flex;
     justify-content: space-between;
     gap: var(--space-4);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     color: var(--gray);
     pointer-events: none;
+  }
+
+  .num {
+    font-family: var(--type-mono);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .wall__grid-ref {
+    margin-right: var(--space-3);
+    font-variant-numeric: tabular-nums;
+    color: var(--bone);
+  }
+
+  /* ── Boot-up ──────────────────────────────────────── */
+  .wall__boot {
+    position: absolute;
+    top: calc(var(--masthead-h) + var(--space-7));
+    left: var(--margin);
+    display: grid;
+    gap: var(--space-1);
+    color: var(--gray);
+    font-size: 0.6875rem;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .wall__boot .jp {
+    display: inline-block;
+    min-width: 2.2em;
+    color: var(--red-light);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wall[data-boot] .wall__boot {
+      visibility: visible;
+      animation: boot-out 0.6s var(--ease-out) 2.6s both;
+    }
+
+    .wall[data-boot] .wall__boot li {
+      animation: boot-line 0.5s steps(6) both;
+    }
+
+    .wall[data-boot] .wall__boot li:nth-child(2) {
+      animation-delay: 0.45s;
+    }
+
+    .wall[data-boot] .wall__boot li:nth-child(3) {
+      animation-delay: 0.9s;
+    }
+  }
+
+  /* each line types itself in */
+  @keyframes boot-line {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes boot-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  /* ── Recon lamp and scan (fine pointers, motion allowed) ── */
+  .wall__lamp,
+  .wall__scan {
+    position: absolute;
+    pointer-events: none;
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .wall[data-live] .wall__lamp {
+      display: block;
+      top: 0;
+      left: 0;
+      width: 44rem;
+      height: 44rem;
+      margin: -22rem 0 0 -22rem;
+      border-radius: 50%;
+      background:
+        radial-gradient(closest-side, rgb(255 214 170 / 0.07), transparent 70%),
+        linear-gradient(rgb(235 229 216 / 0.08) 1px, transparent 1px) 0 0 / 44px 44px,
+        linear-gradient(90deg, rgb(235 229 216 / 0.08) 1px, transparent 1px) 0 0 / 44px 44px;
+      mask-image: radial-gradient(closest-side, #000 20%, transparent 100%);
+      transform: translate3d(var(--lx, 50vw), var(--ly, 50vh), 0);
+      opacity: calc(var(--lamp, 0) * (1 - var(--end)));
+      transition: opacity var(--dur-3) var(--ease-out);
+      will-change: transform;
+    }
+
+    .wall[data-live] .wall__scan {
+      display: block;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgb(226 73 61 / 0.35) 30%, rgb(226 73 61 / 0.35) 70%, transparent);
+      animation: scan 7s linear infinite;
+      opacity: calc(1 - var(--end));
+    }
+  }
+
+  @keyframes scan {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100svh);
+    }
   }
 
   .wall__hud-l,
@@ -1028,6 +1168,21 @@ const courses = Array.from({ length: 12 }, (_, row) => {
 
     .wall__warning-en {
       font-size: 1.5rem;
+    }
+  }
+
+  @media (max-width: 47.99rem) and (max-height: 720px) {
+    .wall__file,
+    .wall__boot {
+      display: none;
+    }
+
+    .wall__title {
+      font-size: clamp(3rem, 19vw, 5.5rem);
+    }
+
+    .wall__intro :global(.wall__links) {
+      display: none;
     }
   }
 

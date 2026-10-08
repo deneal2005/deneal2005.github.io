@@ -46,7 +46,7 @@ const meta = [
   title={data.title}
   description={data.summary}
 >
-  <article class="case" data-sector data-sector-no="04" data-sector-ja="遠征" aria-labelledby="case-title">
+  <article class="case" data-sector data-sector-no="04" data-sector-ja="遠征" data-sector-title="The Expeditions" aria-labelledby="case-title">
     <header class="case__head wrap">
       <div class="case__trail">
         <a class="case__back meta" href="/#expeditions"><Arrow dir="left" /> The Expeditions</a>
@@ -225,7 +225,7 @@ const meta = [
     {
       total > 1 && (
         <nav class="case__next wrap" aria-label="Next project">
-          <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Next">
+          <a class="next" href={`/work/${next.id}/`} data-astro-prefetch>
             <span class="next__label meta">
               {isFinal ? 'Back to the first expedition' : 'Next expedition'} · {String(next.data.order).padStart(2, '0')}
             </span>

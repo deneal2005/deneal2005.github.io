@@ -16,17 +16,16 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
     <div class="ops__head">
       <p class="ops__ja" lang="ja" aria-hidden="true">作戦図</p>
       <h2 id="contents-title" class="ops__title">Operations map</h2>
-      <button class="btn ops__close" type="button" data-contents-close>
-        Close
-        <svg class="ops__x" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1l10 10M11 1L1 11"></path></svg>
+      <button class="ops__close" type="button" data-contents-close aria-label="Close the map">
+        <span class="burger burger--x" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>
     </div>
 
     <nav class="ops__sectors" aria-label="Sectors">
       <ol>
         {
-          sections.map((s) => (
-            <li>
+          sections.map((s, i) => (
+            <li style={`--i: ${i}`}>
               <a class="ops__row" href={`/#${s.id}`} data-contents-link data-nav={s.id}>
                 <span class="ops__no">{s.no}</span>
                 <span class="ops__name">{s.title}</span>
@@ -70,6 +69,11 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
       </ol>
       <ProfileLinks class="ops__links" />
     </nav>
+
+    <div class="ops__cta">
+      <a class="btn btn--ink" href="/#expeditions" data-contents-link>View projects</a>
+      <a class="btn" href="/#beyond" data-contents-link>Contact me</a>
+    </div>
   </div>
 </dialog>
 
@@ -134,6 +138,8 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
   }
 
   .ops__ja {
+    flex: none;
+    white-space: nowrap;
     padding: 0.3em 0.45em;
     background: var(--red);
     font-family: var(--type-jp);
@@ -152,14 +158,56 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
   }
 
   .ops__close {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
     margin-left: auto;
+    background: var(--red);
+    color: var(--bone);
   }
 
-  .ops__x {
-    width: 0.75rem;
-    height: 0.75rem;
-    stroke: currentColor;
-    stroke-width: 1.5;
+  /* The close mark folds in from the menu's three bars */
+  @media (prefers-reduced-motion: no-preference) {
+    .ops[open] .ops__close .burger span {
+      animation: fold 0.5s var(--ease-out) 0.25s backwards;
+    }
+
+    .ops[open] .ops__close .burger span:nth-child(2) {
+      animation-name: fold-mid;
+    }
+
+    /* Rows file in, one after another */
+    .ops[open] .ops__sectors li {
+      animation: file-in 0.6s var(--ease-out) backwards;
+      animation-delay: calc(0.18s + var(--i, 0) * 60ms);
+    }
+  }
+
+  @keyframes fold {
+    from {
+      transform: none;
+    }
+  }
+
+  @keyframes fold-mid {
+    from {
+      opacity: 1;
+    }
+  }
+
+  @keyframes file-in {
+    from {
+      opacity: 0;
+      transform: translateX(-1.5rem);
+    }
+  }
+
+  .ops__cta {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
   }
 
   .ops__sectors {
@@ -263,6 +311,17 @@ const [works, journey] = await Promise.all([getWorks(), getJourney()]);
     .ops__inner {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--space-7);
+      padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Actions stay in thumb reach at the bottom */
+    .ops__cta {
+      flex-direction: column;
+    }
+
+    .ops__cta .btn {
+      justify-content: center;
+      min-height: 3rem;
     }
 
     .ops__row {

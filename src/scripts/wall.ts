@@ -1,4 +1,4 @@
-import { clamp, onFrame, reducedMotion } from './env';
+import { clamp, finePointer, onFrame, reducedMotion } from './env';
 
 /**
  * 01 — The Wall. Scroll progress through the section drives one sequence,
@@ -111,6 +111,18 @@ export function initWall() {
   if (reducedMotion.matches) return;
 
   section.toggleAttribute('data-live', true);
+
+  // Boot-up plays on the first visit of a session only.
+  try {
+    if (!sessionStorage.getItem('wall-booted')) {
+      section.toggleAttribute('data-boot', true);
+      sessionStorage.setItem('wall-booted', '1');
+    }
+  } catch {
+    /* storage blocked: skip the boot sequence */
+  }
+
+  initPointer(section);
   onFrame(() => {
     if (!visible) return;
     target = progress();
@@ -146,4 +158,45 @@ export function initWall() {
     film.addEventListener('canplay', () => syncFilm(hasFilm ? 1 - seg(shown, 0.03, 0.12) : 0), { once: true });
     film.load();
   }
+}
+
+/**
+ * Desktop only: the recon lamp follows the pointer, the world tilts a few
+ * pixels against it, and the HUD reads out the grid square under it. One rAF
+ * per pointer move, transforms only. Touch devices never run any of it.
+ */
+function initPointer(section: HTMLElement) {
+  if (!finePointer.matches) return;
+  const stage = section.querySelector<HTMLElement>('[data-wall-stage]');
+  const grid = section.querySelector<HTMLElement>('[data-wall-grid]');
+  if (!stage) return;
+
+  let x = innerWidth / 2;
+  let y = innerHeight / 2;
+  let queued = false;
+  let lastGrid = '';
+
+  const apply = () => {
+    queued = false;
+    section.style.setProperty('--lx', `${x.toFixed(0)}px`);
+    section.style.setProperty('--ly', `${y.toFixed(0)}px`);
+    section.style.setProperty('--mx', ((x / innerWidth) * 2 - 1).toFixed(3));
+    section.style.setProperty('--my', ((y / innerHeight) * 2 - 1).toFixed(3));
+    const ref = `Grid ${String(Math.floor((x / innerWidth) * 16) + 1).padStart(2, '0')}-${String(Math.floor((y / innerHeight) * 9) + 1).padStart(2, '0')}`;
+    if (grid && ref !== lastGrid) {
+      grid.textContent = ref;
+      lastGrid = ref;
+    }
+  };
+
+  stage.addEventListener('pointermove', (event) => {
+    x = event.clientX;
+    y = event.clientY;
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(apply);
+    }
+  });
+  stage.addEventListener('pointerenter', () => section.style.setProperty('--lamp', '1'));
+  stage.addEventListener('pointerleave', () => section.style.setProperty('--lamp', '0'));
 }

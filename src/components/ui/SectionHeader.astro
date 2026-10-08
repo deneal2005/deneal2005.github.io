@@ -16,12 +16,12 @@ const { id, brief } = Astro.props;
 const section = sectionById(id);
 ---
 
-<header class="sh">
+<header class="sh" data-reveal="rule">
   <p class="sh__file meta">
     <span class="sh__no">{section.no}</span>
     <span class="sh__bar" aria-hidden="true"></span>
     <span>Sector {section.no}</span>
-    <span class="sh__ja" lang="ja">第{section.no}区画</span>
+    <span class="sh__ja" lang="ja">第<span class="sh__num">{section.no}</span>区画</span>
     <span class="sh__class">File · {section.file}</span>
   </p>
   <h2 class="sh__title" id={`${id}-title`} data-reveal="rise">
@@ -43,6 +43,40 @@ const section = sectionById(id);
     padding-top: var(--space-5);
     padding-bottom: var(--space-9);
     border-top: 1px solid var(--color-rule-strong);
+  }
+
+  :global(.js) .sh[data-reveal='rule'] {
+    border-top-color: transparent;
+  }
+
+  .sh::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--color-rule-strong);
+    transform-origin: left;
+  }
+
+  :global(.js) .sh[data-reveal='rule']::after {
+    transform: scaleX(0);
+    transition: transform 1.2s var(--ease-in-out);
+  }
+
+  :global(.js) .sh[data-reveal='rule'].is-in::after {
+    transform: none;
+  }
+
+  :global(.js) .sh[data-reveal='rule']::before {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.6s var(--ease-out) 0.9s;
+  }
+
+  :global(.js) .sh[data-reveal='rule'].is-in::before {
+    transform: none;
   }
 
   /* Hazard tick on the rule, where the file begins */
@@ -82,6 +116,12 @@ const section = sectionById(id);
     font-weight: 700;
     letter-spacing: 0.1em;
     color: var(--color-text-muted);
+  }
+
+  .sh__num {
+    font-family: var(--type-mono);
+    font-weight: 500;
+    letter-spacing: 0;
   }
 
   .sh__class {

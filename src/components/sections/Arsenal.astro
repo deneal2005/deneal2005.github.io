@@ -39,6 +39,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
   data-sector
   data-sector-no={section.no}
   data-sector-ja={section.ja}
+  data-sector-title={section.title}
   aria-labelledby="arsenal-title"
 >
   <SectionHeader
@@ -435,7 +436,11 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     }
 
     .area {
-      margin-bottom: var(--space-7);
+      margin-bottom: var(--space-6);
+    }
+
+    .area__note {
+      display: none;
     }
 
     .area__skills {
@@ -450,7 +455,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
       flex-wrap: wrap;
       align-items: center;
       gap: 0.15rem var(--space-2);
-      padding: 0.45rem 0.7rem;
+      padding: 0.35rem 0.6rem;
       border: 1px solid var(--color-rule);
       border-bottom: 1px solid var(--color-rule);
       background: rgb(232 225 210 / 0.03);

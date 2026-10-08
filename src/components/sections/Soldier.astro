@@ -38,6 +38,7 @@ const fields = [
   data-sector
   data-sector-no={section.no}
   data-sector-ja={section.ja}
+  data-sector-title={section.title}
   aria-labelledby="soldier-title"
 >
   <SectionHeader id="soldier" brief="Who I am, what I build, and where to find me." />
@@ -142,7 +143,7 @@ const fields = [
     grid-column: 1 / span 5;
     position: sticky;
     top: calc(var(--masthead-h) + var(--space-5));
-    padding: var(--space-4);
+    padding: var(--space-4) var(--space-4) 5.5rem;
     box-shadow:
       0 1.5rem 3rem rgb(0 0 0 / 0.5),
       0 0 0 1px rgb(0 0 0 / 0.4);

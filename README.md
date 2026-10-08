@@ -119,11 +119,17 @@ Copy `.env.example` to `.env`. Everything is optional.
 | 05 | The Campaigns | 戦歴 (senreki) | The record: Currently, latest log entries, GitHub activity; the full log is `/journey/` |
 | 06 | Beyond the Wall | 壁の外 (kabe no soto) | Contact |
 
-Sector names, numbers and Japanese titles live in `src/data/sections.ts`; the navigation, sector rail, operations map and footer all read from it.
+Sector names, numbers and Japanese titles live in `src/data/sections.ts`; the navigation, sector rail, mobile dock, operations map and footer all read from it.
+
+**Navigation.** Desktop: a command bar with the sectors (the current one marked in red) and a sector rail with page progress in the right margin. Below desktop width: a menu button at the top, and once the opening is behind you, a dock at the bottom within thumb reach (current sector and progress, a Contact shortcut, the menu). Both open the operations map (作戦図), a full-screen menu that marks the current sector, lists the expedition reports and closes itself when you pick a destination.
+
+**Projects** are presented as operation files (`src/components/work/ProjectSpread.astro`): a recon image (the project's first landscape screenshot, with a phone screenshot riding on it if there is one; the drawn plate otherwise), then status, objective, the first three features as capabilities, the stack as a loadout, and separate actions for the mission report, the live site and the source.
 
 ## The opening sequence
 
 `src/components/sections/Hero.astro` is a tall (about 520vh) section with a sticky stage. Scroll progress drives one sequence, and scrolling back reverses it exactly: the wall alone → tremors, falling dust and cracks → steam behind the parapet → a head rises, a warning, a hand grips the edge → the wall breaks open at the titan's chest → the camera pulls back. All of it is original art drawn in code (geometry in `src/lib/titan.ts`); no frames or assets are copied from anywhere.
+
+On first visit the HUD boots up (起動 System online…) while the name is stamped in. On desktop, a recon lamp with its survey grid follows the pointer, the sky and clouds drift against it for depth, and the HUD reads out the grid square under it; a scan line sweeps the frame. None of that runs on touch devices. Phones get the same sequence over a shorter run (380vh instead of 520vh), with half the dust.
 
 How it stays smooth: every layer is its own element and moves with `transform` or `opacity` only, so the browser composites instead of repainting. Shards are individual elements, the eyes glow on their own layer, and the only painted change (the cracks) steps in twentieths. `src/scripts/wall.ts` does one layout read per frame, eases the camera, and stops work when the section is off screen. Under reduced motion, or without JavaScript, the section is one screen showing the finished scene.
 

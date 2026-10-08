@@ -5,7 +5,7 @@
 // External links get a status check, and the key interactions get exercised.
 //
 // Usage: node scripts/qa.mjs [baseUrl=http://localhost:4321] [--skip-external]
-import { launch, sleep } from './lib/cdp.mjs';
+import { launch } from './lib/cdp.mjs';
 
 const base = (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'http://localhost:4321').replace(/\/$/, '');
 const skipExternal = process.argv.includes('--skip-external');

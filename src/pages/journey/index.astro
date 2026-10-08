@@ -18,7 +18,8 @@ const first = journey.at(-1);
   title="Campaign log"
   description={`The running record of what ${site.name} is learning, building and shipping, newest first.`}
 >
-  <article class="jp" data-sector data-sector-no={section.no} data-sector-ja={section.ja} aria-labelledby="jp-title">
+  <article class="jp" data-sector data-sector-no={section.no} data-sector-ja={section.ja}
+  data-sector-title={section.title} aria-labelledby="jp-title">
     <header class="jp__head wrap">
       <div class="jp__trail">
         <a class="jp__back meta" href="/#campaigns"><Arrow dir="left" /> Back to Sector {section.no}</a>

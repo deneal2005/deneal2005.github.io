@@ -52,7 +52,8 @@ const onHome = Astro.url.pathname === '/';
       )
     }
     <button class="masthead__map" type="button" aria-haspopup="dialog" aria-controls="contents" data-contents-open>
-      <span class="masthead__map-label">Map</span>
+      <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="masthead__map-label">Menu</span>
       <span class="masthead__ja" lang="ja" aria-hidden="true">作戦図</span>
     </button>
   </div>
@@ -82,8 +83,8 @@ const onHome = Astro.url.pathname === '/';
     box-shadow: 0 1px 0 var(--color-rule);
   }
 
-  /* Blur only where it's supported cheaply and only once scrolled */
-  @supports (backdrop-filter: blur(1px)) {
+  /* Blur only on desktop-class devices (it's costly while scrolling on phones), and only once scrolled */
+  @supports (backdrop-filter: blur(1px)) and (hover: hover) {
     .masthead[data-scrolled] {
       background-color: rgb(12 11 10 / 0.7);
       backdrop-filter: blur(12px);
@@ -168,7 +169,7 @@ const onHome = Astro.url.pathname === '/';
   }
 
   .mnav__no {
-    color: var(--smoke);
+    color: var(--gray);
     transition: color var(--dur-2) var(--ease-out);
   }
 
@@ -285,6 +286,8 @@ const onHome = Astro.url.pathname === '/';
   }
 
   .masthead__ja {
+    flex: none;
+    white-space: nowrap;
     font-family: var(--type-jp);
     font-weight: 900;
     font-size: 0.8rem;
@@ -298,6 +301,13 @@ const onHome = Astro.url.pathname === '/';
   @media (hover: hover) {
     .masthead__map:hover .masthead__ja {
       background: var(--red-deep);
+    }
+  }
+
+  /* The narrowest phones: the bars alone are the menu button */
+  @media (max-width: 22.5rem) {
+    .masthead__ja {
+      display: none;
     }
   }
 

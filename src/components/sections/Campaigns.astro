@@ -23,6 +23,7 @@ const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
   data-sector
   data-sector-no={section.no}
   data-sector-ja={section.ja}
+  data-sector-title={section.title}
   aria-labelledby="campaigns-title"
 >
   <SectionHeader
@@ -39,7 +40,7 @@ const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
       <h3 class="journey__heading meta"><span lang="ja" class="jp">最新記録</span> Latest entries</h3>
       <Timeline entries={journey.slice(0, 4)} headingLevel="h4" />
       <a class="btn btn--ink journey__all" href="/journey/">
-        Open the campaign log · {journey.length} entries <Arrow />
+        Full campaign log ({journey.length}) <Arrow />
       </a>
     </div>
   </div>
