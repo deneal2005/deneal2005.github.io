@@ -1,5 +1,5 @@
 /**
- * Education, oldest first. Shown in Chapter 01 as a timeline; the entry with
+ * Education, oldest first. Shown in Sector 02 (The Soldier) as a timeline; the entry with
  * `current: true` is marked as ongoing.
  */
 export interface EducationEntry {

@@ -1,0 +1,104 @@
+---
+/**
+ * 05 — The Campaigns (戦歴): the service record. What's on the desk now, the
+ * latest log entries and commit activity. The full log lives at /journey/.
+ */
+import SectionHeader from '../ui/SectionHeader.astro';
+import Arrow from '../ui/Arrow.astro';
+import NowPanel from '../journey/NowPanel.astro';
+import Timeline from '../journey/Timeline.astro';
+import GitHubActivity from '../journey/GitHubActivity.astro';
+import { sectionById } from '../../data/sections';
+import { getJourney } from '../../lib/content';
+import { getGitHub } from '../../lib/github';
+
+const section = sectionById('campaigns');
+const [journey, github] = await Promise.all([getJourney(), getGitHub()]);
+---
+
+<section
+  id={section.id}
+  class="journey wrap"
+  data-tone="ink"
+  data-sector
+  data-sector-no={section.no}
+  data-sector-ja={section.ja}
+  aria-labelledby="campaigns-title"
+>
+  <SectionHeader
+    id="campaigns"
+    brief="The service record: what I learned, built and shipped, newest first. Short entries, dated, kept honest."
+  />
+
+  <div class="journey__grid grid">
+    <div class="journey__side">
+      <NowPanel />
+    </div>
+
+    <div class="journey__recent">
+      <h3 class="journey__heading meta"><span lang="ja" class="jp">最新記録</span> Latest entries</h3>
+      <Timeline entries={journey.slice(0, 4)} headingLevel="h4" />
+      <a class="btn btn--ink journey__all" href="/journey/">
+        Open the campaign log · {journey.length} entries <Arrow />
+      </a>
+    </div>
+  </div>
+
+  <div class="journey__github grid">
+    <div class="journey__activity">
+      <GitHubActivity github={github} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .journey {
+    padding-block: var(--space-section);
+  }
+
+  .journey__grid {
+    row-gap: var(--space-8);
+    align-items: start;
+  }
+
+  .journey__side {
+    grid-column: 1 / span 5;
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .journey__recent {
+    grid-column: 7 / -1;
+  }
+
+  .journey__heading {
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-rule);
+    color: var(--color-text);
+  }
+
+  .journey__all {
+    margin-top: var(--space-7);
+  }
+
+  .journey__github {
+    margin-top: var(--space-section);
+    padding-top: var(--space-6);
+    border-top: var(--panel-border) solid var(--color-rule-strong);
+    row-gap: var(--space-7);
+    align-items: start;
+  }
+
+  .journey__activity {
+    grid-column: 1 / span 8;
+  }
+
+  @media (max-width: 63.99rem) {
+    .journey__side,
+    .journey__recent,
+    .journey__activity {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

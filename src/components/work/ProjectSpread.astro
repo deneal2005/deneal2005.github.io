@@ -1,8 +1,8 @@
 ---
 /**
- * One work in the Chapter 01 exhibition. Each project chooses one of five
- * compositions (`layout` in its frontmatter) so the sequence reads like a
- * book of spreads rather than a grid of cards.
+ * One expedition in Sector 04. Each project chooses one of five compositions
+ * (`layout` in its frontmatter), so the sequence reads like a set of mission
+ * briefings rather than a grid of cards.
  */
 import type { CollectionEntry } from 'astro:content';
 import Plate from '../ui/Plate.astro';
@@ -22,7 +22,7 @@ const src = plateUrl(data.plate, 'a');
 const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
 ---
 
-<article class:list={['spread', `spread--${data.layout}`]} data-cursor="Read">
+<article class:list={['spread', `spread--${data.layout}`]} data-cursor="Report">
   <Plate
     class="spread__plate"
     src={src}
@@ -35,7 +35,8 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
 
   <div class="spread__text">
     <p class="spread__index meta">
-      <span class="spread__no">{number}</span>
+      <span class="spread__no">Expedition {number}</span>
+      <span class="spread__ja" lang="ja">遠征{number}</span>
       <span class="spread__rule" aria-hidden="true"></span>
       <span>{data.kind}</span>
       <span aria-hidden="true">·</span>
@@ -59,7 +60,7 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
       <p class="spread__logline">{data.summary}</p>
       <p class="spread__disciplines meta">{data.stack.slice(0, 4).join(' / ')}</p>
       <p class="spread__cta meta" aria-hidden="true">
-        Read the case study
+        Read the expedition report
         <Arrow />
       </p>
     </div>
@@ -109,10 +110,18 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     color: var(--color-accent-text);
   }
 
+  .spread__ja {
+    font-family: var(--type-jp);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
   .spread__status {
     margin-left: var(--space-2);
     padding: 0.15rem 0.45rem;
-    border: 1px solid currentColor;
+    background: var(--red);
+    color: var(--bone);
   }
 
   .spread__rule {
@@ -124,7 +133,7 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
   .spread__title {
     margin-top: var(--space-4);
     font-size: var(--text-xl);
-    font-weight: 400;
+    font-weight: 900;
     line-height: 0.86;
     text-transform: uppercase;
   }
@@ -139,12 +148,9 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
 
   .spread__logline {
     max-width: 24rem;
-    font-family: var(--type-display);
     font-size: var(--text-m);
-    font-style: italic;
-    font-weight: 350;
-    font-stretch: 90%;
-    line-height: 1.28;
+    line-height: 1.4;
+    color: rgb(235 229 216 / 0.86);
   }
 
   .spread__cta {
@@ -155,18 +161,27 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     color: var(--color-text);
   }
 
-  /* ── Hover: the plate leans in and is cut once ───────── */
+  /* ── Hover: the plate leans in; target brackets close on it ── */
   .spread :global(.spread__plate)::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: -10%;
-    width: 120%;
-    height: 3px;
-    background: var(--shu);
-    transform: rotate(-24deg) scaleX(0);
-    transform-origin: 100% 50%;
-    transition: transform 650ms var(--ease-brush);
+    inset: 1rem;
+    --c: var(--red);
+    background:
+      linear-gradient(var(--c), var(--c)) 0 0 / 2rem 2px,
+      linear-gradient(var(--c), var(--c)) 0 0 / 2px 2rem,
+      linear-gradient(var(--c), var(--c)) 100% 0 / 2rem 2px,
+      linear-gradient(var(--c), var(--c)) 100% 0 / 2px 2rem,
+      linear-gradient(var(--c), var(--c)) 0 100% / 2rem 2px,
+      linear-gradient(var(--c), var(--c)) 0 100% / 2px 2rem,
+      linear-gradient(var(--c), var(--c)) 100% 100% / 2rem 2px,
+      linear-gradient(var(--c), var(--c)) 100% 100% / 2px 2rem;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(1.06);
+    transition:
+      opacity 400ms var(--ease-out),
+      transform 650ms var(--ease-out);
     pointer-events: none;
   }
 
@@ -176,8 +191,8 @@ const ratio = data.layout === 'wide' ? '21 / 9' : undefined;
     }
 
     .spread:hover :global(.spread__plate)::after {
-      transform: rotate(-24deg) scaleX(1);
-      transform-origin: 0 50%;
+      opacity: 1;
+      transform: none;
     }
 
     .spread:hover .spread__cta .arrow {

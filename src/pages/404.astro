@@ -2,20 +2,20 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Page not found" description="This page isn't in the volume." running={{ label: 'Page 404', title: 'Torn out' }}>
-  <section class="missing wrap" data-chapter-label="Page 404" data-chapter-title="Torn out" aria-labelledby="missing-title">
+<BaseLayout title="Page not found" description="This page doesn't exist on this site.">
+  <section class="missing wrap" aria-labelledby="missing-title">
     <div class="missing__panel">
-      <p class="missing__ja tate" lang="ja" aria-hidden="true">落丁</p>
-      <p class="meta">Page 404 · Rakuchō, a missing page</p>
+      <p class="missing__ja tate" lang="ja" aria-hidden="true">行方不明</p>
+      <p class="meta">Error 404 · <span lang="ja" class="jp">行方不明</span> · Missing in action</p>
       <h1 id="missing-title" class="missing__title display">
-        This page was<br /><em>torn out.</em>
+        Lost<br /><em>beyond the wall.</em>
       </h1>
       <p class="missing__body">
-        The address doesn’t match any page in this volume. It may have moved, or the link may be mistyped.
+        The address doesn’t match any page on this site. It may have moved, or the link may be mistyped.
       </p>
       <div class="missing__actions">
-        <a class="btn" href="/">Go to the first page</a>
-        <a class="btn" href="/#work">See the work</a>
+        <a class="btn btn--ink" href="/">Return to the wall</a>
+        <a class="btn" href="/#expeditions">View the expeditions</a>
       </div>
       <svg class="missing__tear" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
         <path d="M0 40V18l40 9 32-14 41 11 29-8 47 13 36-15 44 12 31-9 48 14 27-12 50 10 34-13 45 15 30-11 52 9 28-14 44 12 37-10 49 13 26-12 51 11 33-15 46 13 30-9 50 12 29-13 43 14 38-11 47 10 31-12 52 13V40z"></path>
@@ -45,19 +45,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     top: clamp(1.5rem, 5vw, 5rem);
     right: clamp(1.5rem, 5vw, 5rem);
     font-size: clamp(2.5rem, 2rem + 3vw, 5.5rem);
-    color: var(--shu);
+    color: var(--red);
   }
 
   .missing__title {
     margin-top: var(--space-6);
     font-size: var(--text-giga);
-    font-weight: 300;
+    font-weight: 900;
     text-transform: uppercase;
   }
 
   .missing__title em {
-    font-style: italic;
-    text-transform: none;
+    font-style: normal;
+    color: var(--red-light);
   }
 
   .missing__body {
@@ -81,6 +81,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     width: 100%;
     max-width: none;
     height: 2.5rem;
-    fill: var(--washi-deep);
+    fill: var(--stone);
   }
 </style>

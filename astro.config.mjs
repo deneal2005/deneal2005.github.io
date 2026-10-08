@@ -31,28 +31,6 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'Noto Serif Display',
-      cssVariable: '--font-display',
-      fallbacks: ['Georgia', 'serif'],
-      options: {
-        variants: [
-          {
-            src: [fontsource('@fontsource-variable/noto-serif-display', 'noto-serif-display-latin-wdth-normal.woff2')],
-            weight: '100 900',
-            style: 'normal',
-            stretch: '62.5% 100%',
-          },
-          {
-            src: [fontsource('@fontsource-variable/noto-serif-display', 'noto-serif-display-latin-wdth-italic.woff2')],
-            weight: '100 900',
-            style: 'italic',
-            stretch: '62.5% 100%',
-          },
-        ],
-      },
-    },
-    {
-      provider: fontProviders.local(),
       name: 'Archivo',
       cssVariable: '--font-sans',
       fallbacks: ['Arial', 'sans-serif'],
@@ -81,11 +59,11 @@ export default defineConfig({
     },
     {
       provider: fontProviders.google(),
-      name: 'Shippori Mincho B1',
+      name: 'Noto Sans JP',
       cssVariable: '--font-jp',
-      weights: [500, 800],
+      weights: [700, 900],
       styles: ['normal'],
-      fallbacks: ['Yu Mincho', 'Hiragino Mincho ProN', 'serif'],
+      fallbacks: ['Hiragino Sans', 'Yu Gothic', 'sans-serif'],
       options: { experimental: { glyphs: [collectGlyphs('./src')] } },
     },
   ],

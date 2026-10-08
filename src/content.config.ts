@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /** Generated plates available under /plates/{name}-{a|b}.svg (see src/lib/plates). */
-export const PLATES = ['greenup', 'rentmate', 'sunrise'] as const;
+export const PLATES = ['greenup', 'rentmate'] as const;
 
 /** Files starting with "_" (like _template.md) are ignored, so templates can live beside entries. */
 const entries = (base: string) => glob({ pattern: '**/[^_]*.md', base });
@@ -34,7 +34,7 @@ const work = defineCollection({
       links: z
         .object({ repo: z.url().optional(), live: z.url().optional(), other: z.array(link).default([]) })
         .default({ other: [] }),
-      /** Composition used for this project's spread in Chapter 03. */
+      /** Composition used for this project's spread in The Expeditions. */
       layout: z.enum(['right', 'wide', 'left', 'offset', 'center']),
       plate: z.enum(PLATES),
       alt: z.string(),
@@ -42,21 +42,6 @@ const work = defineCollection({
       /** Real screenshots, stored next to the entry in src/assets/work/. Shown on the case study. */
       screens: z.array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() })).default([]),
     }),
-});
-
-/** Experiments: exploration, not product. `demo` mounts one of the live studies in Chapter 05. */
-const experiments = defineCollection({
-  loader: entries('./src/content/experiments'),
-  schema: z.object({
-    title: z.string(),
-    ja: z.string().optional(),
-    date: z.coerce.date(),
-    summary: z.string(),
-    stack: z.array(z.string()).default([]),
-    status: z.enum(['Running', 'Sketch', 'Archived']).default('Sketch'),
-    demo: z.enum(['sumi', 'ten', 'hanko']).optional(),
-    links: z.object({ repo: z.url().optional(), live: z.url().optional() }).default({}),
-  }),
 });
 
 /**
@@ -96,4 +81,4 @@ const journey = defineCollection({
     }),
 });
 
-export const collections = { work, experiments, journey };
+export const collections = { work, journey };

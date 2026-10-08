@@ -1,16 +1,17 @@
 ---
 /**
- * Chapter 02 — The Path (道). The roadmap toward software backend engineering
- * in Japan (src/data/path.ts). Skills that already show up in real work link
- * there; the rest are the road ahead. Nothing here claims a level unless a
- * `status` is set.
+ * 03 — The Arsenal (武器庫). The roadmap toward software backend engineering
+ * in Japan (src/data/path.ts), laid out as an armoury: each area a rack, each
+ * skill a piece of kit. Skills already used in real work are issued (red) and
+ * link there; the rest are still to be issued. Nothing here claims a level
+ * unless a `status` is set.
  */
-import ChapterOpener from '../ui/ChapterOpener.astro';
-import { chapterById } from '../../data/chapters';
+import SectionHeader from '../ui/SectionHeader.astro';
+import { sectionById } from '../../data/sections';
 import { goal, path, type SkillStatus } from '../../data/path';
 import { getJourney, getWorks, journeyHref } from '../../lib/content';
 
-const chapter = chapterById('path');
+const section = sectionById('arsenal');
 const [works, journey] = await Promise.all([getWorks(), getJourney()]);
 const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
@@ -32,15 +33,17 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
 ---
 
 <section
-  id={chapter.id}
+  id={section.id}
   class="path wrap"
-  data-chapter-label={chapter.label}
-  data-chapter-title={chapter.title}
-  aria-labelledby="path-title"
+  data-tone="ink"
+  data-sector
+  data-sector-no={section.no}
+  data-sector-ja={section.ja}
+  aria-labelledby="arsenal-title"
 >
-  <ChapterOpener
-    id="path"
-    epigraph="Where I’m headed, and what it takes to get there. When a skill already shows up in my work, it links there."
+  <SectionHeader
+    id="arsenal"
+    brief="What I carry, and what I’m training toward. When a skill is already in use in my work, it links to where."
   />
 
   <div class="path__grid grid">
@@ -51,14 +54,14 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
         <p class="meta path__goal-label">The goal</p>
         <p class="path__goal">{goal.title}</p>
         <dl class="path__count">
-          <div><dt class="meta">Areas</dt><dd>{path.length}</dd></div>
+          <div><dt class="meta">Racks</dt><dd>{path.length}</dd></div>
           <div><dt class="meta">Skills</dt><dd>{total}</dd></div>
-          <div><dt class="meta">Already in my work</dt><dd>{inWork}</dd></div>
+          <div><dt class="meta">Issued in the field</dt><dd>{inWork}</dd></div>
         </dl>
         <p class="path__key">
           <span class="path__mark path__mark--used" aria-hidden="true"></span> Used in a project, linked
           <br />
-          <span class="path__mark" aria-hidden="true"></span> On the road ahead
+          <span class="path__mark" aria-hidden="true"></span> Still in training
           {usesStatus && <><br /><span class="path__status">Learning</span> marks what I’m working on now</>}
         </p>
       </div>
@@ -145,9 +148,11 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
   }
 
   .path__motto {
-    font-size: clamp(2rem, 1.4rem + 1.6vw, 3rem);
-    color: var(--shu);
-    letter-spacing: 0.08em;
+    font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.4rem);
+    color: var(--bone);
+    letter-spacing: 0.12em;
+    padding: 0.5rem 0.35rem;
+    border: 1px solid var(--red);
   }
 
   .path__aside-text {
@@ -167,10 +172,10 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
   .path__goal {
     font-family: var(--type-display);
     font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.4rem);
-    font-style: italic;
-    font-weight: 350;
-    font-stretch: 80%;
-    line-height: 1.05;
+    font-weight: 800;
+    font-stretch: 62%;
+    line-height: 1;
+    text-transform: uppercase;
   }
 
   .path__count {
@@ -190,10 +195,10 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
 
   .path__count dd {
     margin: 0;
-    font-family: var(--type-display);
-    font-size: 1.5rem;
-    font-stretch: 80%;
+    font-family: var(--type-mono);
+    font-size: 1.25rem;
     line-height: 1;
+    color: var(--red-light);
   }
 
   .path__key {
@@ -216,8 +221,8 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
 
   .path__mark--used,
   .skill--used .path__mark {
-    background: var(--shu);
-    border-color: var(--shu);
+    background: var(--red);
+    border-color: var(--red);
   }
 
   .path__status {
@@ -254,27 +259,31 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
   }
 
   .area__n {
-    font-family: var(--type-display);
-    font-size: 2.25rem;
-    font-weight: 200;
-    font-stretch: 70%;
-    line-height: 0.9;
-    color: var(--color-accent-text);
+    font-family: var(--type-mono);
+    font-size: 0.8125rem;
+    line-height: 1;
+    padding: 0.3rem 0.4rem;
+    background: var(--red);
+    color: var(--bone);
+    align-self: center;
   }
 
   .area__name {
     font-family: var(--type-display);
     font-size: 1.6rem;
-    font-weight: 400;
-    font-stretch: 80%;
+    font-weight: 800;
+    font-stretch: 62%;
     line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
   }
 
   .area__ja {
     margin-left: var(--space-2);
     font-family: var(--type-jp);
-    font-weight: 800;
-    font-size: 0.85em;
+    font-weight: 700;
+    font-size: 0.7em;
+    color: var(--color-text-muted);
   }
 
   .area__note {
@@ -357,13 +366,13 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
   }
 
   .ladder__step.is-target {
-    border-color: var(--shu);
-    color: var(--enji);
+    border-color: var(--red);
+    color: var(--red-light);
   }
 
   .ladder__step.is-current {
-    background: var(--sumi);
-    color: var(--washi);
+    background: var(--black);
+    color: var(--bone);
   }
 
   .ladder__tag {
@@ -449,7 +458,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
 
     .skill--used {
       border-color: var(--color-rule-strong);
-      background: var(--gofun);
+      background: var(--stone);
     }
 
     .skill .path__mark {

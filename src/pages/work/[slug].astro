@@ -4,7 +4,6 @@ import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Plate from '../../components/ui/Plate.astro';
 import Arrow from '../../components/ui/Arrow.astro';
-import HamonLine from '../../components/motifs/HamonLine.astro';
 import { formatDate, getJourney, getWorks, journeyHref } from '../../lib/content';
 import { plates, plateSize, plateUrl } from '../../lib/plates';
 
@@ -46,13 +45,12 @@ const meta = [
 <BaseLayout
   title={data.title}
   description={data.summary}
-  running={{ label: `Chapter 03 · ${number}`, title: data.title }}
 >
-  <article class="case" data-chapter-label={`Chapter 03 · ${number}`} data-chapter-title={data.title} aria-labelledby="case-title">
+  <article class="case" data-sector data-sector-no="04" data-sector-ja="遠征" aria-labelledby="case-title">
     <header class="case__head wrap">
       <div class="case__trail">
-        <a class="case__back meta" href="/#work"><Arrow dir="left" /> The Work</a>
-        <p class="meta">Chapter 03 · {number} of {String(total).padStart(2, '0')}</p>
+        <a class="case__back meta" href="/#expeditions"><Arrow dir="left" /> The Expeditions</a>
+        <p class="meta"><span lang="ja" class="jp">遠征報告</span> · Expedition report {number} of {String(total).padStart(2, '0')}</p>
       </div>
 
       <p class="case__kind meta"><span class="case__no">{number}</span> {data.kind} · {data.year} · {data.status}</p>
@@ -222,14 +220,14 @@ const meta = [
       )
     }
 
-    <HamonLine seed={data.order * 5} class="case__hamon" />
+    <div class="case__hazard" aria-hidden="true"></div>
 
     {
       total > 1 && (
         <nav class="case__next wrap" aria-label="Next project">
-          <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Turn">
+          <a class="next" href={`/work/${next.id}/`} data-astro-prefetch data-cursor="Next">
             <span class="next__label meta">
-              {isFinal ? 'Back to the first project' : 'Next project'} · {String(next.data.order).padStart(2, '0')}
+              {isFinal ? 'Back to the first expedition' : 'Next expedition'} · {String(next.data.order).padStart(2, '0')}
             </span>
             <span class="next__title display">{next.data.title}</span>
             <span class="next__summary">{next.data.summary}</span>
@@ -291,7 +289,7 @@ const meta = [
   .case__title {
     margin-top: var(--space-4);
     font-size: clamp(3.75rem, 1.5rem + 9vw, 12rem);
-    font-weight: 350;
+    font-weight: 900;
     text-transform: uppercase;
   }
 
@@ -301,7 +299,7 @@ const meta = [
   }
 
   .case__summary {
-    font-style: italic;
+    font-style: normal;
   }
 
   .case__actions {
@@ -519,9 +517,11 @@ const meta = [
     }
   }
 
-  .case :global(.case__hamon) {
+  .case__hazard {
+    height: 6px;
     margin-top: var(--space-section);
-    padding-inline: var(--margin);
+    background: repeating-linear-gradient(-45deg, var(--red) 0 10px, transparent 10px 20px);
+    opacity: 0.5;
   }
 
   /* ── Next project ─────────────────────────────────── */
@@ -561,7 +561,7 @@ const meta = [
     grid-row: 1 / span 3;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: var(--washi-deep);
+    background: var(--stone);
   }
 
   .next__plate img {
@@ -573,7 +573,7 @@ const meta = [
 
   @media (hover: hover) {
     .next:hover .next__title {
-      color: var(--enji);
+      color: var(--red-light);
     }
 
     .next:hover .next__plate img {

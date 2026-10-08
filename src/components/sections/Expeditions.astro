@@ -1,0 +1,44 @@
+---
+/** 04 — The Expeditions (遠征): the projects, each with its full expedition report. */
+import SectionHeader from '../ui/SectionHeader.astro';
+import ProjectSpread from '../work/ProjectSpread.astro';
+import { sectionById } from '../../data/sections';
+import { getWorks } from '../../lib/content';
+
+const section = sectionById('expeditions');
+const works = await getWorks();
+---
+
+<section
+  id={section.id}
+  class="work wrap"
+  data-sector
+  data-sector-no={section.no}
+  data-sector-ja={section.ja}
+  aria-labelledby="expeditions-title"
+>
+  <SectionHeader
+    id="expeditions"
+    brief={`${works.length === 2 ? 'Two' : works.length} expeditions beyond the wall: built end to end, and live. Each has its own report.`}
+  />
+  <ol class="work__list">
+    {
+      works.map((work) => (
+        <li class="work__item">
+          <ProjectSpread work={work} />
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .work {
+    padding-block: var(--space-section);
+  }
+
+  .work__list {
+    display: grid;
+    row-gap: var(--space-section);
+  }
+</style>

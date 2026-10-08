@@ -1,18 +1,21 @@
 ---
 /**
- * Folio rail: the volume number, a reading-progress spine and a live page
- * number (one page = one screen height), set vertically in the right margin.
+ * Sector rail: the current sector's number and Japanese name, and a progress
+ * spine for the whole page, set vertically in the right margin. Updated by
+ * scripts/chrome.ts. Phones get a red hairline along the top edge instead.
  */
-import { site } from '../../data/site';
+import { sections } from '../../data/sections';
+
+const first = sections[0];
 ---
 
-<div class="rail" data-rail data-tone-auto aria-hidden="true">
-  <span class="rail__vol">{site.volume}</span>
+<div class="rail" data-rail aria-hidden="true">
+  <span class="rail__label">Sector</span>
+  <span class="rail__no" data-rail-no>{first.no}</span>
   <span class="rail__track"><span class="rail__fill" data-rail-fill></span></span>
-  <span class="rail__page">p. <span data-rail-page>001</span></span>
+  <span class="rail__ja" lang="ja" data-rail-ja>{first.ja}</span>
 </div>
 
-<!-- Phones and tablets: the rail is hidden, so progress becomes a hairline along the top edge -->
 <span class="readbar" aria-hidden="true"><span class="readbar__fill" data-read-fill></span></span>
 
 <style>
@@ -24,15 +27,14 @@ import { site } from '../../data/site';
     display: none;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
-    color: var(--color-text);
+    gap: var(--space-3);
+    color: var(--bone);
     font-family: var(--type-mono);
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     letter-spacing: var(--tracking-meta);
     text-transform: uppercase;
     transform: translateY(-50%);
     pointer-events: none;
-    transition: color var(--dur-2) linear;
   }
 
   @media (min-width: 64rem) {
@@ -41,27 +43,38 @@ import { site } from '../../data/site';
     }
   }
 
-  .rail__vol,
-  .rail__page {
+  .rail__label {
     writing-mode: vertical-rl;
+    color: var(--gray);
   }
 
-  .rail__page {
+  .rail__no {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--red-light);
     font-variant-numeric: tabular-nums;
+  }
+
+  .rail__ja {
+    writing-mode: vertical-rl;
+    font-family: var(--type-jp);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
   }
 
   .rail__track {
     position: relative;
     width: 1px;
-    height: 22vh;
-    background: var(--color-rule);
+    height: 20vh;
+    background: var(--color-rule-strong);
     overflow: hidden;
   }
 
   .rail__fill {
     position: absolute;
     inset: 0;
-    background: var(--shu);
+    background: var(--red);
     transform-origin: top;
     transform: scaleY(var(--progress, 0));
   }
@@ -77,7 +90,7 @@ import { site } from '../../data/site';
   .readbar__fill {
     position: absolute;
     inset: 0;
-    background: var(--shu);
+    background: var(--red);
     transform-origin: left;
     transform: scaleX(var(--progress, 0));
   }

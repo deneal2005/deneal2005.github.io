@@ -1,9 +1,9 @@
-import { brushStroke, halftone, rng, round, smoothstep } from '../draw';
+import { brushStroke, halftone, rng, round } from '../draw';
 import { INK, type Plate } from './shared';
 
 export { renderPlate, plateSize, type Plate, type Variant } from './shared';
 
-/** GreenUP: a sapling on a globe printed in ink dots, pinned where actions were logged. */
+/** GreenUP: a sapling on a globe printed in dots, pinned where actions were logged. */
 const greenup: Plate = {
   width: 800,
   height: 1000,
@@ -67,7 +67,7 @@ const greenup: Plate = {
     const pinMarks = pins
       .map(
         ({ x, y }) =>
-          `<circle cx="${round(x)}" cy="${round(y)}" r="13" fill="${INK.washi}" stroke="${INK.shu}" stroke-width="2.5"/><circle cx="${round(x)}" cy="${round(y)}" r="5.5" fill="${INK.shu}"/>`,
+          `<circle cx="${round(x)}" cy="${round(y)}" r="13" fill="${INK.ground}" stroke="${INK.red}" stroke-width="2.5"/><circle cx="${round(x)}" cy="${round(y)}" r="5.5" fill="${INK.red}"/>`,
       )
       .join('');
     const shadow = halftone({
@@ -81,15 +81,15 @@ const greenup: Plate = {
     });
     const top = globe.cy - globe.r;
     return {
-      ground: 'washi',
+      ground: 'ground',
       body: [
-        `<g fill="${INK.sumi}">${shadow}</g>`,
-        `<g fill="${INK.sumi}">${dots}</g>`,
-        `<g fill="none" stroke="${INK.sumi}" stroke-width="1" opacity="0.28">${graticule}</g>`,
-        `<circle cx="${globe.cx}" cy="${globe.cy}" r="${globe.r}" fill="none" stroke="${INK.sumi}" stroke-width="1.5" opacity="0.7"/>`,
+        `<g fill="${INK.line}">${shadow}</g>`,
+        `<g fill="${INK.line}">${dots}</g>`,
+        `<g fill="none" stroke="${INK.line}" stroke-width="1" opacity="0.28">${graticule}</g>`,
+        `<circle cx="${globe.cx}" cy="${globe.cy}" r="${globe.r}" fill="none" stroke="${INK.line}" stroke-width="1.5" opacity="0.7"/>`,
         pinMarks,
         // the sapling
-        `<g fill="${INK.sumi}"><path d="M397 ${top + 2} C393 ${top - 26} 396 ${top - 52} 402 ${top - 74} L407 ${top - 73} C402 ${top - 50} 400 ${top - 26} 404 ${top + 2} Z"/>`,
+        `<g fill="${INK.line}"><path d="M397 ${top + 2} C393 ${top - 26} 396 ${top - 52} 402 ${top - 74} L407 ${top - 73} C402 ${top - 50} 400 ${top - 26} 404 ${top + 2} Z"/>`,
         `<path d="M401 ${top - 40} C380 ${top - 64} 350 ${top - 64} 338 ${top - 52} C352 ${top - 34} 382 ${top - 30} 401 ${top - 40} Z"/>`,
         `<path d="M404 ${top - 62} C424 ${top - 92} 458 ${top - 96} 472 ${top - 84} C458 ${top - 62} 428 ${top - 54} 404 ${top - 62} Z"/></g>`,
       ].join(''),
@@ -139,7 +139,7 @@ const rentmate: Plate = {
       },
     });
 
-    // The city: blocks along the ground, a few windows lit, one in vermilion.
+    // The city: blocks along the ground, a few windows lit, one in red.
     const blocks: string[] = [];
     const windows: string[] = [];
     let lit = '';
@@ -150,7 +150,7 @@ const rentmate: Plate = {
       for (let wy = ground - h + 14; wy < ground - 18; wy += 22) {
         for (let wx = x + 9; wx < x + w - 16; wx += 15) {
           const r = random();
-          if (r > 0.9 && !lit && wy < ground - 80) lit = `<rect x="${wx}" y="${round(wy)}" width="7" height="11" fill="${INK.shu}"/>`;
+          if (r > 0.9 && !lit && wy < ground - 80) lit = `<rect x="${wx}" y="${round(wy)}" width="7" height="11" fill="${INK.red}"/>`;
           else if (r > 0.72) windows.push(`<rect x="${wx}" y="${round(wy)}" width="7" height="11"/>`);
         }
       }
@@ -163,51 +163,24 @@ const rentmate: Plate = {
     ];
 
     return {
-      ground: 'sumi',
+      ground: 'night',
       body: [
-        `<g fill="${INK.shu}" opacity="0.85">${glow}</g>`,
-        `<g fill="${INK.keshizumi}">${blocks.join('')}</g>`,
-        `<g fill="${INK.gofun}" opacity="0.5">${windows.join('')}</g>`,
+        `<g fill="${INK.red}" opacity="0.85">${glow}</g>`,
+        `<g fill="${INK.stone}">${blocks.join('')}</g>`,
+        `<g fill="${INK.bone}" opacity="0.5">${windows.join('')}</g>`,
         lit,
-        `<rect x="0" y="${ground}" width="1200" height="2" fill="${INK.usuzumi}" opacity="0.6"/>`,
-        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="${INK.night}"/>`,
-        `<g fill="none" stroke="${INK.shu}" stroke-width="30">${notches}</g>`,
-        `<g fill="none" stroke="${INK.usuzumi}" stroke-width="1.5" opacity="0.7">${ticks}</g>`,
-        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="none" stroke="${INK.gofun}" stroke-width="1" opacity="0.35"/>`,
-        `<g fill="${INK.gofun}">${check.map((d) => `<path d="${d}"/>`).join('')}</g>`,
+        `<rect x="0" y="${ground}" width="1200" height="2" fill="${INK.gray}" opacity="0.6"/>`,
+        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="${INK.black}"/>`,
+        `<g fill="none" stroke="${INK.red}" stroke-width="30">${notches}</g>`,
+        `<g fill="none" stroke="${INK.gray}" stroke-width="1.5" opacity="0.7">${ticks}</g>`,
+        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="none" stroke="${INK.bone}" stroke-width="1" opacity="0.35"/>`,
+        `<g fill="${INK.bone}">${check.map((d) => `<path d="${d}"/>`).join('')}</g>`,
       ].join(''),
     };
   },
 };
 
-/** Chapter 01 portrait, until a photo is set in profile.ts: a sunrise through haze. */
-const sunrise: Plate = {
-  width: 800,
-  height: 1000,
-  detail: [160, 300, 480, 480],
-  draw: () => {
-    const horizon = 760;
-    const sun = { cx: 400, cy: 760, r: 520 };
-    const dots = halftone({
-      x: sun.cx - sun.r,
-      y: sun.cy - sun.r,
-      width: sun.r * 2,
-      height: horizon - (sun.cy - sun.r),
-      step: 17,
-      angle: 45,
-      value: (x, y) =>
-        (x - sun.cx) ** 2 + (y - sun.cy) ** 2 > sun.r ** 2 ? 0 : 0.1 + 0.9 * smoothstep(sun.cy - sun.r + 20, horizon - 60, y),
-    });
-    const line = brushStroke({ from: [0, horizon], to: [800, horizon], width: 10, peak: 0.42, seed: 23, wobble: 0.4, segments: 36 });
-    return {
-      ground: 'washi',
-      defs: `<clipPath id="above"><rect width="800" height="${horizon}"/></clipPath>`,
-      body: [`<g fill="${INK.enji}" clip-path="url(#above)">${dots}</g>`, `<path d="${line}" fill="${INK.sumi}"/>`].join(''),
-    };
-  },
-};
-
-export const plates = { greenup, rentmate, sunrise } satisfies Record<string, Plate>;
+export const plates = { greenup, rentmate } satisfies Record<string, Plate>;
 export type PlateName = keyof typeof plates;
 
 export const plateUrl = (name: PlateName, variant: 'a' | 'b' = 'a') => `/plates/${name}-${variant}.svg`;

@@ -1,0 +1,241 @@
+---
+/**
+ * 06 — Beyond the Wall (壁の外): contact. Seen from outside now: the wall a
+ * dark line on the horizon, and a red signal flare rising from it. Contact
+ * leads with LinkedIn, email and phone as icon tiles; the rest follow as rows.
+ */
+import ProfileLinks from '../ui/ProfileLinks.astro';
+import { sectionById } from '../../data/sections';
+import { site } from '../../data/site';
+
+const section = sectionById('beyond');
+const contact = ['linkedin', 'email', 'phone'];
+---
+
+<section
+  id={section.id}
+  class="invite"
+  data-tone="ink"
+  data-sector
+  data-sector-no={section.no}
+  data-sector-ja={section.ja}
+  aria-labelledby="beyond-title"
+>
+  <div class="invite__sky" aria-hidden="true">
+    <div class="invite__flare" data-depth="-0.12"><span></span></div>
+    <svg class="invite__wall" viewBox="0 0 1600 200" preserveAspectRatio="none" data-depth="0.08">
+      <path d="M0 120H220V112H236V120H700V108H716V120H1180V110H1196V120H1600V200H0Z"></path>
+    </svg>
+  </div>
+
+  <div class="invite__inner wrap">
+    <div class="invite__head">
+      <p class="meta invite__label">
+        <span class="invite__no">{section.no}</span> Sector {section.no} · {section.file}
+      </p>
+      <p class="invite__ja tate" lang="ja" aria-hidden="true">{section.ja}</p>
+    </div>
+
+    <h2 id="beyond-title" class="invite__title display" data-reveal="rise">
+      <span class="rise" style="--line: 0"><span>{section.title}</span></span>
+      <span class="rise invite__title-2" style="--line: 1"><span>Send word.</span></span>
+    </h2>
+
+    <div class="invite__grid">
+      <div class="invite__body" data-reveal="fade">
+        <p class="invite__signal meta"><span lang="ja" class="jp">信号弾</span> Signal flare</p>
+        <p>A question about something on this site, a thing you’d like to build together, or a bug you found in it: write to me.</p>
+      </div>
+
+      <div class="invite__contact" data-reveal="fade" style="--i: 2">
+        <ProfileLinks variant="tiles" only={contact} class="invite__tiles" />
+        {
+          site.email && (
+            <div class="invite__actions">
+              <button class="btn" type="button" data-copy={site.email}>
+                <span data-copy-label>Copy email</span>
+              </button>
+            </div>
+          )
+        }
+        <p class="vh" aria-live="polite" data-copy-status></p>
+        <ProfileLinks variant="rows" exclude={contact} class="invite__links" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .invite {
+    position: relative;
+    min-height: 100svh;
+    padding-block: var(--space-section) 0;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  .invite__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(70% 40% at 70% 100%, rgb(179 35 28 / 0.18), transparent 70%);
+  }
+
+  /* The wall, far off now: a dark line on the horizon */
+  .invite__wall {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: clamp(5rem, 14vw, 11rem);
+    fill: var(--black);
+    transform: translateY(var(--depth, 0px));
+  }
+
+  /* A red signal flare, its smoke trail hanging in the air */
+  .invite__flare {
+    position: absolute;
+    right: 22%;
+    bottom: clamp(3rem, 8vw, 7rem);
+    width: 2px;
+    height: 70%;
+    transform: translateY(var(--depth, 0px));
+  }
+
+  .invite__flare::before {
+    content: '';
+    position: absolute;
+    inset: 0 -1.5rem;
+    background: linear-gradient(0deg, rgb(179 35 28 / 0.55), rgb(179 35 28 / 0.12) 60%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
+  }
+
+  .invite__flare span {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-left: -0.3rem;
+    border-radius: 50%;
+    background: var(--red-light);
+    box-shadow: 0 0 1.5rem 0.4rem rgb(226 73 61 / 0.5);
+  }
+
+  .invite__inner {
+    position: relative;
+    padding-bottom: clamp(16rem, 36vw, 30rem);
+  }
+
+  .invite__head {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-rule-strong);
+  }
+
+  .invite__head::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 4.5rem;
+    height: 3px;
+    background: var(--red);
+  }
+
+  .invite__label {
+    color: var(--color-text);
+  }
+
+  .invite__no {
+    color: var(--red-light);
+    margin-right: var(--space-3);
+  }
+
+  .invite__ja {
+    font-size: clamp(2rem, 1.3rem + 2.4vw, 4rem);
+    letter-spacing: 0.1em;
+  }
+
+  .invite__title {
+    margin-top: var(--space-6);
+    font-size: var(--text-giga);
+    font-weight: 900;
+    line-height: 0.86;
+    text-transform: uppercase;
+  }
+
+  .invite__title-2 {
+    color: var(--red-light);
+  }
+
+  .invite__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-7);
+    margin-top: var(--space-8);
+    align-items: start;
+  }
+
+  .invite__body {
+    grid-column: 1 / span 4;
+    color: var(--color-text-muted);
+  }
+
+  .invite__signal {
+    margin-bottom: var(--space-3);
+    color: var(--red-light);
+  }
+
+  .invite__contact {
+    grid-column: 6 / -1;
+  }
+
+  .invite__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+
+  .invite__contact :global(.invite__links) {
+    margin-top: var(--space-7);
+    max-width: 36rem;
+  }
+
+  .invite__actions :global(.btn.is-copied) {
+    background-color: var(--red);
+    border-color: var(--red);
+    color: var(--bone);
+  }
+
+  @media (max-width: 63.99rem) {
+    .invite__body,
+    .invite__contact {
+      grid-column: 1 / -1;
+    }
+
+    .invite__title {
+      font-size: clamp(2.9rem, 13vw, 6rem);
+    }
+
+    .invite__flare {
+      right: 12%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .invite__wall,
+    .invite__flare {
+      transform: none;
+    }
+  }
+</style>

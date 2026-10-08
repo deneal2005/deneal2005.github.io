@@ -11,7 +11,7 @@ export const now = {
   updated: '2026-10-05',
   building: [
     { text: 'RentMate', href: '/work/rentmate/' },
-    { text: 'This portfolio, set as a manga volume', href: '/journey/2026-10-05-hamon-vol-01/' },
+    { text: 'This portfolio', href: '/' },
   ] as NowItem[],
   learning: [] as NowItem[],
   exploring: [] as NowItem[],

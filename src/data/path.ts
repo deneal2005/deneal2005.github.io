@@ -1,5 +1,5 @@
 /**
- * Chapter 02 — The Path. The skills roadmap toward software backend
+ * 03 — The Arsenal. The skills roadmap toward software backend
  * engineering in Japan, from Delin's own roadmap. Skill names stay concise and
  * technology-focused: no "basics", sub-topics or beginner descriptions.
  *

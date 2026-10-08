@@ -263,7 +263,7 @@ const summary = weeks
     height: calc(var(--v) * 100%);
     /* 4px rounded data end, square at the baseline */
     border-radius: 4px 4px 0 0;
-    background: var(--shu);
+    background: var(--red);
     transform-origin: bottom;
     transition:
       transform 900ms var(--ease-out),
@@ -276,7 +276,7 @@ const summary = weeks
   }
 
   .activity__week.is-active .activity__bar {
-    background: var(--enji);
+    background: var(--red-light);
   }
 
   .activity__months {
@@ -299,8 +299,8 @@ const summary = weeks
     display: grid;
     gap: 0.1rem;
     padding: var(--space-2) var(--space-3);
-    background: var(--sumi);
-    color: var(--washi);
+    background: var(--black);
+    color: var(--bone);
     font-size: var(--text-xs);
     line-height: 1.3;
     white-space: nowrap;
@@ -318,7 +318,7 @@ const summary = weeks
 
   .activity__tip span {
     font-family: var(--type-mono);
-    color: var(--usuzumi);
+    color: var(--gray);
   }
 
   .activity__summary {

@@ -1,60 +1,52 @@
 import { clamp, onFrame } from './env';
 
 /**
- * Masthead and folio rail: scroll state, ink/paper tone, the running head
- * (current chapter) and the live page number.
+ * Command bar and sector rail: scroll state, the active sector (marked in the
+ * navigation and the rail) and reading progress.
  */
 export function initChrome() {
   const masthead = document.querySelector<HTMLElement>('[data-masthead]');
-  const rail = document.querySelector<HTMLElement>('[data-rail]');
   const railFill = document.querySelector<HTMLElement>('[data-rail-fill]');
   const readFill = document.querySelector<HTMLElement>('[data-read-fill]');
-  const railPage = document.querySelector<HTMLElement>('[data-rail-page]');
-  const runningLabel = document.querySelector<HTMLElement>('[data-running-label]');
-  const runningTitle = document.querySelector<HTMLElement>('[data-running-title]');
-  const inkSections = [...document.querySelectorAll<HTMLElement>('[data-tone="ink"]:not(dialog)')];
-  const chapters = [...document.querySelectorAll<HTMLElement>('[data-chapter-label]')];
-  const reel = document.querySelector<HTMLElement>('[data-reel]');
+  const railNo = document.querySelector<HTMLElement>('[data-rail-no]');
+  const railJa = document.querySelector<HTMLElement>('[data-rail-ja]');
+  const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav]')];
+  const sectors = [...document.querySelectorAll<HTMLElement>('[data-sector]')];
+  const wall = document.querySelector<HTMLElement>('[data-wall]');
 
   let lastY = scrollY;
-  let currentChapter: HTMLElement | null = null;
-
-  const isOverInk = (y: number) =>
-    inkSections.some((section) => {
-      const r = section.getBoundingClientRect();
-      return r.top <= y && r.bottom > y;
-    });
+  let current: HTMLElement | null = null;
 
   onFrame(() => {
     const y = scrollY;
     const vh = innerHeight;
 
     if (masthead) {
+      // Over the opening sequence the bar stays clear, so the frame is never boxed in.
+      const wallEnd = wall ? wall.offsetTop + wall.offsetHeight - masthead.offsetHeight : 0;
       const goingDown = y > lastY;
-      // Over the opening reel the bar stays clear, so the frame is never boxed in.
-      const reelEnd = reel ? reel.offsetTop + reel.offsetHeight - masthead.offsetHeight : 0;
-      masthead.toggleAttribute('data-scrolled', y > Math.max(8, reelEnd));
-      // Step out of the way while reading downward; return on any upward scroll.
-      if (Math.abs(y - lastY) > 4) masthead.toggleAttribute('data-hidden', goingDown && y > vh * 0.6 && y > reelEnd);
-      masthead.toggleAttribute('data-on-ink', isOverInk(masthead.offsetHeight / 2));
+      masthead.toggleAttribute('data-scrolled', y > Math.max(8, wallEnd));
+      if (Math.abs(y - lastY) > 4) masthead.toggleAttribute('data-hidden', goingDown && y > wallEnd + vh * 0.6);
     }
-
-    if (rail) rail.toggleAttribute('data-on-ink', isOverInk(vh / 2));
 
     const max = document.documentElement.scrollHeight - vh;
     const progress = String(max > 0 ? clamp(y / max) : 0);
     railFill?.style.setProperty('--progress', progress);
     readFill?.style.setProperty('--progress', progress);
-    if (railPage) railPage.textContent = String(Math.floor(y / vh) + 1).padStart(3, '0');
 
-    // Running head: the last chapter whose opening has passed the upper third.
+    // Active sector: the last one whose top has passed the upper third.
     let active: HTMLElement | null = null;
-    for (const chapter of chapters) if (chapter.getBoundingClientRect().top <= vh * 0.34) active = chapter;
-    active ??= chapters[0] ?? null;
-    if (active && active !== currentChapter) {
-      currentChapter = active;
-      if (runningLabel) runningLabel.textContent = active.dataset.chapterLabel ?? '';
-      if (runningTitle) runningTitle.textContent = active.dataset.chapterTitle ?? '';
+    for (const sector of sectors) if (sector.getBoundingClientRect().top <= vh * 0.34) active = sector;
+    active ??= sectors[0] ?? null;
+    if (active !== current) {
+      current = active;
+      const id = active?.id;
+      for (const link of navLinks) {
+        if (link.dataset.nav === id) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      }
+      if (railNo) railNo.textContent = active?.dataset.sectorNo ?? '';
+      if (railJa) railJa.textContent = active?.dataset.sectorJa ?? '';
     }
 
     lastY = y;

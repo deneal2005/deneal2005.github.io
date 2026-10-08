@@ -1,5 +1,5 @@
 /**
- * Who this volume belongs to. Everything personal lives in this file.
+ * Who this site belongs to. Everything personal lives in this file.
  *
  * Rules the UI follows:
  * - An empty string or empty list hides whatever depends on it. Nothing renders
@@ -19,7 +19,7 @@ export const profile = {
   statement:
     'I build web apps end to end: the interface, the server behind it and the database rules underneath.',
 
-  /** Who I am / What I do, for Chapter 01. Keep each to a few sentences. */
+  /** Who I am / What I do, for Sector 02 (The Soldier). Keep each to a few sentences. */
   about: {
     who: 'I’m Delin Thangjam, a developer studying Artificial Intelligence and Data Science.',
     what: 'I build for the web end to end. RentMate is a Next.js app running on its own NestJS and PostgreSQL API, with payments, chat and a trust-and-safety console; GreenUP runs on plain HTML, CSS and JavaScript with Supabase underneath. The work keeps returning to the unglamorous parts: an upload queue that survives a dropped connection, a payment path that stays consistent under concurrent requests, a README that says plainly what is still simulated. Next on my path: backend engineering.',
@@ -28,7 +28,7 @@ export const profile = {
     learning: [] as string[],
   },
 
-  /** Optional real photo for Chapter 01, e.g. { src: '/portrait.jpg', alt: '…' }. Empty: a printed plate stands in. */
+  /** Optional real photo for the dossier in The Soldier, e.g. { src: '/portrait.jpg', alt: '…' }. Empty: the dossier says no photograph is on file. */
   portrait: null as { src: string; alt: string } | null,
 
   links: {

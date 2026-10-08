@@ -1,67 +1,54 @@
 /*
- * Design tokens. A dark, cinematic system: near-black, charcoal and steel,
- * a muted military green, bronze and a little gold, with warm off-white type.
+ * Design tokens. A dark military world: charcoal and black, weathered stone,
+ * dirty beige paper, muted brown and metal, with one signal colour: red.
  *
- * The pigment names from the first edition are kept as aliases so every
- * component keeps working; they now point at the cinematic palette by role:
- *   --sumi      deepest black (inverted blocks, silhouettes)
- *   --washi     warm off-white (type on the darkest blocks)
- *   --gofun     a raised panel, one step above the ground
- *   --shu       gold: the single accent. Marks, rules and large type only
- *   --enji      bronze-gold for small accent text
- * Components should prefer the semantic aliases further down.
+ * Red is a signal, never decoration. It marks what matters: the primary
+ * action, the active section, seals and stamps, warnings, section numbers.
+ * Large red uses --red; red text below 24px uses --red-light (contrast).
  */
 :root {
   /* ── Palette ──────────────────────────────────────────── */
-  --void: #08090a; /* the ground: near-black */
-  --char: #101213; /* charcoal */
-  --steel: #181c1f; /* dark steel */
-  --steel-2: #252a2e; /* lighter steel, hairlines on panels */
-  --moss: #4d5843; /* muted military green */
-  --moss-deep: #0d110e; /* green-black, for alternate chapters */
-  --bronze: #8a6a40; /* deep bronze */
-  --gold: #c2a068; /* dark gold, used sparingly */
-  --gold-light: #d8bd8a; /* gold tuned for small text on void (10:1) */
-  --bone: #e8e1d2; /* warm off-white */
-  --ash: #9b9e96; /* muted text on void (7.4:1) */
-  --smoke: #6d716c; /* tertiary, decorative text only */
+  --black: #070707; /* deepest black: inverted blocks, silhouettes */
+  --void: #0c0b0a; /* the ground */
+  --char: #141312; /* charcoal */
+  --stone: #1f1d1b; /* stone: panels, raised surfaces */
+  --stone-2: #2d2a27; /* lighter stone, rules on panels */
+  --gray: #a29d94; /* weathered gray: muted text on void (7.3:1) */
+  --smoke: #6c6862; /* tertiary, decorative only */
+  --metal: #8b8d8c; /* steel fittings, hairlines */
+  --brown: #4b3c2f; /* muted brown */
+  --beige: #b8ab90; /* dirty beige */
+  --paper: #d9cdb2; /* weathered paper: dossiers */
+  --paper-ink: #1a1714; /* type printed on paper */
+  --bone: #ebe5d8; /* off-white type */
+  --red: #b3231c; /* dark crimson signal: fills, seals, large marks */
+  --red-deep: #6e1612; /* dried red: shadows of stamps */
+  --red-light: #e2493d; /* red text on void (5.2:1) */
 
-  /* ── First-edition aliases (by role) ──────────────────── */
-  --sumi: #050606;
-  --keshizumi: var(--steel);
-  --nibi: var(--ash);
-  --usuzumi: var(--ash);
-  --washi: var(--bone);
-  --washi-deep: var(--steel);
-  --gofun: #121517;
-  --shu: var(--gold);
-  --shu-light: var(--gold-light);
-  --enji: #c9a873;
-  --kin: var(--bronze);
-
-  /* ── Semantic: the ground (default) ───────────────────── */
+  /* ── Semantic ─────────────────────────────────────────── */
   --color-bg: var(--void);
   --color-bg-alt: var(--char);
+  --color-panel: var(--stone);
   --color-text: var(--bone);
-  --color-text-muted: var(--ash);
-  --color-accent: var(--gold);
-  --color-accent-text: var(--gold-light);
-  --color-rule: rgb(232 225 210 / 0.1);
-  --color-rule-strong: rgb(232 225 210 / 0.3);
-  --color-focus: var(--gold-light);
+  --color-text-muted: var(--gray);
+  --color-accent: var(--red);
+  --color-accent-text: var(--red-light);
+  --color-rule: rgb(235 229 216 / 0.1);
+  --color-rule-strong: rgb(235 229 216 / 0.28);
+  --color-focus: var(--red-light);
 
   /* ── Type families (font faces registered via Astro Fonts) ─ */
-  --type-display: var(--font-display), 'Noto Serif Display', Georgia, serif;
+  --type-display: var(--font-sans), 'Archivo', 'Arial Narrow', Arial, sans-serif;
   --type-sans: var(--font-sans), 'Archivo', Arial, sans-serif;
   --type-mono: var(--font-mono), 'IBM Plex Mono', ui-monospace, monospace;
-  --type-jp: var(--font-jp), 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --type-jp: var(--font-jp), 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 
   /* ── Type scale (fluid) ───────────────────────────────── */
-  --text-mega: clamp(4.25rem, 2.2rem + 9.6vw, 13.5rem); /* the opening headline */
-  --text-giga: clamp(3.4rem, 1.9rem + 6.8vw, 9.5rem); /* chapter titles */
-  --text-xl: clamp(2.6rem, 1.6rem + 4.2vw, 6.25rem); /* project titles */
-  --text-l: clamp(1.6rem, 1.15rem + 1.9vw, 2.9rem); /* ledes, set in display */
-  --text-m: clamp(1.2rem, 1.05rem + 0.6vw, 1.55rem);
+  --text-mega: clamp(4rem, 1.8rem + 10vw, 14rem); /* the opening title */
+  --text-giga: clamp(3.2rem, 1.6rem + 7vw, 10rem); /* section titles */
+  --text-xl: clamp(2.6rem, 1.5rem + 4.6vw, 6.5rem); /* project titles */
+  --text-l: clamp(1.45rem, 1.1rem + 1.5vw, 2.4rem); /* ledes */
+  --text-m: clamp(1.15rem, 1.02rem + 0.55vw, 1.45rem);
   --text-base: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
   --text-s: 0.9375rem;
   --text-xs: 0.75rem; /* metadata, always mono + uppercase */
@@ -69,9 +56,9 @@
   --leading-tight: 0.86;
   --leading-snug: 1.12;
   --leading-body: 1.6;
-  --tracking-meta: 0.2em;
-  --tracking-title: 0.32em; /* film-title spacing for wide uppercase */
-  --stretch-condensed: 62.5%; /* display face at its narrowest: tall like a vertical column */
+  --tracking-meta: 0.18em;
+  --tracking-title: 0.3em;
+  --stretch-condensed: 62%; /* Archivo at its narrowest: stencilled, industrial */
 
   /* ── Space (4px base) ─────────────────────────────────── */
   --space-1: 0.25rem;
@@ -84,19 +71,19 @@
   --space-8: 4rem;
   --space-9: 6rem;
   --space-10: 8rem;
-  --space-section: clamp(6rem, 3rem + 10vw, 13rem);
+  --space-section: clamp(6rem, 3rem + 10vw, 12rem);
 
   /* ── Layout ───────────────────────────────────────────── */
   --margin: clamp(1rem, 0.4rem + 3vw, 3.5rem);
   --gutter: clamp(0.75rem, 0.4rem + 1.4vw, 2rem);
   --measure: 34rem;
-  --masthead-h: 4.25rem;
+  --masthead-h: 4rem;
   --panel-border: 1px;
 
   /* ── Motion ───────────────────────────────────────────── */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* reveals settle, never bounce */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* settles, never bounces */
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* wipes and cuts */
-  --ease-brush: cubic-bezier(0.55, 0, 0.1, 1); /* fast attack, long release: a blade stroke */
+  --ease-brush: cubic-bezier(0.55, 0, 0.1, 1); /* fast attack, long release */
   --dur-1: 180ms; /* hover feedback */
   --dur-2: 420ms; /* UI state */
   --dur-3: 900ms; /* scroll reveals */
@@ -108,17 +95,23 @@
   --z-cursor: 70;
 }
 
-/* Alternate chapters sit on a green-black ground, a shade off the void, so the
-   change of scene reads without a seam. Fixed chrome takes [data-on-ink] while
-   it floats over one. */
+/* Alternate sections sit on charcoal, which fades in and out of the void
+   at their edges. Fixed chrome takes [data-on-ink] while it floats over one. */
 [data-tone='ink'],
 [data-on-ink] {
-  --color-bg: var(--moss-deep);
-  --color-bg-alt: var(--steel);
-  --color-text: var(--bone);
-  --color-text-muted: var(--ash);
-  --color-accent-text: var(--gold-light);
-  --color-rule: rgb(232 225 210 / 0.11);
-  --color-rule-strong: rgb(232 225 210 / 0.32);
-  --color-focus: var(--gold-light);
+  --color-bg: var(--char);
+  --color-bg-alt: var(--stone);
+}
+
+/* Dossier: weathered paper with dark type, for documents inside the world. */
+[data-tone='paper'] {
+  --color-bg: var(--paper);
+  --color-bg-alt: #cbbe9f;
+  --color-panel: #cfc2a5;
+  --color-text: var(--paper-ink);
+  --color-text-muted: #5a5246;
+  --color-accent-text: #8e1a14;
+  --color-rule: rgb(26 23 20 / 0.16);
+  --color-rule-strong: rgb(26 23 20 / 0.5);
+  --color-focus: #8e1a14;
 }

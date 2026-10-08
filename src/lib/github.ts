@@ -41,7 +41,7 @@ const API = 'https://api.github.com';
 
 const headers = (): HeadersInit => ({
   Accept: 'application/vnd.github+json',
-  'User-Agent': 'hamon-portfolio-build',
+  'User-Agent': 'delin-portfolio-build',
   'X-GitHub-Api-Version': '2022-11-28',
   ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
 });

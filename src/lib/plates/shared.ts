@@ -1,30 +1,30 @@
 /**
- * Plates are the volume's imagery: screen-print compositions generated from code
+ * Plates are the site's imagery: screen-print compositions generated from code
  * at build time and served as static SVG files from /plates/{name}-{a|b}.svg.
  * Variant "a" is the full plate; "b" is a detail crop of the same drawing.
  */
 
 /**
- * Mirrors the cinematic palette in src/styles/tokens.css (SVG files can't read
- * CSS variables). Keys keep their first-edition names, by role: `washi` is the
- * plate's ground, `sumi` the drawing on it, `shu` the single gold accent.
- * `night` is the ground of plates printed dark-on-dark.
+ * Mirrors the palette in src/styles/tokens.css (SVG files can't read CSS
+ * variables). Plates are printed light-on-dark, like intelligence photographs:
+ * `ground` is the plate, `line` the drawing on it, `red` the single signal.
+ * Plates with `ground: 'night'` are printed on the deeper black.
  */
 export const INK = {
-  night: '#060707',
-  sumi: '#d8d0bf',
-  keshizumi: '#1f2427',
-  usuzumi: '#6f746e',
-  washi: '#0e1112',
-  washiDeep: '#181c1f',
-  gofun: '#e8e1d2',
-  shu: '#c2a068',
-  enji: '#8a6a40',
+  black: '#070707',
+  line: '#d6cbb3',
+  stone: '#24211e',
+  gray: '#6c6862',
+  ground: '#12110f',
+  groundDeep: '#1c1a17',
+  bone: '#ebe5d8',
+  red: '#b3231c',
+  redDeep: '#6e1612',
 } as const;
 
 export interface PlateDrawing {
   /** The ground the plate is printed on. */
-  ground: 'washi' | 'sumi';
+  ground: 'ground' | 'night';
   defs?: string;
   body: string;
 }
@@ -47,7 +47,7 @@ const grain = () => {
 
 /** Hairline plate border and registration marks, as on a proof sheet. */
 const proofMarks = (w: number, h: number, ground: PlateDrawing['ground']) => {
-  const c = ground === 'sumi' ? INK.usuzumi : INK.sumi;
+  const c = ground === 'night' ? INK.gray : INK.line;
   const m = Math.round(Math.min(w, h) * 0.035);
   const tick = m * 0.7;
   const reg = (x: number, y: number) =>
@@ -63,7 +63,7 @@ export function renderPlate(plate: Plate, variant: Variant) {
   const { width, height } = plate;
   const [vx, vy, vw, vh] = variant === 'b' ? plate.detail : [0, 0, width, height];
   const { ground, defs = '', body } = plate.draw();
-  const bg = ground === 'sumi' ? INK.night : INK.washi;
+  const bg = ground === 'night' ? INK.black : INK.ground;
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}" width="${vw}" height="${vh}">`,

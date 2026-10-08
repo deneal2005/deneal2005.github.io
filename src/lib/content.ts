@@ -6,9 +6,6 @@ export const getWorks = async () => (await getCollection('work')).sort((a, b) =>
 export const getJourney = async () =>
   (await getCollection('journey')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-export const getExperiments = async () =>
-  (await getCollection('experiments')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-
 /** A journey entry gets its own page only when it has a body. */
 export const hasPage = (entry: CollectionEntry<'journey'>) => Boolean(entry.body?.trim());
 

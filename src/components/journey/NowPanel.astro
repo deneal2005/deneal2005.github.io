@@ -15,7 +15,7 @@ interface Props {
 const { headingLevel = 'h3' } = Astro.props;
 const Heading = headingLevel;
 const [github, works] = await Promise.all([getGitHub(), getWorks()]);
-// Only repositories that are projects in this volume (repos come newest push first).
+// Only repositories that are projects on this site (repos come newest push first).
 const projectRepos = new Set(works.map((w) => w.data.links.repo?.toLowerCase()).filter(Boolean));
 const latest = github.status === 'ok' ? github.repos.find((r) => projectRepos.has(r.url.toLowerCase())) : undefined;
 
@@ -83,7 +83,7 @@ const rows: { label: string; items: NowItem[] }[] = [
     position: relative;
     padding: clamp(1.25rem, 2.5vw, 2rem);
     border: var(--panel-border) solid var(--color-rule-strong);
-    background: var(--gofun);
+    background: var(--stone);
   }
 
   .now__head {
@@ -100,8 +100,8 @@ const rows: { label: string; items: NowItem[] }[] = [
     width: 3.25rem;
     height: 3.25rem;
     flex: none;
-    background: var(--shu);
-    color: var(--gofun);
+    background: var(--red);
+    color: var(--bone);
     font-family: var(--type-jp);
     font-weight: 800;
     font-size: 1.9rem;
@@ -112,8 +112,8 @@ const rows: { label: string; items: NowItem[] }[] = [
   .now__title {
     font-family: var(--type-display);
     font-size: clamp(1.75rem, 1.4rem + 1vw, 2.4rem);
-    font-style: italic;
-    font-weight: 350;
+    font-style: normal;
+    font-weight: 800;
     font-stretch: 80%;
     line-height: 1;
   }

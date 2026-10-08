@@ -100,15 +100,15 @@ const contents = await page.eval(`(async () => {
   document.querySelector('[data-contents-open]').click();
   await wait(300);
   const opened = dialog.open && dialog.contains(document.activeElement);
-  dialog.querySelector('a.contents__row[href="/#journey"]').click();
+  dialog.querySelector('a.ops__row[href="/#campaigns"]').click();
   await wait(400);
-  const top = Math.round(document.getElementById('journey').getBoundingClientRect().top);
+  const top = Math.round(document.getElementById('campaigns').getBoundingClientRect().top);
   return { opened, closed: !dialog.open, top, focused: document.activeElement.id };
 })()`);
-if (!contents.opened) fail('/', 'contents dialog did not open with focus inside');
-if (!contents.closed) fail('/', 'contents dialog stayed open after choosing a chapter');
-if (Math.abs(contents.top) > 120) fail('/', `choosing a chapter left it ${contents.top}px from the top of the viewport`);
-if (contents.focused !== 'journey') fail('/', `focus went to "${contents.focused}" instead of the chosen chapter`);
+if (!contents.opened) fail('/', 'operations map did not open with focus inside');
+if (!contents.closed) fail('/', 'operations map stayed open after choosing a sector');
+if (Math.abs(contents.top) > 120) fail('/', `choosing a sector left it ${contents.top}px from the top of the viewport`);
+if (contents.focused !== 'campaigns') fail('/', `focus went to "${contents.focused}" instead of the chosen sector`);
 
 const chart = await page.eval(`(async () => {
   const plot = document.querySelector('[data-activity]');

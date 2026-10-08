@@ -1,6 +1,6 @@
 # Working on this repo
 
-Delin Thangjam's portfolio, set as a dark cinematic film: a scroll-scrubbed opening reel, then chapters cut like scenes. Astro 7, static output, no client framework.
+Delin Thangjam's portfolio, set in a dark Japanese military world: a colossal wall and a titan that breaks through it as you scroll, then six sectors filed like military records. Astro 7, static output, no client framework.
 
 ## Ground rules
 
@@ -9,7 +9,10 @@ Delin Thangjam's portfolio, set as a dark cinematic film: a scroll-scrubbed open
 - **Skills are the roadmap in `src/data/path.ts`**, as the owner wrote it. Don't add skills. Names stay concise ("SQL", "Linux", "DSA"): no "basics", sub-topics or beginner descriptions. Only add a `usedIn` link when the project's code really uses the skill.
 - **No location or nationality** in the introduction, hero, metadata or anywhere describing where the owner is based. (The GitHub profile's location field is wrong; never use it.)
 - LinkedIn, email and phone render as icons only (`ProfileLinks`), never as raw URLs or addresses.
-- Keep the visual system: tokens in `src/styles/tokens.css`, motion in `src/styles/motion.css`. Dark ground, bone type, gold (`--gold`, alias `--shu`) only for the occasional accent; small accent text uses `--gold-light`. No neon, glow or busy gradients.
+- Keep the visual system: tokens in `src/styles/tokens.css`, motion in `src/styles/motion.css`. Dark ground, bone type, red (`--red`) only as a signal (primary action, active sector, seals, warnings, section numbers); red text uses `--red-light`. No neon, glow or busy gradients.
+- Japanese text must mean what it says and fit its place (sector labels, classifications, stamps, warnings). Never decorative filler.
+- All art is original and drawn in code. Never copy official Attack on Titan logos, characters, panels or promotional art.
+- The opening sequence must stay compositor-only: animate `transform`/`opacity` on separate elements, never per-frame paint properties (see README, "The opening sequence").
 - **Never commit or deploy `public/media/`.** It holds third-party footage and music for local preview only (git-ignored). Builds without it must keep working: the hero falls back to `WallScene` and the sound toggle hides (`src/lib/media.ts`).
 - Every animation must respect `prefers-reduced-motion`, and content must be readable without JavaScript (hidden states only apply under `html.js`).
 
@@ -18,16 +21,15 @@ Delin Thangjam's portfolio, set as a dark cinematic film: a scroll-scrubbed open
 | What | Where |
 | --- | --- |
 | Name, role, statement, links (LinkedIn, email, phone), résumé | `src/data/profile.ts` |
-| Education (Chapter 01) | `src/data/education.ts` |
+| Education (Sector 02) | `src/data/education.ts` |
 | "Currently" panel | `src/data/now.ts` |
-| Skills roadmap (Chapter 02) | `src/data/path.ts` |
-| Precepts (Chapter 04) | `src/data/precepts.ts` |
+| Skills roadmap (Sector 03) | `src/data/path.ts` |
+| Sector names, numbers, Japanese titles | `src/data/sections.ts` |
 | Projects | `src/content/work/*.md` |
-| Experiments | `src/content/experiments/*.md` |
 | Journey entries | `src/content/journey/*.md` (copy `_template.md`) |
 | Generated images ("plates") | `src/lib/plates/`, served from `/plates/{name}-{a,b}.svg` |
 | Build-time GitHub data | `src/lib/github.ts` |
-| Opening reel (scroll-scrubbed video) | `src/components/sections/Hero.astro`, `src/scripts/reel.ts`, media in `public/media/` (git-ignored) |
+| Opening sequence (wall, titan) | `src/components/sections/Hero.astro`, `src/lib/titan.ts`, `src/scripts/wall.ts`; local-only footage in `public/media/` (git-ignored) |
 
 ## Commands
 

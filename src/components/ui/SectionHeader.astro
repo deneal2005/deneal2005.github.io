@@ -1,0 +1,145 @@
+---
+/**
+ * A section's title block, set like the cover of a military file: sector
+ * number, classification, the English title, and its Japanese name running
+ * vertically in the margin.
+ */
+import { sectionById } from '../../data/sections';
+
+interface Props {
+  id: string;
+  /** One or two sentences under the title. */
+  brief: string;
+}
+
+const { id, brief } = Astro.props;
+const section = sectionById(id);
+---
+
+<header class="sh">
+  <p class="sh__file meta">
+    <span class="sh__no">{section.no}</span>
+    <span class="sh__bar" aria-hidden="true"></span>
+    <span>Sector {section.no}</span>
+    <span class="sh__ja" lang="ja">第{section.no}区画</span>
+    <span class="sh__class">File · {section.file}</span>
+  </p>
+  <h2 class="sh__title" id={`${id}-title`} data-reveal="rise">
+    <span class="rise"><span>{section.title}</span></span>
+  </h2>
+  <div class="sh__side" aria-hidden="true">
+    <p class="sh__kanji" lang="ja">{section.ja}</p>
+    <p class="sh__reading meta">{section.reading}</p>
+  </div>
+  <p class="sh__brief" data-reveal="fade" style="--i: 2">{brief}</p>
+</header>
+
+<style>
+  .sh {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--gutter);
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-9);
+    border-top: 1px solid var(--color-rule-strong);
+  }
+
+  /* Hazard tick on the rule, where the file begins */
+  .sh::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 4.5rem;
+    height: 3px;
+    background: var(--red);
+  }
+
+  .sh__file {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    color: var(--color-text);
+  }
+
+  .sh__no {
+    color: var(--color-accent-text);
+    font-weight: 500;
+  }
+
+  .sh__bar {
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .sh__ja {
+    font-family: var(--type-jp);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+  }
+
+  .sh__class {
+    margin-left: auto;
+    color: var(--color-text-muted);
+  }
+
+  .sh__title {
+    grid-column: 1;
+    margin-top: var(--space-6);
+    font-family: var(--type-display);
+    font-size: var(--text-giga);
+    font-stretch: var(--stretch-condensed);
+    font-weight: 800;
+    line-height: 0.86;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+  }
+
+  .sh__side {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    display: flex;
+    gap: var(--space-2);
+    align-self: start;
+    margin-top: var(--space-6);
+  }
+
+  .sh__kanji {
+    writing-mode: vertical-rl;
+    font-family: var(--type-jp);
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 3rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.1em;
+  }
+
+  .sh__reading {
+    writing-mode: vertical-rl;
+  }
+
+  .sh__brief {
+    grid-column: 1;
+    margin-top: var(--space-5);
+    max-width: 34rem;
+    font-size: var(--text-m);
+    line-height: 1.45;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 47.99rem) {
+    .sh__class {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+
+    .sh__title {
+      font-size: clamp(2.9rem, 15vw, 5rem);
+    }
+  }
+</style>

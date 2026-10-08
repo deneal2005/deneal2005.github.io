@@ -94,14 +94,14 @@ ol {
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--void);
+  background: var(--red);
+  color: var(--bone);
 }
 
 html {
   background: var(--void);
   color-scheme: dark;
-  scrollbar-color: var(--steel-2) var(--void);
+  scrollbar-color: var(--stone-2) var(--void);
 }
 
 /* ── Accessibility ──────────────────────────────────────── */
@@ -111,7 +111,7 @@ html {
   border-radius: 1px;
 }
 
-/* Sections focused programmatically (skip link, contents) don't need a ring around the whole chapter. */
+/* Sections focused programmatically (skip link, contents) don't need a ring around the whole section. */
 [tabindex='-1']:focus {
   outline: none;
 }
@@ -134,8 +134,8 @@ html {
   left: var(--space-3);
   z-index: 100;
   padding: var(--space-3) var(--space-4);
-  background: var(--sumi);
-  color: var(--washi);
+  background: var(--black);
+  color: var(--bone);
   font-family: var(--type-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-meta);
@@ -170,15 +170,22 @@ html {
   color: var(--color-text);
 }
 
-/* Alternate chapters fade in and out of the void at their edges: no hard seams between scenes. */
-[data-tone='ink']:not(dialog):not(.panel) {
+/* Alternate sectors fade in and out of the void at their edges: no hard seams between scenes. */
+[data-tone='ink']:not(dialog) {
   background-image: linear-gradient(
     180deg,
     var(--void) 0,
-    var(--moss-deep) clamp(6rem, 18vh, 14rem),
-    var(--moss-deep) calc(100% - clamp(6rem, 18vh, 14rem)),
+    var(--char) clamp(6rem, 18vh, 14rem),
+    var(--char) calc(100% - clamp(6rem, 18vh, 14rem)),
     var(--void) 100%
   );
+}
+
+/* Weathered paper: a faint fibre and a darker, scuffed edge */
+[data-tone='paper'] {
+  background-image:
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(74 58 40 / 0.28) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .24 0 0 0 0 .16 0 0 0 1.8 -1.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 }
 
 /* ── Type primitives ────────────────────────────────────── */
@@ -195,9 +202,16 @@ html {
 .display {
   font-family: var(--type-display);
   font-stretch: var(--stretch-condensed);
-  font-weight: 400;
+  font-weight: 800;
   line-height: var(--leading-tight);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
+}
+
+/* Japanese set as signage: gothic, heavy, tracked */
+.jp {
+  font-family: var(--type-jp);
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 /* Film-title setting: wide, light, generously tracked uppercase */
@@ -213,8 +227,8 @@ html {
   font-family: var(--type-display);
   font-size: var(--text-l);
   font-stretch: 87.5%;
-  font-weight: 350;
-  line-height: 1.14;
+  font-weight: 500;
+  line-height: 1.16;
   letter-spacing: -0.005em;
 }
 
@@ -228,17 +242,15 @@ html {
 }
 
 .prose em {
-  font-family: var(--type-display);
-  font-size: 1.12em;
-  font-style: italic;
-  line-height: 1;
+  font-style: normal;
+  color: var(--color-accent-text);
 }
 
 /* 縦書き: vertical Japanese setting */
 .tate {
   writing-mode: vertical-rl;
   font-family: var(--type-jp);
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1;
   letter-spacing: 0.12em;
 }
@@ -268,6 +280,7 @@ html {
   min-height: 2.75rem;
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--color-rule-strong);
+  border-radius: 0;
   font-family: var(--type-mono);
   font-size: var(--text-xs);
   font-weight: 500;
@@ -283,9 +296,8 @@ html {
 
 @media (hover: hover) {
   .btn:hover {
-    background-color: rgb(232 225 210 / 0.06);
-    border-color: var(--gold);
-    color: var(--gold-light);
+    background-color: rgb(235 229 216 / 0.06);
+    border-color: var(--bone);
   }
 }
 
@@ -301,18 +313,19 @@ html {
   }
 }
 
-/* The one primary action in a view: the gold blade */
+/* The one primary action in a view: signal red, with clipped corners like a stencilled plate */
 .btn--ink {
-  background-color: var(--gold);
-  border-color: var(--gold);
-  color: var(--void);
+  background-color: var(--red);
+  border-color: var(--red);
+  color: var(--bone);
+  clip-path: polygon(0.5rem 0, 100% 0, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0 100%, 0 0.5rem);
 }
 
 @media (hover: hover) {
   .btn--ink:hover {
-    background-color: var(--gold-light);
-    border-color: var(--gold-light);
-    color: var(--void);
+    background-color: #c92a22;
+    border-color: #c92a22;
+    color: var(--bone);
   }
 
   .btn:hover .arrow--right {
@@ -345,9 +358,9 @@ html {
   height: 4.75rem;
   margin: -2.375rem 0 0 -2.375rem;
   border-radius: 50%;
-  background: rgb(8 9 10 / 0.55);
-  border: 1px solid var(--gold);
-  color: var(--gold-light);
+  background: rgb(12 11 10 / 0.6);
+  border: 1px solid var(--red);
+  color: var(--bone);
   backdrop-filter: blur(8px);
   font-family: var(--type-mono);
   font-size: var(--text-xs);
@@ -419,16 +432,12 @@ html {
 }
 
 .longform h2 + p {
-  font-family: var(--type-display);
   font-size: var(--text-m);
-  font-stretch: 90%;
-  line-height: 1.38;
+  line-height: 1.45;
 }
 
 .longform em {
-  font-family: var(--type-display);
-  font-style: italic;
-  font-size: 1.08em;
+  font-style: normal;
   color: var(--color-accent-text);
 }
 
@@ -441,16 +450,16 @@ html {
   font-family: var(--type-mono);
   font-size: 0.85em;
   padding: 0.1em 0.35em;
-  background: var(--washi-deep);
+  background: var(--stone);
 }
 
 .longform pre {
   margin-top: var(--space-5);
   padding: var(--space-4) var(--space-5);
   overflow-x: auto;
-  background: var(--sumi) !important;
-  color: var(--washi);
-  border-left: 2px solid var(--gold);
+  background: var(--black) !important;
+  color: var(--bone);
+  border-left: 2px solid var(--red);
 }
 
 .longform pre code {

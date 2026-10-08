@@ -30,10 +30,10 @@ const prev = neighbour(older);
 const next = neighbour(newer);
 ---
 
-<BaseLayout title={data.title} description={data.summary} running={{ label: 'Journey', title: formatDate(data.date) }}>
-  <article class="je wrap" data-chapter-label="Journey" data-chapter-title={formatDate(data.date)} aria-labelledby="je-title">
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="je wrap" data-sector data-sector-no="05" data-sector-ja="戦歴" aria-labelledby="je-title">
     <div class="je__trail">
-      <a class="je__back meta" href="/journey/"><Arrow dir="left" /> All entries</a>
+      <a class="je__back meta" href="/journey/"><Arrow dir="left" /> Campaign log</a>
       <p class="meta"><time datetime={date}>{formatDate(data.date)}</time></p>
     </div>
 
@@ -153,12 +153,12 @@ const next = neighbour(newer);
   .je__title {
     margin-top: var(--space-4);
     font-size: clamp(3rem, 1.6rem + 5vw, 7rem);
-    font-weight: 350;
+    font-weight: 800;
   }
 
   .je__summary {
     margin-top: var(--space-5);
-    font-style: italic;
+    font-style: normal;
   }
 
   .je__body {

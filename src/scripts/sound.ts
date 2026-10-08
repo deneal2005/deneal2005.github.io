@@ -26,7 +26,7 @@ export function initSound() {
     const from = a.volume;
     const start = performance.now();
     const step = (now: number) => {
-      const k = Math.min(1, (now - start) / 900);
+      const k = Math.min(1, Math.max(0, (now - start) / 900));
       a.volume = from + (to - from) * k;
       if (k < 1) fade = requestAnimationFrame(step);
       else done?.();

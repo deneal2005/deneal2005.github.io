@@ -4,22 +4,20 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/motion.css';
 import Masthead from '../components/chrome/Masthead.astro';
-import PageRail from '../components/chrome/PageRail.astro';
-import ContentsDialog from '../components/chrome/ContentsDialog.astro';
-import Colophon from '../components/chrome/Colophon.astro';
+import SectorRail from '../components/chrome/SectorRail.astro';
+import OpsMap from '../components/chrome/OpsMap.astro';
+import Footer from '../components/chrome/Footer.astro';
 import { site } from '../data/site';
 import { profileLinks } from '../lib/links';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Running head shown in the masthead before any chapter has scrolled in. */
-  running?: { label: string; title: string };
   /** Adds Person structured data (the homepage). */
   person?: boolean;
 }
 
-const { title, description = site.description, running = { label: 'Prologue', title: 'Every line is final' }, person = false } = Astro.props;
+const { title, description = site.description, person = false } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.title;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 const ogImage = Astro.site ? new URL('/og.png', Astro.site).href : '/og.png';
@@ -60,11 +58,10 @@ const personLd = person
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="A vermilion sun split by a brush stroke above a lone swordsman, with the words Every line is final." />
+    <meta property="og:image:alt" content={`${site.name}, ${site.role}.`} />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary_large_image" />
     {personLd && <script type="application/ld+json" set:html={personLd} />}
-    <Font cssVariable="--font-display" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-sans" preload />
     <Font cssVariable="--font-mono" />
     <Font cssVariable="--font-jp" />
@@ -75,13 +72,13 @@ const personLd = person
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <Masthead label={running.label} title={running.title} />
-    <PageRail />
+    <Masthead />
+    <SectorRail />
     <main id="main" tabindex="-1">
       <slot />
     </main>
-    <Colophon />
-    <ContentsDialog />
+    <Footer />
+    <OpsMap />
     <div class="grain" aria-hidden="true"></div>
     <script>
       import '../scripts/main';

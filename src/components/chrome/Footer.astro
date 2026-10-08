@@ -1,0 +1,201 @@
+---
+/** 通信終了 — end of transmission. Who, where to go, how it was made. Every line is fact. */
+import Insignia from '../ui/Insignia.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
+import { sections } from '../../data/sections';
+import { site } from '../../data/site';
+
+const year = new Date().getFullYear();
+const built = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+---
+
+<footer class="foot" data-tone="ink">
+  <div class="foot__hazard" aria-hidden="true"></div>
+  <div class="foot__grid grid">
+    <div class="foot__who">
+      <p class="foot__name"><Insignia size={28} /> {site.name}</p>
+      <p class="foot__statement">{site.statement}</p>
+      <ProfileLinks class="foot__links" />
+    </div>
+
+    <nav class="foot__nav" aria-label="Footer">
+      <p class="meta">Sectors</p>
+      <ol>
+        {
+          sections.map((s) => (
+            <li>
+              <a class="link" href={`/#${s.id}`}>
+                <span class="foot__no">{s.no}</span> {s.title}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a class="link" href="/journey/"><span class="foot__no">—</span> Campaign log</a>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="foot__file">
+      <p class="foot__ja" lang="ja" aria-hidden="true">通信終了</p>
+      <h2 class="foot__heading meta">End of transmission</h2>
+      <dl class="foot__facts">
+        <div>
+          <dt class="meta">Built</dt>
+          <dd>{built}, with Astro. Static files, no client framework.</dd>
+        </div>
+        <div>
+          <dt class="meta">Type</dt>
+          <dd>Archivo, IBM Plex Mono and Noto Sans JP</dd>
+        </div>
+        <div>
+          <dt class="meta">Imagery</dt>
+          <dd>The wall, the titan and the project plates are drawn in code. No stock imagery.</dd>
+        </div>
+        <div>
+          <dt class="meta">Privacy</dt>
+          <dd>No cookies, no trackers, nothing to accept.</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="foot__end">
+      <a class="link" href="/#top">Back to the wall</a>
+      <p class="meta">© {year} {site.name}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    position: relative;
+    padding: 0 var(--margin) var(--space-6);
+    border-top: 1px solid var(--color-rule-strong);
+  }
+
+  /* A strip of warning stripes, where the page ends */
+  .foot__hazard {
+    height: 6px;
+    margin-inline: calc(var(--margin) * -1);
+    background: repeating-linear-gradient(-45deg, var(--red) 0 10px, transparent 10px 20px);
+    opacity: 0.55;
+  }
+
+  .foot__grid {
+    row-gap: var(--space-8);
+    padding-top: var(--space-9);
+  }
+
+  .foot__who {
+    grid-column: 1 / span 5;
+  }
+
+  .foot__name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--type-sans);
+    font-size: 0.95rem;
+    font-stretch: 112%;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .foot__statement {
+    margin-top: var(--space-4);
+    max-width: 26rem;
+    color: var(--color-text-muted);
+  }
+
+  .foot__who :global(.foot__links) {
+    margin-top: var(--space-5);
+  }
+
+  .foot__nav {
+    grid-column: 6 / span 3;
+  }
+
+  .foot__nav ol {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .foot__no {
+    font-family: var(--type-mono);
+    font-size: var(--text-xs);
+    color: var(--red-light);
+    margin-right: var(--space-2);
+  }
+
+  .foot__file {
+    grid-column: 9 / -1;
+    position: relative;
+  }
+
+  .foot__ja {
+    display: inline-block;
+    margin-bottom: var(--space-3);
+    padding: 0.25em 0.45em;
+    border: 1px solid var(--red);
+    font-family: var(--type-jp);
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    color: var(--red-light);
+  }
+
+  .foot__heading {
+    color: var(--color-text);
+  }
+
+  .foot__facts {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .foot__facts div {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    font-size: var(--text-s);
+  }
+
+  .foot__facts dd {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  .foot__end {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-rule);
+  }
+
+  @media (max-width: 63.99rem) {
+    .foot__who {
+      grid-column: 1 / -1;
+    }
+
+    .foot__nav {
+      grid-column: 1 / span 3;
+    }
+
+    .foot__file {
+      grid-column: 4 / -1;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .foot__nav,
+    .foot__file {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -1,10 +1,10 @@
-# Hamon, Vol. 01
+# Delin Thangjam: portfolio
 
-The portfolio of **Delin Thangjam**, set as a film: an opening reel you scrub with the scroll wheel, chapters cut like scenes, a contents page with live page numbers, and a colophon at the back. Dark, cinematic and restrained: near-black, steel, muted military green, bronze and a little gold, with film-title typography.
+The portfolio of **Delin Thangjam**, set inside a dark Japanese military world: a colossal wall, and a titan that rises behind it and breaks through as you scroll. Six sectors follow, each filed like a military record, with Japanese labels that mean what they say. Charcoal, weathered stone and paper, metal, and red used only as a signal.
 
 Everything on the site is either a fact from the projects themselves (their code, READMEs and live sites) or something written for the site. Nothing is invented. Fields that aren't filled in yet hide themselves instead of showing placeholders.
 
-**Stack:** Astro 7 (static output) · TypeScript · plain CSS with design tokens · no client framework · under 5 KB of JavaScript (gzipped) on first load, plus the lab studies, which load only when you scroll to them.
+**Stack:** Astro 7 (static output) · TypeScript · plain CSS with design tokens · no client framework · a few KB of JavaScript (gzipped), no dependencies in the browser.
 
 ---
 
@@ -33,7 +33,7 @@ The QA and screenshot scripts drive a local Chrome or Edge in headless mode. Set
 
 ## Updating the site
 
-Almost everything is edited in one of three places: **`src/data/`** for identity, **`src/content/`** for projects, experiments and journey entries, and **`public/`** for files like a résumé.
+Almost everything is edited in one of three places: **`src/data/`** for identity, **`src/content/`** for projects and log entries, and **`public/`** for files like a résumé.
 
 ### Your identity: `src/data/profile.ts`
 
@@ -45,14 +45,14 @@ Name, role, the one-sentence statement, the About text and every link. The site 
 | `links.email` (or `PUBLIC_CONTACT_EMAIL`) | No email icon, and "Copy email" disappears |
 | `links.phone` | No phone icon. Use the international format, e.g. `+919862667033` |
 | `links.resume` | No résumé link. To add one, put `resume.pdf` in `public/` and set `resume: '/resume.pdf'` |
-| `about.exploring`, `about.learning` | Those lists are hidden in Chapter 01 |
+| `about.exploring`, `about.learning` | Those lists are hidden in The Soldier |
 | `portrait` | A printed sunrise plate stands in for a photo |
 
 LinkedIn, email and phone always appear as icons (`tel:` and `mailto:` links), never as raw URLs or addresses.
 
 ### Education: `src/data/education.ts`
 
-Shown in Chapter 01 as a timeline, oldest first. Mark the ongoing entry with `current: true` and a `status`.
+Shown in The Soldier (Sector 02) as a timeline, oldest first. Mark the ongoing entry with `current: true` and a `status`.
 
 ### What you're doing now: `src/data/now.ts`
 
@@ -72,13 +72,9 @@ One Markdown file per project. The frontmatter holds the facts (summary, status,
 
 Each project also needs a `plate`, its generated cover image. Plates live in `src/lib/plates/index.ts`. For a new project, either write a new plate function (copy one of the existing ones) or reuse an existing plate until you do.
 
-### An experiment: `src/content/experiments/`
-
-Copy `_template.md`. Experiments are exploration, not product. Without a `demo` they're listed as lab notes in Chapter 05, with optional repository and live links.
-
 ### Skills: `src/data/path.ts`
 
-Chapter 02, The Path, is the roadmap toward software backend engineering in Japan: eleven areas, from Java fundamentals to Japanese, exactly as in the roadmap. Each skill can carry:
+Sector 03, The Arsenal, is the roadmap toward software backend engineering in Japan: eleven areas, from Java fundamentals to Japanese, exactly as in the roadmap. Each skill can carry:
 
 - `usedIn: ['rentmate']`: the file name of a project or journey entry where the skill really shows up. It renders as a link, and the build fails if the name doesn't exist.
 - `status: 'learning'` or `'comfortable'`: a small label, shown only when set.
@@ -87,7 +83,7 @@ The Japanese area has a JLPT ladder (`ladder.current` marks where you are now; t
 
 ### Japanese characters
 
-The mincho font is subset at build time to exactly the characters used under `src/`. If you add new kanji, restart the dev server so they're included.
+Noto Sans JP is subset at build time to exactly the characters used under `src/`. If you add new kanji, restart the dev server so they're included.
 
 ---
 
@@ -112,26 +108,41 @@ Copy `.env.example` to `.env`. Everything is optional.
 
 ---
 
-## The opening reel
+## The sectors
 
-The homepage opens on a tall (about 420vh) section whose sticky frame plays a video as a scroll-controlled image sequence: scroll progress maps directly to playback position, forward and backward (`src/scripts/reel.ts`). The owner's statement is cut into title cards timed against the reel, with a closing credit before the first chapter.
+| No. | Section | 日本語 | What |
+| --- | --- | --- | --- |
+| 01 | The Wall | 壁 (kabe) | The opening sequence and introduction |
+| 02 | The Soldier | 兵士 (heishi) | About: a personnel dossier, education, links |
+| 03 | The Arsenal | 武器庫 (bukiko) | Skills, from `src/data/path.ts` |
+| 04 | The Expeditions | 遠征 (ensei) | Projects; each has an expedition report at `/work/<id>/` |
+| 05 | The Campaigns | 戦歴 (senreki) | The record: Currently, latest log entries, GitHub activity; the full log is `/journey/` |
+| 06 | Beyond the Wall | 壁の外 (kabe no soto) | Contact |
 
-The reel's media lives in `public/media/`, which is **git-ignored**. The footage and soundtrack used while developing are third-party, copyrighted material, so they are never committed or deployed. Builds without them (CI, GitHub Pages) show an original scene in their place (`src/components/motifs/WallScene.astro`) that still moves with the scroll, and the sound toggle hides itself. To use footage you own or have licensed, drop these files into `public/media/` and remove the folder from `.gitignore`:
+Sector names, numbers and Japanese titles live in `src/data/sections.ts`; the navigation, sector rail, operations map and footer all read from it.
+
+## The opening sequence
+
+`src/components/sections/Hero.astro` is a tall (about 520vh) section with a sticky stage. Scroll progress drives one sequence, and scrolling back reverses it exactly: the wall alone → tremors, falling dust and cracks → steam behind the parapet → a head rises, a warning, a hand grips the edge → the wall breaks open at the titan's chest → the camera pulls back. All of it is original art drawn in code (geometry in `src/lib/titan.ts`); no frames or assets are copied from anywhere.
+
+How it stays smooth: every layer is its own element and moves with `transform` or `opacity` only, so the browser composites instead of repainting. Shards are individual elements, the eyes glow on their own layer, and the only painted change (the cracks) steps in twentieths. `src/scripts/wall.ts` does one layout read per frame, eases the camera, and stops work when the section is off screen. Under reduced motion, or without JavaScript, the section is one screen showing the finished scene.
+
+### Opening footage (local only)
+
+If `public/media/` holds footage, it plays as the opening shot and cuts to the wall on the first scroll. That folder is **git-ignored**: the footage and soundtrack used while developing are third-party and copyrighted, so they are never committed or deployed. Builds without them (CI, GitHub Pages) open straight on the wall, and the Sound toggle hides itself.
 
 | File | What |
 | --- | --- |
-| `hero-720.mp4` | The reel. H.264, no audio, short GOP so seeking stays instant. |
-| `hero-480.mp4` | Optional phone version. |
-| `hero-poster.jpg` | Optional first frame, shown until the reel loads. |
-| `theme.mp3` | Optional soundtrack. Off until the visitor presses Sound in the masthead. |
+| `reel-720.mp4` | The opening shot. H.264, no audio, colour grade baked in. |
+| `reel-480.mp4` | Optional phone version. |
+| `reel-poster.jpg` | Optional first frame, shown until playback starts. |
+| `theme.mp3` | Optional soundtrack. Off until the visitor presses Sound. |
 
-Encode the reel with a keyframe every few frames, or scrubbing stutters:
+The footage plays natively at its own frame rate; it is never seeked from the scroll (per-frame seeking is what makes scroll-scrubbed video stutter). It loads only when the section is on screen, pauses once it has faded out or scrolled away, and is skipped under Save-Data. Bake the grade into the file instead of using CSS filters over it:
 
 ```
-ffmpeg -i source.mp4 -an -vf "fps=24,scale=1280:-2" -c:v libx264 -preset slow -crf 26 -g 6 -bf 0 -sc_threshold 0 -pix_fmt yuv420p -movflags +faststart public/media/hero-720.mp4
+ffmpeg -i source.mp4 -an -vf "scale=1280:-2,eq=saturation=0.55:contrast=1.1:brightness=-0.06,vignette=PI/4.5" -r 30 -c:v libx264 -profile:v high -preset slow -crf 23 -g 60 -pix_fmt yuv420p -movflags +faststart public/media/reel-720.mp4
 ```
-
-The reel is fetched whole before the first seek, skipped entirely with Save-Data, and replaced by the poster under reduced motion.
 
 ---
 
@@ -150,28 +161,27 @@ CI (`.github/workflows/ci.yml`) runs the type and content checks, the build and 
 
 ```
 src/
-  data/          profile, now, the skills path, precepts, chapter list
-  content/       work/, experiments/, journey/ (Markdown, with _template.md files)
+  data/          profile, now, education, the skills path, sections
+  content/       work/, journey/ (Markdown, with _template.md files)
   components/
-    chrome/      masthead, contents dialog, folio rail, colophon
-    sections/    the homepage chapters, in reading order
+    chrome/      command bar, operations map, sector rail, footer
+    sections/    the homepage sectors, in order
     journey/     Currently panel, timeline, GitHub activity chart
-    motifs/      the reel's fallback scene, temper-line divider, cut-sun mark
-    ui/          shared pieces: plate frame, chapter opener, links, arrow
-    work/        the exhibition spread
-  lib/           drawing helpers, plates, reel media lookup, GitHub client, content queries
+    ui/          shared pieces: section header, insignia, plate frame, links, arrow
+    work/        the expedition spread
+  lib/           the wall/titan geometry, drawing helpers, plates, media lookup, GitHub client, content queries
   pages/         routes: /, /work/[slug], /journey, /journey/[slug], /plates/*.svg, 404, sitemap, robots
-  scripts/       client JS: the reel, sound, reveals, chrome, contents dialog, interactions, lab studies
+  scripts/       client JS: the wall sequence, sound, reveals, chrome, operations map, interactions
   styles/        tokens, base, motion
 scripts/         QA crawl, screenshots, icon rendering, glyph collection for the font subset
 ```
 
 ## Design system
 
-- **Colour:** near-black (`--void`), charcoal, dark steel, a muted military green, bronze, dark gold and a warm off-white (`--bone`). Gold is the single accent and is used sparingly. Defined once in `src/styles/tokens.css`; the first edition's pigment names (`--sumi`, `--washi`, `--shu`…) remain as aliases by role. Alternate chapters (`data-tone="ink"`) sit on a green-black ground that fades in and out of the void, so there are no seams between scenes.
-- **Type:** Noto Serif Display at its narrowest width for display, Archivo for text, IBM Plex Mono for metadata, Shippori Mincho B1 for Japanese. All self-hosted, with metric-matched fallbacks.
-- **Motion:** four durations and three easings, restrained and deliberate. Type surfaces with a focus pull (blur to sharp) and settles; the reel's camera pushes in slowly as you scroll. Reveals wait for the display font, so type never reflows mid-animation. Page changes cut through black with cross-document view transitions.
-- **Accessibility:** semantic landmarks, a skip link, visible focus, a native `<dialog>` for the contents, keyboard-readable chart with a table view, and reduced-motion support throughout.
+- **Colour:** charcoal and black, weathered stone, dirty beige and weathered paper (dossiers, `data-tone="paper"`), muted brown, metal, and off-white type. Red (`--red`, small text `--red-light`) is a signal only: the primary action, the active sector, seals, warnings and section numbers. Defined once in `src/styles/tokens.css`. Alternate sectors (`data-tone="ink"`) sit on charcoal that fades in and out of the void, so there are no seams.
+- **Type:** Archivo at its narrowest, heaviest widths for industrial display type and at normal width for text, IBM Plex Mono for military metadata, Noto Sans JP (gothic, heavy) for Japanese labels. Japanese is used as signage and classification, always meaning what it says (第02区画, 人事記録, 在学中, 警報).
+- **Motion:** restrained and deliberate. The wall sequence carries the drama (shake on impacts, dust, cracks, a red warning flash); elsewhere, type is stamped in and panels open like shutters. Page changes cut through black with cross-document view transitions.
+- **Accessibility:** semantic landmarks, a skip link, visible focus, a native `<dialog>` for the operations map, `aria-current` on the active sector, a keyboard-readable chart with a table view, and reduced-motion support throughout.
 
 ## Still to fill in
 
@@ -187,4 +197,4 @@ Things only you can provide. Each one is a single field, and nothing shows until
 
 ## Credits
 
-Fonts under the SIL Open Font License: Noto Serif Display, Archivo, IBM Plex Mono, Shippori Mincho B1. Every image in the repository is generated from code. Any reel footage or soundtrack placed in `public/media/` belongs to its rights holders and stays out of the repository.
+Fonts under the SIL Open Font License: Archivo, IBM Plex Mono, Noto Sans JP. Every image in the repository is generated from code. Any reel footage or soundtrack placed in `public/media/` belongs to its rights holders and stays out of the repository.

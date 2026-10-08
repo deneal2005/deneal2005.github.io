@@ -130,26 +130,6 @@ export function brushStroke(opts: {
   return smoothPath([...left, ...right.reverse()], true);
 }
 
-/**
- * A temper line: the misty wave a hardened edge leaves along a blade.
- * Mixes a slow undulation (notare) with clustered round bumps (gunome).
- */
-export function hamonPath(opts: { width: number; height: number; seed?: number; step?: number }) {
-  const { width, height, seed = 3, step = 14 } = opts;
-  const random = rng(seed);
-  const p1 = random() * Math.PI * 2;
-  const p2 = random() * Math.PI * 2;
-  const mid = height / 2;
-  const amp = height * 0.36;
-  const points: Point[] = [];
-  for (let x = 0; x <= width + 0.01; x += step) {
-    const slow = Math.sin(x * 0.006 + p1) * 0.55;
-    const bumps = Math.abs(Math.sin(x * 0.034 + p2)) * 0.75 - 0.35;
-    const grain = (random() - 0.5) * 0.12;
-    points.push([x, mid + amp * (slow + bumps + grain) * 0.75]);
-  }
-  return smoothPath(points);
-}
 
 /** The two halves of a circle split by a line through `through` at `angle` degrees. */
 export function splitCircle(opts: { cx: number; cy: number; r: number; through: Point; angle: number; reach?: number }) {

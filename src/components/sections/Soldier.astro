@@ -1,0 +1,328 @@
+---
+/**
+ * 02 — The Soldier (兵士): who this is, set as a personnel file. A weathered
+ * dossier card on the left, the full account on the right. Facts only:
+ * every field comes from profile.ts, education.ts or the build's GitHub data.
+ */
+import SectionHeader from '../ui/SectionHeader.astro';
+import Insignia from '../ui/Insignia.astro';
+import ProfileLinks from '../ui/ProfileLinks.astro';
+import Education from '../ui/Education.astro';
+import { sectionById } from '../../data/sections';
+import { site } from '../../data/site';
+import { education } from '../../data/education';
+import { getGitHub } from '../../lib/github';
+import { getJourney, getWorks } from '../../lib/content';
+
+const section = sectionById('soldier');
+const github = await getGitHub();
+const [works, journey] = await Promise.all([getWorks(), getJourney()]);
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const { about } = site;
+const studying = education.find((e) => e.current);
+
+const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const fields = [
+  { label: 'Name', value: site.name },
+  { label: 'Role', value: site.role },
+  studying && { label: 'Training', value: studying.title },
+  { label: 'Working toward', value: 'Software backend engineering' },
+  github.status === 'ok' && { label: 'On GitHub since', value: monthYear.format(new Date(github.memberSince)) },
+  { label: 'On file', value: [count(works.length, 'project', 'projects'), count(journey.length, 'log entry', 'log entries')].join(' · ') },
+].filter((f): f is { label: string; value: string } => Boolean(f));
+---
+
+<section
+  id={section.id}
+  class="soldier wrap"
+  data-sector
+  data-sector-no={section.no}
+  data-sector-ja={section.ja}
+  aria-labelledby="soldier-title"
+>
+  <SectionHeader id="soldier" brief="Who I am, what I build, and where to find me." />
+
+  <div class="soldier__grid grid">
+    <!-- The dossier -->
+    <div class="dossier" data-tone="paper" data-reveal="panel">
+      <div class="dossier__strip">
+        <span lang="ja" class="jp">人事記録</span>
+        <span>Personnel file</span>
+        <span class="dossier__ref">No. {section.no}</span>
+      </div>
+
+      <div class="dossier__body">
+        <figure class="dossier__photo">
+          {
+            site.portrait ? (
+              <img src={site.portrait.src} alt={site.portrait.alt} loading="lazy" decoding="async" />
+            ) : (
+              <div class="dossier__nophoto">
+                <Insignia size={44} />
+                <span class="meta">No photograph on file</span>
+                <span lang="ja" class="jp">写真なし</span>
+              </div>
+            )
+          }
+        </figure>
+
+        <dl class="dossier__fields">
+          {
+            fields.map((f) => (
+              <div>
+                <dt class="meta">{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      {
+        studying?.status && (
+          <p class="dossier__stamp" aria-label={studying.status}>
+            <span lang="ja">在学中</span>
+            <span class="dossier__stamp-en">{studying.status}</span>
+          </p>
+        )
+      }
+    </div>
+
+    <!-- The account -->
+    <div class="soldier__intro">
+      <p class="soldier__lede lede" data-reveal="fade">{about.who}</p>
+      <p class="soldier__what" data-reveal="fade" style="--i: 2">{about.what}</p>
+
+      <Education />
+
+      {
+        (about.exploring.length > 0 || about.learning.length > 0) && (
+          <div class="soldier__lists">
+            {about.exploring.length > 0 && (
+              <div>
+                <h3 class="meta">Exploring</h3>
+                <ul>
+                  {about.exploring.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {about.learning.length > 0 && (
+              <div>
+                <h3 class="meta">Learning</h3>
+                <ul>
+                  {about.learning.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      <ProfileLinks variant="rows" class="soldier__links" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .soldier {
+    padding-block: var(--space-section);
+  }
+
+  .soldier__grid {
+    align-items: start;
+    row-gap: var(--space-7);
+  }
+
+  /* ── Dossier ──────────────────────────────────────── */
+  .dossier {
+    grid-column: 1 / span 5;
+    position: sticky;
+    top: calc(var(--masthead-h) + var(--space-5));
+    padding: var(--space-4);
+    box-shadow:
+      0 1.5rem 3rem rgb(0 0 0 / 0.5),
+      0 0 0 1px rgb(0 0 0 / 0.4);
+    transform: rotate(-0.6deg);
+  }
+
+  .dossier__strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    background: var(--paper-ink);
+    color: var(--paper);
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+  }
+
+  .dossier__ref {
+    margin-left: auto;
+  }
+
+  .dossier__body {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-5);
+  }
+
+  .dossier__photo img,
+  .dossier__nophoto {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    filter: grayscale(1) sepia(0.3) contrast(1.1);
+  }
+
+  .dossier__nophoto {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px dashed var(--color-rule-strong);
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+
+  .dossier__nophoto .meta {
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+  }
+
+  .dossier__nophoto .jp {
+    font-size: 0.75rem;
+  }
+
+  .dossier__fields {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+
+  .dossier__fields div {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .dossier__fields dt {
+    font-size: 0.625rem;
+  }
+
+  .dossier__fields dd {
+    margin: var(--space-1) 0 0;
+    font-family: var(--type-display);
+    font-stretch: 80%;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  /* The red stamp: pressed at an angle, slightly broken */
+  .dossier__stamp {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    display: grid;
+    justify-items: center;
+    padding: 0.4rem 0.6rem;
+    border: 3px solid #a3201a;
+    color: #a3201a;
+    font-family: var(--type-jp);
+    font-weight: 900;
+    font-size: 1.5rem;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    transform: rotate(-8deg);
+    opacity: 0.82;
+    mix-blend-mode: multiply;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .dossier__stamp-en {
+    margin-top: 0.3rem;
+    font-family: var(--type-mono);
+    font-size: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* ── Account ──────────────────────────────────────── */
+  .soldier__intro {
+    grid-column: 7 / -1;
+  }
+
+  .soldier__lede {
+    font-size: clamp(1.9rem, 1.2rem + 2.4vw, 3.4rem);
+    font-stretch: 75%;
+    font-weight: 700;
+    line-height: 1.02;
+    text-transform: uppercase;
+  }
+
+  .soldier__what {
+    margin-top: var(--space-6);
+    max-width: 34rem;
+    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.2rem);
+    line-height: 1.65;
+    color: rgb(235 229 216 / 0.86);
+  }
+
+  .soldier__intro :global(.edu) {
+    margin-top: var(--space-8);
+  }
+
+  .soldier__lists {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gutter);
+    margin-top: var(--space-7);
+    max-width: 34rem;
+  }
+
+  .soldier__lists ul {
+    margin-top: var(--space-3);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .soldier__intro :global(.soldier__links) {
+    margin-top: var(--space-7);
+    max-width: 34rem;
+  }
+
+  @media (max-width: 63.99rem) {
+    .dossier,
+    .soldier__intro {
+      grid-column: 1 / -1;
+    }
+
+    .dossier {
+      position: relative;
+      top: auto;
+      max-width: 34rem;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .dossier__body {
+      grid-template-columns: 6rem minmax(0, 1fr);
+      gap: var(--space-4);
+    }
+
+    .dossier__stamp {
+      right: 0.75rem;
+      bottom: 0.75rem;
+      font-size: 1.2rem;
+    }
+  }
+</style>

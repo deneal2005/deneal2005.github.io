@@ -4,7 +4,7 @@ import { education } from '../../data/education';
 ---
 
 <section class="edu" id="education" aria-labelledby="education-title">
-  <h3 id="education-title" class="edu__heading meta">Education</h3>
+  <h3 id="education-title" class="edu__heading meta"><span lang="ja" class="jp">学歴</span> Education</h3>
   <ol class="edu__list">
     {
       education.map((entry, i) => (
@@ -94,22 +94,22 @@ import { education } from '../../data/education';
     margin-left: calc(var(--space-4) * -1);
     padding: var(--space-4) var(--space-4) var(--space-4) calc(var(--space-4) + 0.7rem + var(--space-5));
     border: var(--panel-border) solid var(--color-rule-strong);
-    background: var(--gofun);
+    background: var(--stone);
   }
 
   .edu__item.is-current .edu__node {
     top: calc(var(--space-4) + 0.3rem);
     left: var(--space-4);
-    background: var(--shu);
-    border-color: var(--shu);
+    background: var(--red);
+    border-color: var(--red);
   }
 
   .edu__status {
     display: inline-block;
     margin-top: var(--space-3);
     padding: 0.2rem 0.55rem;
-    background: var(--shu);
-    color: var(--gofun);
+    background: var(--red);
+    color: var(--bone);
     font-family: var(--type-mono);
     font-size: 0.6875rem;
     font-weight: 500;
