@@ -83,7 +83,7 @@ const notes = experiments.filter((e) => !e.data.demo);
                   <canvas
                     class="study__canvas"
                     role="img"
-                    aria-label="A vermilion sun drawn as a live halftone screen. The dots swell toward your pointer."
+                    aria-label="A gold sun drawn as a live halftone screen. The dots swell toward your pointer."
                   />
                 </div>
                 <p class="study__desc">{study.data.summary}</p>
@@ -96,7 +96,7 @@ const notes = experiments.filter((e) => !e.data.demo);
             {study.data.demo === 'hanko' && (
               <>
                 <div class="study__stage study__stage--paper">
-                  <canvas class="study__canvas" role="img" aria-label="A vermilion seal carved with your initials." data-hanko-canvas />
+                  <canvas class="study__canvas" role="img" aria-label="A gold seal carved with your initials." data-hanko-canvas />
                 </div>
                 <p class="study__desc">{study.data.summary}</p>
                 <form class="hanko__form" data-hanko-form>
@@ -223,13 +223,13 @@ const notes = experiments.filter((e) => !e.data.demo);
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 5;
-    border: var(--panel-border) solid var(--washi);
+    border: 1px solid var(--color-rule-strong);
     background: var(--sumi);
     overflow: hidden;
   }
 
   .study__stage--paper {
-    background: #f2ece0;
+    background: #0e1112;
   }
 
   .study__canvas {

@@ -5,9 +5,9 @@ import { fitCanvas } from './canvas';
  * 点 Ten — the sun as a live halftone screen. Coverage comes from the disc, a
  * slow breathing ripple and a light source that follows the pointer.
  */
-const SHU = '#da3b22';
-const GOFUN = 'rgba(246, 242, 234, 0.82)';
-const SUMI = '#13110f';
+const SHU = '#c2a068';
+const GOFUN = 'rgba(232, 225, 210, 0.42)';
+const SUMI = '#060707';
 const STEP = 11;
 
 export function mount(root: HTMLElement) {

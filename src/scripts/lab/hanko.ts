@@ -5,7 +5,7 @@ import { fitCanvas, fontFamily } from './canvas';
  * top to bottom, right column first. The ink loss is seeded by the text, so
  * the same initials always stamp the same way.
  */
-const SHU = '#da3b22';
+const SHU = '#c2a068';
 const SIZE = 640;
 
 const seeded = (text: string) => {

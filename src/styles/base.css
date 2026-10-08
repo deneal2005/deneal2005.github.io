@@ -94,8 +94,14 @@ ol {
 }
 
 ::selection {
-  background: var(--shu);
-  color: var(--gofun);
+  background: var(--gold);
+  color: var(--void);
+}
+
+html {
+  background: var(--void);
+  color-scheme: dark;
+  scrollbar-color: var(--steel-2) var(--void);
 }
 
 /* ── Accessibility ──────────────────────────────────────── */
@@ -164,9 +170,15 @@ ol {
   color: var(--color-text);
 }
 
-/* Ink chapters carry their own pale speckle, since the page grain is dark. */
-[data-tone='ink'] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .92 0 0 0 0 .89 0 0 0 0 .84 0 0 0 2.2 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+/* Alternate chapters fade in and out of the void at their edges: no hard seams between scenes. */
+[data-tone='ink']:not(dialog):not(.panel) {
+  background-image: linear-gradient(
+    180deg,
+    var(--void) 0,
+    var(--moss-deep) clamp(6rem, 18vh, 14rem),
+    var(--moss-deep) calc(100% - clamp(6rem, 18vh, 14rem)),
+    var(--void) 100%
+  );
 }
 
 /* ── Type primitives ────────────────────────────────────── */
@@ -186,6 +198,15 @@ ol {
   font-weight: 400;
   line-height: var(--leading-tight);
   letter-spacing: -0.01em;
+}
+
+/* Film-title setting: wide, light, generously tracked uppercase */
+.title-wide {
+  font-family: var(--type-sans);
+  font-stretch: 125%;
+  font-weight: 300;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
 }
 
 .lede {
@@ -246,23 +267,25 @@ ol {
   gap: var(--space-3);
   min-height: 2.75rem;
   padding: var(--space-2) var(--space-4);
-  border: 1.5px solid currentColor;
+  border: 1px solid var(--color-rule-strong);
   font-family: var(--type-mono);
   font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   white-space: nowrap;
+  backdrop-filter: blur(6px);
   transition:
-    background-color var(--dur-1) linear,
-    color var(--dur-1) linear;
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
 }
 
 @media (hover: hover) {
   .btn:hover {
-    background-color: var(--color-text);
-    color: var(--color-bg);
-    border-color: var(--color-text);
+    background-color: rgb(232 225 210 / 0.06);
+    border-color: var(--gold);
+    color: var(--gold-light);
   }
 }
 
@@ -278,18 +301,18 @@ ol {
   }
 }
 
-/* The one primary action in a view */
+/* The one primary action in a view: the gold blade */
 .btn--ink {
-  background-color: var(--color-text);
-  border-color: var(--color-text);
-  color: var(--color-bg);
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: var(--void);
 }
 
 @media (hover: hover) {
   .btn--ink:hover {
-    background-color: var(--shu);
-    border-color: var(--shu);
-    color: var(--gofun);
+    background-color: var(--gold-light);
+    border-color: var(--gold-light);
+    color: var(--void);
   }
 
   .btn:hover .arrow--right {
@@ -322,8 +345,10 @@ ol {
   height: 4.75rem;
   margin: -2.375rem 0 0 -2.375rem;
   border-radius: 50%;
-  background: var(--shu);
-  color: var(--gofun);
+  background: rgb(8 9 10 / 0.55);
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+  backdrop-filter: blur(8px);
   font-family: var(--type-mono);
   font-size: var(--text-xs);
   font-weight: 500;
@@ -425,7 +450,7 @@ ol {
   overflow-x: auto;
   background: var(--sumi) !important;
   color: var(--washi);
-  border-left: var(--panel-border) solid var(--shu);
+  border-left: 2px solid var(--gold);
 }
 
 .longform pre code {

@@ -18,7 +18,7 @@ links:
   live: https://rent-mate-beryl.vercel.app/
 layout: wide
 plate: rentmate
-alt: A vermilion verification seal of six segments over a city at night, with a brushed check mark at its centre.
+alt: A gold verification seal of six segments over a city at night, with a brushed check mark at its centre.
 detailAlt: Close-up of the seal's segments and the check mark, printed over a faint halftone glow.
 screens:
   - src: ../../assets/work/rentmate-home.jpg

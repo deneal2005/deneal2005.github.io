@@ -18,8 +18,8 @@ links:
   live: https://deneal2005.github.io/GreenUP/
 layout: right
 plate: greenup
-alt: A sapling growing from the top of a globe printed in ink dots, with vermilion map pins scattered across it.
-detailAlt: Close-up of the globe's halftone dots and two of the vermilion pins.
+alt: A sapling growing from the top of a globe printed in pale dots on black, with gold map pins scattered across it.
+detailAlt: Close-up of the globe's halftone dots and two of the gold pins.
 ---
 
 ## What it is

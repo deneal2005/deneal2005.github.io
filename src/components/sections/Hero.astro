@@ -1,435 +1,656 @@
 ---
-import HeroScene from '../motifs/HeroScene.astro';
+/**
+ * Prologue: the opening reel. A tall section (about 420vh) whose sticky
+ * stage plays the reel as a scroll-controlled image sequence: scroll
+ * progress maps directly to playback position, forward and back
+ * (scripts/reel.ts). The portfolio's opening, the owner's statement and a
+ * closing credit are timed against it.
+ *
+ * Without JavaScript, or with reduced motion, the section is one screen tall:
+ * the poster (or the original wall scene) and the opening text, nothing hidden.
+ */
+import WallScene from '../motifs/WallScene.astro';
 import Arrow from '../ui/Arrow.astro';
 import ProfileLinks from '../ui/ProfileLinks.astro';
-import { brushStroke } from '../../lib/draw';
 import { chapterById } from '../../data/chapters';
 import { site } from '../../data/site';
+import { getWorks } from '../../lib/content';
+import { reelMedia } from '../../lib/media';
 
 const chapter = chapterById('prologue');
-const horizon = brushStroke({ from: [0, 14], to: [2400, 14], width: 5, peak: 0.5, seed: 5, wobble: 0.5, segments: 80 });
+const works = await getWorks();
+
+// The statement, cut into title cards: "…: the interface, the server behind it
+// and the database rules underneath." If it no longer splits that way, the
+// cards are simply left out; the full sentence is always in the opening.
+const [, list = ''] = site.statement.split(': ');
+const cards = list
+  .replace(/\.$/, '')
+  .split(/, | and (?=the )/)
+  .map((s) => s.trim())
+  .filter(Boolean);
+const showCards = cards.length >= 2 && cards.length <= 4;
+
+// Beat windows as fractions of the reel. Three cards sit over its calmer
+// passages; any other count is spread evenly between the opening and the credit.
+const windows =
+  cards.length === 3
+    ? [
+        [0.1, 0.24],
+        [0.38, 0.52],
+        [0.62, 0.76],
+      ]
+    : cards.map((_, i) => {
+        const span = 0.7 / cards.length;
+        return [0.1 + i * span, 0.1 + (i + 1) * span - 0.03];
+      });
+const finale = [0.86, 1.01];
 ---
 
 <section
   id={chapter.id}
-  class="hero"
-  data-hero
+  class:list={['reel', { 'reel--film': reelMedia }]}
+  data-reel
+  data-duration={reelMedia ? undefined : 60}
   data-chapter-label={chapter.label}
   data-chapter-title={chapter.title}
   aria-labelledby="hero-title"
 >
-  <div class="hero__panel">
-    <span class="hero__crop hero__crop--tl" aria-hidden="true"></span>
-    <span class="hero__crop hero__crop--tr" aria-hidden="true"></span>
-    <span class="hero__crop hero__crop--bl" aria-hidden="true"></span>
-    <span class="hero__crop hero__crop--br" aria-hidden="true"></span>
-
-    <div class="hero__art">
-      <div class="hero__stage">
-        <svg class="hero__horizon" viewBox="0 0 2400 28" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-          <path d={horizon}></path>
-        </svg>
-        <HeroScene />
-      </div>
+  <div class="reel__stage">
+    <div class="reel__camera" aria-hidden="true">
+      {
+        reelMedia ? (
+          <>
+            {reelMedia.poster && <img class="reel__poster" src={reelMedia.poster} alt="" fetchpriority="high" decoding="async" />}
+            <video
+              class="reel__video"
+              data-reel-video
+              data-src-hd={reelMedia.hd}
+              data-src-sd={reelMedia.sd}
+              muted
+              playsinline
+              preload="none"
+              disablepictureinpicture
+              disableRemotePlayback
+              tabindex="-1"
+            />
+          </>
+        ) : (
+          <WallScene />
+        )
+      }
     </div>
 
-    <div class="hero__epigraph">
-      <p class="hero__ja tate" lang="ja">一筆入魂</p>
-      <p class="hero__gloss meta"><span lang="ja-Latn">Ippitsu nyūkon</span> · One stroke, whole soul</p>
+    <!-- Colour grade, vignette and the fades that melt the frame into the page -->
+    <div class="reel__grade" aria-hidden="true"></div>
+    <div class="reel__bars" aria-hidden="true"><span></span><span></span></div>
+
+    <div class="reel__hud meta" aria-hidden="true">
+      <span class="reel__hud-l"><span class="reel__dot"></span>Reel 01<span class="reel__hud-chapter"><span class="reel__sep"></span>{chapter.label}</span></span>
+      <span class="reel__hud-r"><span data-reel-tc>00:00:00:00</span><span class="reel__status" data-reel-status></span></span>
     </div>
 
-    <p class="hero__vol meta" data-reveal="fade" style="--i: 14">
-      {site.volume} · {site.volumeTitle}
-    </p>
-
-    <div class="hero__copy">
-      <h1 id="hero-title" class="hero__heading">
-        <span class="hero__name" data-reveal="fade" style="--i: 12">
-          {site.name}<span class="hero__role">{site.role}</span>
-        </span>
-        <span class="hero__title display" data-reveal="rise" style="--delay: 1450ms">
-          <span class="rise" style="--line: 0"><span>Every line</span></span>
-          <span class="rise hero__title-2" style="--line: 1"><span><em>is final</em><span class="hero__stop">.</span></span></span>
+    <!-- The opening -->
+    <div class="reel__open" data-beat data-in="-1" data-out="0.075">
+      <h1 id="hero-title" class="reel__heading">
+        <span class="reel__name title-wide">{site.name}</span>
+        <span class="reel__title display">
+          <span class="reel__line">Every line</span>
+          <span class="reel__line reel__line--2"><em>is final</em><span class="reel__stop">.</span></span>
         </span>
       </h1>
-    </div>
-
-    <div class="hero__intro" data-reveal="fade" style="--i: 20">
-      <p>{site.statement} This volume holds what I’ve built, what I’m testing and what I’m learning.</p>
-      <div class="hero__actions">
-        <a class="btn btn--ink" href="#work">See the work <Arrow /></a>
-        <a class="btn" href="/journey/">Follow the journey</a>
+      <div class="reel__intro">
+        <p class="reel__role meta"><span class="reel__rule"></span>{site.role} · {site.volume}</p>
+        <p class="reel__lede">{site.statement}</p>
+        <div class="reel__actions">
+          <a class="btn btn--ink" href="#work">See the work <Arrow /></a>
+          <a class="btn" href="/journey/">Follow the journey</a>
+        </div>
+        <ProfileLinks class="reel__links" />
       </div>
-      <ProfileLinks class="hero__links" />
     </div>
 
-    <a class="hero__next meta" href="#hamon" data-reveal="fade" style="--i: 22">
-      <span>Read on</span>
-      <svg class="hero__next-arrow" viewBox="0 0 10 28" aria-hidden="true"><path d="M5 0v26M1 22l4 5 4-5"></path></svg>
+    <!-- Title cards: the statement, one clause per calm passage of the reel -->
+    {
+      showCards &&
+        cards.map((card, i) => (
+          <p
+            class:list={['reel__card', `reel__card--${i + 1}`]}
+            data-beat
+            data-in={windows[i][0]}
+            data-out={windows[i][1]}
+            aria-hidden="true"
+          >
+            <span class="reel__card-n meta">
+              {String(i + 1).padStart(2, '0')} <span class="reel__sep" /> {String(cards.length).padStart(2, '0')}
+            </span>
+            <span class="reel__card-text display">{card}</span>
+          </p>
+        ))
+    }
+
+    <!-- Closing credit -->
+    <div class="reel__credit" data-beat data-in={finale[0]} data-out={finale[1]} aria-hidden="true">
+      <p class="meta">A portfolio by</p>
+      <p class="reel__credit-name title-wide">{site.name}</p>
+      {
+        works.length > 0 && (
+          <p class="reel__credit-works meta">
+            Featuring {works.map((w) => w.data.title).join(' · ')}
+          </p>
+        )
+      }
+    </div>
+
+    <a class="reel__next meta" href="#hamon" data-reel-next>
+      <span class="reel__next-label">Scroll</span>
+      <span class="reel__track" aria-hidden="true"><span class="reel__fill"></span></span>
     </a>
   </div>
 </section>
 
 <style>
-  .hero {
-    --pad: clamp(1.25rem, 3%, 2.5rem);
-    padding: var(--masthead-h) var(--margin) 0;
-  }
-
-  /* Intro at the top, headline on the ground, the sky between them. A grid, so on
-     short screens the two push the panel taller instead of overlapping. */
-  .hero__panel {
+  /* ── Frame ────────────────────────────────────────────
+   * --p is the reel's progress (0–1), set by scripts/reel.ts. Every beat gets
+   * --o (opacity) and --t (travel through its own window, 0–1).
+   */
+  .reel {
+    --p: 0;
     position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    min-height: clamp(30rem, calc(100svh - var(--masthead-h) - var(--margin) * 0.6), 68rem);
-    padding: var(--pad) var(--pad) calc(var(--pad) * 1.2);
-    border: var(--panel-border) solid var(--sumi);
-    isolation: isolate;
+    height: 100svh;
+    min-height: 34rem;
+    background: var(--void);
   }
 
-  /* Printer's crop marks, just outside the frame */
-  .hero__crop {
-    position: absolute;
-    width: 0.9rem;
-    height: 0.9rem;
-    border: 0 solid var(--sumi);
-  }
-
-  .hero__crop--tl {
-    top: -1.2rem;
-    left: -1.2rem;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-  }
-
-  .hero__crop--tr {
-    top: -1.2rem;
-    right: -1.2rem;
-    border-left-width: 1px;
-    border-bottom-width: 1px;
-  }
-
-  .hero__crop--bl {
-    bottom: -1.2rem;
-    left: -1.2rem;
-    border-right-width: 1px;
-    border-top-width: 1px;
-  }
-
-  .hero__crop--br {
-    bottom: -1.2rem;
-    right: -1.2rem;
-    border-left-width: 1px;
-    border-top-width: 1px;
-  }
-
-  /* ── Art ──────────────────────────────────────────── */
-  .hero__art {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    overflow: clip;
-  }
-
-  /* The stage is the scene's square; the horizon is pinned to its ground line. */
-  .hero__stage {
-    position: absolute;
-    top: 2%;
-    right: 2%;
-    height: 104%;
-    aspect-ratio: 1;
-  }
-
-  .hero__stage :global(.scene) {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* On wide screens the horizon starts at the sun and fades in, so it never strikes through the headline. */
-  .hero__horizon {
-    position: absolute;
-    top: calc(85% - 14px);
-    left: 8%;
-    width: 300%;
-    max-width: none;
-    height: 28px;
-    fill: var(--sumi);
-    transform-origin: 12% 50%;
-    mask-image: linear-gradient(90deg, transparent 0, #000 5%);
-  }
-
-  :global(.js) .hero__horizon {
-    transform: scaleX(0);
-  }
-
-  :global(.js.is-ready) .hero__horizon {
-    animation: horizon-draw 1.8s var(--ease-in-out) 150ms forwards;
-  }
-
-  @keyframes horizon-draw {
-    to {
-      transform: scaleX(1);
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .reel {
+      height: 420vh;
     }
   }
 
-  /* ── Type ─────────────────────────────────────────── */
-  .hero__epigraph {
+  .reel__stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 34rem;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  /* The camera pushes in slowly as the reel runs */
+  .reel__camera {
     position: absolute;
-    top: var(--pad);
-    left: var(--pad);
+    inset: 0;
+    z-index: -3;
+    background: var(--void);
+    transform: scale(calc(1.08 - var(--p) * 0.08));
+    transform-origin: 50% 45%;
+  }
+
+  .reel__poster,
+  .reel__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    /* The grade: muted, cooler, heavier blacks */
+    filter: saturate(0.58) contrast(1.08) brightness(0.74) sepia(0.14);
+  }
+
+  .reel__video {
+    opacity: 0;
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  .reel[data-reel-ready] .reel__video {
+    opacity: 1;
+  }
+
+  .reel__grade {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      /* the frame melts into the page below */
+      linear-gradient(0deg, var(--void) 0%, rgb(8 9 10 / 0.7) 14%, rgb(8 9 10 / 0) 42%),
+      /* and under the masthead */
+      linear-gradient(180deg, rgb(8 9 10 / 0.75) 0%, rgb(8 9 10 / 0) 22%),
+      /* a lower-left scrim for the type */
+      radial-gradient(120% 90% at 0% 100%, rgb(8 9 10 / 0.78) 0%, rgb(8 9 10 / 0) 60%),
+      /* vignette */
+      radial-gradient(140% 110% at 50% 45%, rgb(8 9 10 / 0) 55%, rgb(8 9 10 / 0.7) 100%);
+  }
+
+  /* A tint that pulls every frame into the palette: steel shadows, bronze light */
+  .reel__grade::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgb(77 88 67 / 0.22), rgb(138 106 64 / 0.16));
+    mix-blend-mode: soft-light;
+  }
+
+  /* The end of the reel fades to black, and the page continues from the black */
+  .reel__grade::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--void);
+    opacity: var(--end, 0);
+  }
+
+  /* Letterbox: arrives once the film starts, leaves before the credit */
+  .reel__bars span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    height: calc(var(--bars, 0) * 7svh);
+    background: var(--void);
+  }
+
+  .reel__bars span:first-child {
+    top: 0;
+  }
+
+  .reel__bars span:last-child {
+    bottom: 0;
+  }
+
+  /* ── HUD ──────────────────────────────────────────── */
+  .reel__hud {
+    position: absolute;
+    top: calc(var(--masthead-h) + var(--space-2));
+    left: var(--margin);
+    right: var(--margin);
     display: flex;
-    gap: var(--space-2);
-    align-items: flex-start;
-  }
-
-  .hero__ja {
-    font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem);
-    color: var(--sumi);
-  }
-
-  .hero__gloss {
-    writing-mode: vertical-rl;
+    justify-content: space-between;
+    gap: var(--space-4);
+    color: var(--ash);
     font-size: 0.625rem;
-    letter-spacing: 0.18em;
+    pointer-events: none;
   }
 
-  .hero__vol {
+  .reel__hud-l,
+  .reel__hud-r {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .reel__hud-r {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .reel__dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .reel__dot {
+      animation: rec 2.4s steps(1) infinite;
+    }
+  }
+
+  @keyframes rec {
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  .reel__hud-chapter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .reel__sep {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.6;
+    vertical-align: middle;
+  }
+
+  .reel__status:not(:empty) {
+    color: var(--gold-light);
+  }
+
+  /* ── Beats ────────────────────────────────────────── */
+  [data-beat] {
+    --o: 1;
+    --t: 0.5;
+  }
+
+  :global(.js) .reel [data-beat] {
+    opacity: var(--o);
+    visibility: var(--vis, visible);
+  }
+
+  /* ── The opening ──────────────────────────────────── */
+  .reel__open {
     position: absolute;
-    top: var(--pad);
-    right: var(--pad);
-    color: var(--sumi);
+    inset: auto var(--margin) clamp(4.5rem, 11svh, 7rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 1fr);
+    align-items: end;
+    gap: var(--space-6) var(--gutter);
   }
 
-  .hero__copy {
-    grid-row: 3;
-    margin-top: var(--space-6);
+  :global(.js) .reel__open {
+    filter: blur(calc((1 - var(--o)) * 10px));
+    transform: translateY(calc((1 - var(--o)) * -4vh));
   }
 
-  .hero__name {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 1rem;
-    margin-bottom: var(--space-4);
-    padding-left: 0.2em;
-    font-family: var(--type-sans);
-    font-size: clamp(0.95rem, 0.8rem + 0.45vw, 1.2rem);
-    font-stretch: 125%;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    color: var(--sumi);
+  .reel__heading {
+    display: grid;
+    gap: var(--space-4);
   }
 
-  .hero__role {
-    font-family: var(--type-mono);
-    font-size: var(--text-xs);
-    font-stretch: 100%;
-    font-weight: 400;
-    letter-spacing: var(--tracking-meta);
-    color: var(--nibi);
+  .reel__name {
+    font-size: clamp(0.8rem, 0.7rem + 0.4vw, 1.05rem);
+    color: var(--bone);
   }
 
-  .hero__title {
+  :global(.js:not(.is-ready)) .reel__name,
+  :global(.js:not(.is-ready)) .reel__line,
+  :global(.js:not(.is-ready)) .reel__intro {
+    opacity: 0;
+  }
+
+  .reel__title {
     display: block;
-    font-size: clamp(3.6rem, min(10.5vw, 21svh), 13.5rem);
-    font-weight: 380;
+    font-size: clamp(3.4rem, min(10vw, 20svh), 12.5rem);
+    font-weight: 300;
     line-height: 0.84;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
     text-transform: uppercase;
-    color: var(--sumi);
+    color: var(--bone);
   }
 
-  .hero__title em {
+  .reel__line {
+    display: block;
+  }
+
+  .reel__line--2 {
+    padding-left: 0.55em;
+  }
+
+  .reel__title em {
     font-style: italic;
-    font-weight: 300;
+    font-weight: 250;
     text-transform: none;
   }
 
-  .hero__title-2 {
-    padding-left: 0.62em;
-  }
-
-  .hero__stop {
-    color: var(--shu);
+  .reel__stop {
+    color: var(--gold);
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
   }
 
-  .hero__intro {
-    grid-row: 1;
-    margin: clamp(3rem, 11svh, 8.5rem) 0 0 4.75rem;
-    max-width: 25.5rem;
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js.is-ready) .reel__name {
+      animation: title-in 1.6s var(--ease-out) both;
+    }
+
+    :global(.js.is-ready) .reel__line {
+      animation: title-in 1.8s var(--ease-out) both;
+      animation-delay: 250ms;
+    }
+
+    :global(.js.is-ready) .reel__line--2 {
+      animation-delay: 450ms;
+    }
+
+    :global(.js.is-ready) .reel__intro {
+      animation: title-in 1.6s var(--ease-out) 800ms both;
+    }
+  }
+
+  /* Type surfaces out of the dark: tracking settles, focus pulls in */
+  @keyframes title-in {
+    from {
+      opacity: 0;
+      filter: blur(12px);
+      letter-spacing: 0.08em;
+      transform: translateY(1.5rem);
+    }
+  }
+
+  .reel__intro {
+    max-width: 26rem;
+    justify-self: end;
     font-size: var(--text-s);
-    line-height: 1.55;
+    line-height: 1.6;
+    color: var(--bone);
   }
 
-  .hero__actions {
+  .reel__role {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--gold-light);
+  }
+
+  .reel__rule {
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .reel__lede {
+    margin-top: var(--space-4);
+    color: rgb(232 225 210 / 0.86);
+    text-wrap: pretty;
+  }
+
+  .reel__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-5);
   }
 
-  .hero__intro :global(.hero__links) {
-    margin-top: var(--space-2);
+  .reel__intro :global(.reel__links) {
+    margin-top: var(--space-3);
   }
 
-  .hero__next {
+  /* ── Title cards ──────────────────────────────────── */
+  .reel__card {
     position: absolute;
-    right: var(--pad);
-    bottom: var(--space-2);
-    background: var(--washi);
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2);
-    color: var(--sumi);
+    left: var(--margin);
+    bottom: clamp(5rem, 16svh, 10rem);
+    display: grid;
+    gap: var(--space-4);
+    max-width: min(60rem, 80vw);
+    pointer-events: none;
+    transform: translateY(calc((0.5 - var(--t)) * 7svh));
   }
 
-  .hero__next-arrow {
-    width: 0.6rem;
-    height: 1.75rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.2;
+  /* Alternate sides so the cards never sit on the same part of the frame twice */
+  .reel__card--2 {
+    left: auto;
+    right: var(--margin);
+    text-align: right;
+    justify-items: end;
+  }
+
+  .reel__card-n {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--gold-light);
+  }
+
+  .reel__card-text {
+    font-size: clamp(2.6rem, 1.4rem + 6vw, 8.5rem);
+    font-weight: 300;
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: var(--bone);
+    text-shadow: 0 0.04em 0.6em rgb(8 9 10 / 0.6);
+    text-wrap: balance;
+    letter-spacing: calc(0.02em + (1 - var(--o)) * 0.06em);
+  }
+
+  /* ── Closing credit ───────────────────────────────── */
+  .reel__credit {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-4);
+    padding-inline: var(--margin);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .reel__credit-name {
+    font-size: clamp(1.4rem, 0.9rem + 2.6vw, 3.4rem);
+    font-weight: 250;
+    color: var(--bone);
+    margin-right: calc(var(--tracking-title) * -1);
+  }
+
+  .reel__credit-works {
+    color: var(--gold-light);
+  }
+
+  /* Without the reel there are no cards or credit to time: the opening is the hero. */
+  :global(html:not(.js)) .reel__card,
+  :global(html:not(.js)) .reel__credit {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reel__card,
+    .reel__credit,
+    .reel__bars {
+      display: none;
+    }
+  }
+
+  /* ── Scroll cue ───────────────────────────────────── */
+  .reel__next {
+    position: absolute;
+    right: var(--margin);
+    bottom: var(--space-5);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    color: var(--ash);
+    opacity: calc(1 - var(--end, 0));
+  }
+
+  .reel__track {
+    position: relative;
+    width: clamp(4rem, 12vw, 9rem);
+    height: 1px;
+    background: var(--color-rule-strong);
+    overflow: hidden;
+  }
+
+  .reel__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(var(--p));
+    transform-origin: left;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .hero__next-arrow {
-      animation: nudge 2.4s var(--ease-in-out) 3.2s infinite;
+    :global(html:not(.js)) .reel__fill,
+    .reel__next[data-idle] .reel__fill {
+      animation: cue 2.6s var(--ease-in-out) infinite;
     }
   }
 
-  @keyframes nudge {
-    0%,
-    60%,
+  @keyframes cue {
+    0% {
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    50% {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+    50.1% {
+      transform-origin: right;
+    }
     100% {
-      transform: none;
-    }
-    30% {
-      transform: translateY(5px);
+      transform: scaleX(0);
+      transform-origin: right;
     }
   }
 
-  /* ── Squarer landscape screens (4:3 laptops, tablets on their side) ──
-   * The sun moves off the right edge so the intro keeps clear paper to sit on. */
-  @media (min-aspect-ratio: 5/4) and (max-aspect-ratio: 8/5) {
-    .hero__stage {
-      top: 6%;
-      right: -14%;
-      height: 96%;
+  /* ── Smaller screens ──────────────────────────────── */
+  @media (max-width: 63.99rem) {
+    .reel__open {
+      grid-template-columns: minmax(0, 1fr);
+      bottom: clamp(4.25rem, 9svh, 6rem);
     }
 
-    .hero__intro {
-      max-width: 20rem;
+    .reel__intro {
+      justify-self: start;
     }
   }
 
-  /* ── Short screens: everything tightens so the headline stays in the frame ── */
-  @media (min-aspect-ratio: 5/4) and (max-height: 760px) {
-    .hero__intro {
-      margin-top: clamp(1.5rem, 6svh, 3rem);
+  @media (max-width: 47.99rem) {
+    .reel__hud-chapter {
+      display: none;
     }
 
-    .hero__title {
-      font-size: clamp(3.4rem, min(10vw, 18.5svh), 13.5rem);
+    .reel__title {
+      font-size: clamp(3rem, 16.5vw, 6rem);
     }
 
-    .hero__name {
-      margin-bottom: var(--space-3);
+    .reel__line--2 {
+      padding-left: 0.35em;
     }
 
-    .hero__copy {
-      margin-top: var(--space-4);
+    .reel__lede {
+      font-size: 0.875rem;
     }
 
-    .hero__gloss {
+    .reel__card,
+    .reel__card--2 {
+      left: var(--margin);
+      right: var(--margin);
+      max-width: none;
+      text-align: left;
+      justify-items: start;
+    }
+
+    .reel__card-text {
+      font-size: clamp(2.4rem, 13vw, 4.5rem);
+    }
+
+    .reel__next {
+      bottom: var(--space-3);
+    }
+
+    .reel__next-label {
       display: none;
     }
   }
 
-  /* ── Portrait screens ─────────────────────────────────
-   * Its own composition, not a shrunk one: the sun rises off the right edge,
-   * the horizon sits under it, and the type stacks on the ground below.
-   */
-  @media (max-aspect-ratio: 5/4) {
-    .hero {
-      --pad: clamp(1rem, 4.5vw, 2.5rem);
-    }
-
-    .hero__panel {
-      min-height: calc(100svh - var(--masthead-h) - var(--margin));
-      display: flex;
-      flex-direction: column;
-      padding: 0 var(--pad) var(--pad);
-    }
-
-    .hero__art {
-      --art-h: min(104vw, 47svh);
-      position: relative;
-      inset: auto;
-      flex: none;
-      height: var(--art-h);
-      margin-inline: calc(var(--pad) * -1);
-    }
-
-    .hero__horizon {
-      left: -400%;
-      width: 900%;
-      mask-image: none;
-      transform-origin: 50% 50%;
-    }
-
-    .hero__stage {
-      top: calc(var(--art-h) * -0.2);
-      right: auto;
-      left: calc(70% - var(--art-h) * 0.6);
-      height: calc(var(--art-h) * 1.15);
-    }
-
-    .hero__copy,
-    .hero__intro {
-      position: relative;
-      inset: auto;
-    }
-
-    .hero__copy {
-      margin-top: auto;
-      padding-top: var(--space-5);
-    }
-
-    .hero__vol {
+  /* Short landscape screens: drop the lede so the headline keeps the frame */
+  @media (min-aspect-ratio: 5/4) and (max-height: 640px) {
+    .reel__lede {
       display: none;
     }
 
-    .hero__gloss {
-      display: none;
-    }
-
-    .hero__title {
-      font-size: clamp(3.4rem, 17.5vw, 9rem);
-    }
-
-    .hero__title-2 {
-      padding-left: 0.4em;
-    }
-
-    .hero__intro {
-      margin: var(--space-5) 0 0;
-      max-width: 30rem;
-    }
-
-    .hero__intro p {
-      padding-right: 3rem;
-    }
-
-    .hero__next {
-      right: calc(var(--pad) - var(--space-2));
-      bottom: calc(var(--pad) - var(--space-2));
+    .reel__title {
+      font-size: clamp(3rem, min(9vw, 17svh), 12.5rem);
     }
   }
 </style>

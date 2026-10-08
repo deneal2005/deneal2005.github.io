@@ -1,8 +1,10 @@
 import { initChrome } from './chrome';
 import { initContents } from './contents';
-import { initCursor, initDepth, initHero, initInvitation, initMagnetic } from './interactions';
+import { initCursor, initDepth, initInvitation, initMagnetic } from './interactions';
 import { initLab } from './lab';
+import { initReel } from './reel';
 import { initReveals } from './reveal';
+import { initSound } from './sound';
 
 const root = document.documentElement;
 
@@ -17,7 +19,8 @@ fontsReady.then(() => {
 
 initChrome();
 initContents();
-initHero();
+initReel();
+initSound();
 initDepth();
 initMagnetic();
 initCursor();

@@ -178,7 +178,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     gap: var(--space-2);
     margin-top: var(--space-4);
     padding-top: var(--space-3);
-    border-top: var(--panel-border) solid var(--sumi);
+    border-top: var(--panel-border) solid var(--color-rule-strong);
   }
 
   .path__count div {
@@ -203,7 +203,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     color: var(--color-text-muted);
   }
 
-  /* Markers: a filled vermilion diamond where the skill is proven in work, a hairline where it's ahead */
+  /* Markers: a filled gold diamond where the skill is proven in work, a hairline where it's ahead */
   .path__mark {
     display: inline-block;
     flex: none;
@@ -250,7 +250,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     align-items: baseline;
     gap: var(--space-3);
     padding-bottom: var(--space-2);
-    border-bottom: var(--panel-border) solid var(--sumi);
+    border-bottom: var(--panel-border) solid var(--color-rule-strong);
   }
 
   .area__n {
@@ -338,7 +338,7 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
     display: grid;
     place-items: center;
     width: 3.5rem;
-    border: 1.5px solid var(--sumi);
+    border: 1.5px solid var(--color-rule-strong);
     font-family: var(--type-display);
     font-size: 1.15rem;
     font-stretch: 80%;
@@ -444,11 +444,11 @@ const usesStatus = path.some((area) => area.skills.some((s) => s.status));
       padding: 0.45rem 0.7rem;
       border: 1px solid var(--color-rule);
       border-bottom: 1px solid var(--color-rule);
-      background: rgb(246 242 234 / 0.55);
+      background: rgb(232 225 210 / 0.03);
     }
 
     .skill--used {
-      border-color: var(--sumi);
+      border-color: var(--color-rule-strong);
       background: var(--gofun);
     }
 

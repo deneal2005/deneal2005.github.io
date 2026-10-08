@@ -4,16 +4,22 @@
  * Variant "a" is the full plate; "b" is a detail crop of the same drawing.
  */
 
-/** Mirrors the pigments in src/styles/tokens.css (SVG files can't read CSS variables). */
+/**
+ * Mirrors the cinematic palette in src/styles/tokens.css (SVG files can't read
+ * CSS variables). Keys keep their first-edition names, by role: `washi` is the
+ * plate's ground, `sumi` the drawing on it, `shu` the single gold accent.
+ * `night` is the ground of plates printed dark-on-dark.
+ */
 export const INK = {
-  sumi: '#13110f',
-  keshizumi: '#2a2622',
-  usuzumi: '#a39b90',
-  washi: '#ebe4d6',
-  washiDeep: '#ddd4c2',
-  gofun: '#f6f2ea',
-  shu: '#da3b22',
-  enji: '#8f1d21',
+  night: '#060707',
+  sumi: '#d8d0bf',
+  keshizumi: '#1f2427',
+  usuzumi: '#6f746e',
+  washi: '#0e1112',
+  washiDeep: '#181c1f',
+  gofun: '#e8e1d2',
+  shu: '#c2a068',
+  enji: '#8a6a40',
 } as const;
 
 export interface PlateDrawing {
@@ -33,9 +39,9 @@ export interface Plate {
 
 export type Variant = 'a' | 'b';
 
-const grain = (ground: PlateDrawing['ground']) => {
-  // Paper fibre on washi prints as dark specks; on sumi, the ink is flecked with paper.
-  const [r, g, b] = ground === 'sumi' ? [0.92, 0.89, 0.84] : [0.07, 0.06, 0.05];
+const grain = () => {
+  // Both grounds are dark now: pale flecks, like dust on a projected print.
+  const [r, g, b] = [0.92, 0.89, 0.84];
   return `<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} 0 0 0 2.3 -1.3"/></filter>`;
 };
 
@@ -57,15 +63,15 @@ export function renderPlate(plate: Plate, variant: Variant) {
   const { width, height } = plate;
   const [vx, vy, vw, vh] = variant === 'b' ? plate.detail : [0, 0, width, height];
   const { ground, defs = '', body } = plate.draw();
-  const bg = ground === 'sumi' ? INK.sumi : INK.washi;
+  const bg = ground === 'sumi' ? INK.night : INK.washi;
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vx} ${vy} ${vw} ${vh}" width="${vw}" height="${vh}">`,
-    `<defs>${grain(ground)}${defs}</defs>`,
+    `<defs>${grain()}${defs}</defs>`,
     `<rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="${bg}"/>`,
     body,
     variant === 'a' ? proofMarks(width, height, ground) : '',
-    `<rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" filter="url(#grain)" opacity="0.5"/>`,
+    `<rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" filter="url(#grain)" opacity="0.22"/>`,
     `</svg>`,
   ].join('');
 }

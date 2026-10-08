@@ -1,27 +1,4 @@
-import { clamp, finePointer, onFrame, reducedMotion } from './env';
-
-/** Hero depth: pointer drift (fine pointers only) and scroll progress through the opening plate. */
-export function initHero() {
-  const hero = document.querySelector<HTMLElement>('[data-hero]');
-  if (!hero) return;
-
-  onFrame(() => {
-    const progress = clamp(scrollY / hero.offsetHeight);
-    hero.style.setProperty('--hp', reducedMotion.matches ? '0' : progress.toFixed(3));
-  });
-
-  hero.addEventListener('pointermove', (event) => {
-    if (!finePointer.matches || reducedMotion.matches) return;
-    const r = hero.getBoundingClientRect();
-    hero.style.setProperty('--px', (((event.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
-    hero.style.setProperty('--py', (((event.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
-  });
-
-  hero.addEventListener('pointerleave', () => {
-    hero.style.setProperty('--px', '0');
-    hero.style.setProperty('--py', '0');
-  });
-}
+import { finePointer, onFrame, reducedMotion } from './env';
 
 /** Elements that lean toward the pointer, for the few actions worth reaching for. */
 export function initMagnetic() {

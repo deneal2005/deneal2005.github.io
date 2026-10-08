@@ -4,8 +4,8 @@ import { fitCanvas } from './canvas';
  * 墨 Sumi — a brush that responds to speed (and pen pressure where available).
  * Slow strokes are wet and heavy with a soft bleed; fast ones split into dry bristles.
  */
-const PAPER = '#f2ece0';
-const INK = '19, 17, 15';
+const PAPER = '#0e1112';
+const INK = '232, 225, 210';
 
 export function mount(root: HTMLElement) {
   const canvas = root.querySelector<HTMLCanvasElement>('canvas');
@@ -22,7 +22,7 @@ export function mount(root: HTMLElement) {
     ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, w, h);
     // fibres
-    ctx.strokeStyle = 'rgba(120, 100, 70, 0.08)';
+    ctx.strokeStyle = 'rgba(232, 225, 210, 0.035)';
     ctx.lineWidth = 0.6;
     for (let i = 0; i < (w * h) / 900; i++) {
       const x = Math.random() * w;

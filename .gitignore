@@ -27,3 +27,6 @@ pnpm-debug.log*
 *.capture.png
 
 .vercel
+
+# Third-party media (copyrighted footage and soundtrack): local preview only, never committed or deployed
+public/media/

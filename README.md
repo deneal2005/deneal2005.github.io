@@ -1,6 +1,6 @@
 # Hamon, Vol. 01
 
-The portfolio of **Delin Thangjam**, set as a manga volume: a prologue, chapters, a contents page with live page numbers, and a colophon at the back. The design borrows from Japanese print rather than anime: halftone screens, misregistered ink, panel borders, lots of empty paper.
+The portfolio of **Delin Thangjam**, set as a film: an opening reel you scrub with the scroll wheel, chapters cut like scenes, a contents page with live page numbers, and a colophon at the back. Dark, cinematic and restrained: near-black, steel, muted military green, bronze and a little gold, with film-title typography.
 
 Everything on the site is either a fact from the projects themselves (their code, READMEs and live sites) or something written for the site. Nothing is invented. Fields that aren't filled in yet hide themselves instead of showing placeholders.
 
@@ -112,14 +112,35 @@ Copy `.env.example` to `.env`. Everything is optional.
 
 ---
 
+## The opening reel
+
+The homepage opens on a tall (about 420vh) section whose sticky frame plays a video as a scroll-controlled image sequence: scroll progress maps directly to playback position, forward and backward (`src/scripts/reel.ts`). The owner's statement is cut into title cards timed against the reel, with a closing credit before the first chapter.
+
+The reel's media lives in `public/media/`, which is **git-ignored**. The footage and soundtrack used while developing are third-party, copyrighted material, so they are never committed or deployed. Builds without them (CI, GitHub Pages) show an original scene in their place (`src/components/motifs/WallScene.astro`) that still moves with the scroll, and the sound toggle hides itself. To use footage you own or have licensed, drop these files into `public/media/` and remove the folder from `.gitignore`:
+
+| File | What |
+| --- | --- |
+| `hero-720.mp4` | The reel. H.264, no audio, short GOP so seeking stays instant. |
+| `hero-480.mp4` | Optional phone version. |
+| `hero-poster.jpg` | Optional first frame, shown until the reel loads. |
+| `theme.mp3` | Optional soundtrack. Off until the visitor presses Sound in the masthead. |
+
+Encode the reel with a keyframe every few frames, or scrubbing stutters:
+
+```
+ffmpeg -i source.mp4 -an -vf "fps=24,scale=1280:-2" -c:v libx264 -preset slow -crf 26 -g 6 -bf 0 -sc_threshold 0 -pix_fmt yuv420p -movflags +faststart public/media/hero-720.mp4
+```
+
+The reel is fetched whole before the first seek, skipped entirely with Save-Data, and replaced by the poster under reduced motion.
+
+---
+
 ## Deploying
 
-The build is a folder of static files (`dist/`), so it runs on any static host. Since this repository is private, GitHub Pages would need a paid plan; these work for free:
+The build is a folder of static files (`dist/`), so it runs on any static host. This repository deploys to GitHub Pages at https://deneal2005.github.io/ through `.github/workflows/deploy.yml`, on every push to `main` and once a day so the GitHub data stays fresh.
 
 - **Vercel / Netlify / Cloudflare Pages:** import the repository. Build command `npm run build`, output directory `dist`, and set `PUBLIC_SITE_URL` in the project's environment variables.
 - **Anything else:** run `npm run build` and upload `dist/`.
-
-To keep the GitHub data fresh, add a scheduled redeploy, for example a daily deploy hook called from a cron job or a scheduled GitHub Action.
 
 CI (`.github/workflows/ci.yml`) runs the type and content checks, the build and the QA crawl on every push and pull request.
 
@@ -135,21 +156,21 @@ src/
     chrome/      masthead, contents dialog, folio rail, colophon
     sections/    the homepage chapters, in reading order
     journey/     Currently panel, timeline, GitHub activity chart
-    motifs/      the opening scene, temper-line divider, cut-sun mark
+    motifs/      the reel's fallback scene, temper-line divider, cut-sun mark
     ui/          shared pieces: plate frame, chapter opener, links, arrow
     work/        the exhibition spread
-  lib/           drawing helpers, scene geometry, plates, GitHub client, content queries
+  lib/           drawing helpers, plates, reel media lookup, GitHub client, content queries
   pages/         routes: /, /work/[slug], /journey, /journey/[slug], /plates/*.svg, 404, sitemap, robots
-  scripts/       client JS: reveals, chrome, contents dialog, interactions, lab studies
+  scripts/       client JS: the reel, sound, reveals, chrome, contents dialog, interactions, lab studies
   styles/        tokens, base, motion
 scripts/         QA crawl, screenshots, icon rendering, glyph collection for the font subset
 ```
 
 ## Design system
 
-- **Colour:** named after traditional pigments. Sumi (ink), washi (paper), shu (vermilion, the sun), enji (crimson, for small red text), plus charcoal, greys and a little gold. Defined once in `src/styles/tokens.css`. Ink chapters switch tone with `data-tone="ink"`.
+- **Colour:** near-black (`--void`), charcoal, dark steel, a muted military green, bronze, dark gold and a warm off-white (`--bone`). Gold is the single accent and is used sparingly. Defined once in `src/styles/tokens.css`; the first edition's pigment names (`--sumi`, `--washi`, `--shu`…) remain as aliases by role. Alternate chapters (`data-tone="ink"`) sit on a green-black ground that fades in and out of the void, so there are no seams between scenes.
 - **Type:** Noto Serif Display at its narrowest width for display, Archivo for text, IBM Plex Mono for metadata, Shippori Mincho B1 for Japanese. All self-hosted, with metric-matched fallbacks.
-- **Motion:** four durations and three easings. Reveals wait for the display font, so type never reflows mid-animation. Page changes use cross-document view transitions: the new page is revealed from the left, the way a right-bound book turns.
+- **Motion:** four durations and three easings, restrained and deliberate. Type surfaces with a focus pull (blur to sharp) and settles; the reel's camera pushes in slowly as you scroll. Reveals wait for the display font, so type never reflows mid-animation. Page changes cut through black with cross-document view transitions.
 - **Accessibility:** semantic landmarks, a skip link, visible focus, a native `<dialog>` for the contents, keyboard-readable chart with a table view, and reduced-motion support throughout.
 
 ## Still to fill in
@@ -166,4 +187,4 @@ Things only you can provide. Each one is a single field, and nothing shows until
 
 ## Credits
 
-Fonts under the SIL Open Font License: Noto Serif Display, Archivo, IBM Plex Mono, Shippori Mincho B1. Every image is generated from code in this repository.
+Fonts under the SIL Open Font License: Noto Serif Display, Archivo, IBM Plex Mono, Shippori Mincho B1. Every image in the repository is generated from code. Any reel footage or soundtrack placed in `public/media/` belongs to its rights holders and stays out of the repository.

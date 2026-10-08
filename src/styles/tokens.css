@@ -1,32 +1,54 @@
 /*
- * HAMON design tokens.
- * Raw colours are named after the traditional Japanese pigments they stand in for;
- * components only ever reference the semantic aliases below them.
+ * Design tokens. A dark, cinematic system: near-black, charcoal and steel,
+ * a muted military green, bronze and a little gold, with warm off-white type.
+ *
+ * The pigment names from the first edition are kept as aliases so every
+ * component keeps working; they now point at the cinematic palette by role:
+ *   --sumi      deepest black (inverted blocks, silhouettes)
+ *   --washi     warm off-white (type on the darkest blocks)
+ *   --gofun     a raised panel, one step above the ground
+ *   --shu       gold: the single accent. Marks, rules and large type only
+ *   --enji      bronze-gold for small accent text
+ * Components should prefer the semantic aliases further down.
  */
 :root {
-  /* ── Pigments ─────────────────────────────────────────── */
-  --sumi: #13110f; /* 墨 ink black */
-  --keshizumi: #2a2622; /* 消炭 charcoal */
-  --nibi: #625b53; /* 鈍 muted grey, text-safe on washi (5.1:1) */
-  --usuzumi: #a39b90; /* 薄墨 diluted ink, rules & text on sumi */
-  --washi: #ebe4d6; /* 和紙 warm paper */
-  --washi-deep: #ddd4c2; /* shaded paper */
-  --gofun: #f6f2ea; /* 胡粉 shell white */
-  --shu: #da3b22; /* 朱 vermilion: the sun. Large type & graphics only on washi */
-  --shu-light: #f0634b; /* vermilion tuned for small text on sumi (5.6:1) */
-  --enji: #8f1d21; /* 臙脂 deep crimson: small red text on washi (6.8:1) */
-  --kin: #b48a4e; /* 金 warm metallic, decorative only */
+  /* ── Palette ──────────────────────────────────────────── */
+  --void: #08090a; /* the ground: near-black */
+  --char: #101213; /* charcoal */
+  --steel: #181c1f; /* dark steel */
+  --steel-2: #252a2e; /* lighter steel, hairlines on panels */
+  --moss: #4d5843; /* muted military green */
+  --moss-deep: #0d110e; /* green-black, for alternate chapters */
+  --bronze: #8a6a40; /* deep bronze */
+  --gold: #c2a068; /* dark gold, used sparingly */
+  --gold-light: #d8bd8a; /* gold tuned for small text on void (10:1) */
+  --bone: #e8e1d2; /* warm off-white */
+  --ash: #9b9e96; /* muted text on void (7.4:1) */
+  --smoke: #6d716c; /* tertiary, decorative text only */
 
-  /* ── Semantic: paper tone (default) ───────────────────── */
-  --color-bg: var(--washi);
-  --color-bg-alt: var(--washi-deep);
-  --color-text: var(--sumi);
-  --color-text-muted: var(--nibi);
-  --color-accent: var(--shu);
-  --color-accent-text: var(--enji);
-  --color-rule: rgb(19 17 15 / 0.16);
-  --color-rule-strong: var(--sumi);
-  --color-focus: var(--enji);
+  /* ── First-edition aliases (by role) ──────────────────── */
+  --sumi: #050606;
+  --keshizumi: var(--steel);
+  --nibi: var(--ash);
+  --usuzumi: var(--ash);
+  --washi: var(--bone);
+  --washi-deep: var(--steel);
+  --gofun: #121517;
+  --shu: var(--gold);
+  --shu-light: var(--gold-light);
+  --enji: #c9a873;
+  --kin: var(--bronze);
+
+  /* ── Semantic: the ground (default) ───────────────────── */
+  --color-bg: var(--void);
+  --color-bg-alt: var(--char);
+  --color-text: var(--bone);
+  --color-text-muted: var(--ash);
+  --color-accent: var(--gold);
+  --color-accent-text: var(--gold-light);
+  --color-rule: rgb(232 225 210 / 0.1);
+  --color-rule-strong: rgb(232 225 210 / 0.3);
+  --color-focus: var(--gold-light);
 
   /* ── Type families (font faces registered via Astro Fonts) ─ */
   --type-display: var(--font-display), 'Noto Serif Display', Georgia, serif;
@@ -47,7 +69,8 @@
   --leading-tight: 0.86;
   --leading-snug: 1.12;
   --leading-body: 1.6;
-  --tracking-meta: 0.14em;
+  --tracking-meta: 0.2em;
+  --tracking-title: 0.32em; /* film-title spacing for wide uppercase */
   --stretch-condensed: 62.5%; /* display face at its narrowest: tall like a vertical column */
 
   /* ── Space (4px base) ─────────────────────────────────── */
@@ -68,12 +91,12 @@
   --gutter: clamp(0.75rem, 0.4rem + 1.4vw, 2rem);
   --measure: 34rem;
   --masthead-h: 4.25rem;
-  --panel-border: 3px;
+  --panel-border: 1px;
 
   /* ── Motion ───────────────────────────────────────────── */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* reveals settle like ink soaking in */
-  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* panel wipes and page turns */
-  --ease-brush: cubic-bezier(0.55, 0, 0.1, 1); /* fast attack, long lift-off */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* reveals settle, never bounce */
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* wipes and cuts */
+  --ease-brush: cubic-bezier(0.55, 0, 0.1, 1); /* fast attack, long release: a blade stroke */
   --dur-1: 180ms; /* hover feedback */
   --dur-2: 420ms; /* UI state */
   --dur-3: 900ms; /* scroll reveals */
@@ -85,16 +108,17 @@
   --z-cursor: 70;
 }
 
-/* Inverted chapters: ink ground, paper type. Fixed chrome (masthead, rail)
-   takes [data-on-ink] while it floats over an ink chapter. */
+/* Alternate chapters sit on a green-black ground, a shade off the void, so the
+   change of scene reads without a seam. Fixed chrome takes [data-on-ink] while
+   it floats over one. */
 [data-tone='ink'],
 [data-on-ink] {
-  --color-bg: var(--sumi);
-  --color-bg-alt: var(--keshizumi);
-  --color-text: var(--washi);
-  --color-text-muted: var(--usuzumi);
-  --color-accent-text: var(--shu-light);
-  --color-rule: rgb(235 228 214 / 0.18);
-  --color-rule-strong: var(--washi);
-  --color-focus: var(--shu-light);
+  --color-bg: var(--moss-deep);
+  --color-bg-alt: var(--steel);
+  --color-text: var(--bone);
+  --color-text-muted: var(--ash);
+  --color-accent-text: var(--gold-light);
+  --color-rule: rgb(232 225 210 / 0.11);
+  --color-rule-strong: rgb(232 225 210 / 0.32);
+  --color-focus: var(--gold-light);
 }

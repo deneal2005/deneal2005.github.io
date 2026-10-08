@@ -170,7 +170,7 @@ const rentmate: Plate = {
         `<g fill="${INK.gofun}" opacity="0.5">${windows.join('')}</g>`,
         lit,
         `<rect x="0" y="${ground}" width="1200" height="2" fill="${INK.usuzumi}" opacity="0.6"/>`,
-        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="${INK.sumi}"/>`,
+        `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="${INK.night}"/>`,
         `<g fill="none" stroke="${INK.shu}" stroke-width="30">${notches}</g>`,
         `<g fill="none" stroke="${INK.usuzumi}" stroke-width="1.5" opacity="0.7">${ticks}</g>`,
         `<circle cx="${seal.cx}" cy="${seal.cy}" r="${seal.r - 34}" fill="none" stroke="${INK.gofun}" stroke-width="1" opacity="0.35"/>`,
@@ -202,7 +202,7 @@ const sunrise: Plate = {
     return {
       ground: 'washi',
       defs: `<clipPath id="above"><rect width="800" height="${horizon}"/></clipPath>`,
-      body: [`<g fill="${INK.shu}" clip-path="url(#above)">${dots}</g>`, `<path d="${line}" fill="${INK.sumi}"/>`].join(''),
+      body: [`<g fill="${INK.enji}" clip-path="url(#above)">${dots}</g>`, `<path d="${line}" fill="${INK.sumi}"/>`].join(''),
     };
   },
 };

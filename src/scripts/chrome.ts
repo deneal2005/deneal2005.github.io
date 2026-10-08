@@ -14,6 +14,7 @@ export function initChrome() {
   const runningTitle = document.querySelector<HTMLElement>('[data-running-title]');
   const inkSections = [...document.querySelectorAll<HTMLElement>('[data-tone="ink"]:not(dialog)')];
   const chapters = [...document.querySelectorAll<HTMLElement>('[data-chapter-label]')];
+  const reel = document.querySelector<HTMLElement>('[data-reel]');
 
   let lastY = scrollY;
   let currentChapter: HTMLElement | null = null;
@@ -30,9 +31,11 @@ export function initChrome() {
 
     if (masthead) {
       const goingDown = y > lastY;
-      masthead.toggleAttribute('data-scrolled', y > 8);
+      // Over the opening reel the bar stays clear, so the frame is never boxed in.
+      const reelEnd = reel ? reel.offsetTop + reel.offsetHeight - masthead.offsetHeight : 0;
+      masthead.toggleAttribute('data-scrolled', y > Math.max(8, reelEnd));
       // Step out of the way while reading downward; return on any upward scroll.
-      if (Math.abs(y - lastY) > 4) masthead.toggleAttribute('data-hidden', goingDown && y > vh * 0.6);
+      if (Math.abs(y - lastY) > 4) masthead.toggleAttribute('data-hidden', goingDown && y > vh * 0.6 && y > reelEnd);
       masthead.toggleAttribute('data-on-ink', isOverInk(masthead.offsetHeight / 2));
     }
 

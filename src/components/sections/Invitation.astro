@@ -1,7 +1,7 @@
 ---
 /**
- * Final chapter — The Invitation. The volume opened on a sun cut in two;
- * it closes on a whole one, rising. Contact leads with LinkedIn, email and
+ * Final chapter — The Invitation. It closes on an eclipsed sun rising out of
+ * the dark: a black disc, lit only at its rim. Contact leads with LinkedIn, email and
  * phone as icon tiles; everything else follows as rows.
  */
 import ProfileLinks from '../ui/ProfileLinks.astro';
@@ -75,7 +75,7 @@ const contact = ['linkedin', 'email', 'phone'];
     pointer-events: none;
   }
 
-  /* The whole sun, rising as the chapter scrolls into place. */
+  /* The eclipsed sun, rising as the chapter scrolls into place. */
   .invite__sun {
     position: absolute;
     left: 50%;
@@ -83,8 +83,11 @@ const contact = ['linkedin', 'email', 'phone'];
     width: min(120vw, 82rem);
     aspect-ratio: 1;
     border-radius: 50%;
-    background: var(--shu);
-    box-shadow: 0.6rem 0.4rem 0 var(--enji);
+    background: radial-gradient(closest-side, var(--void) 92%, #0d0f0d 100%);
+    box-shadow:
+      0 -1px 0 0 rgb(216 189 138 / 0.85),
+      0 -0.4rem 1.5rem rgb(194 160 104 / 0.25),
+      0 -3rem 10rem rgb(138 106 64 / 0.22);
     transform: translate(-50%, calc(62% + var(--depth, 0px)));
   }
 
@@ -157,9 +160,9 @@ const contact = ['linkedin', 'email', 'phone'];
   }
 
   .invite__actions :global(.btn.is-copied) {
-    background-color: var(--shu);
-    border-color: var(--shu);
-    color: var(--gofun);
+    background-color: var(--gold);
+    border-color: var(--gold);
+    color: var(--void);
   }
 
   @media (max-width: 63.99rem) {
