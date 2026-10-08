@@ -4,10 +4,10 @@ import { join } from 'node:path';
 /**
  * The opening reel's media, resolved at build time from public/media/.
  *
- * public/media/ is git-ignored: the footage and soundtrack used while
- * developing are third-party and must never be committed or deployed. Builds
- * without them (CI, GitHub Pages) render the original atmospheric scene in
- * their place, and the sound toggle hides itself.
+ * The footage and soundtrack are committed and deployed (the owner's choice;
+ * they are third-party material). Anything else in public/media stays
+ * git-ignored. Every file is optional: without the reel the hero opens on the
+ * drawn wall, and without the soundtrack the sound toggle hides itself.
  *
  *   reel-720.mp4     the opening shot, desktop: H.264 at the source's 30fps, colour
  *                    grade baked in, no audio. It plays natively (never scrubbed).

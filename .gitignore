@@ -28,5 +28,10 @@ pnpm-debug.log*
 
 .vercel
 
-# Third-party media (copyrighted footage and soundtrack): local preview only, never committed or deployed
-public/media/
+# Opening footage and soundtrack are published (the owner's decision, 2026-10-09).
+# Everything else in public/media stays local, e.g. the dossier avatar.
+public/media/*
+!public/media/reel-720.mp4
+!public/media/reel-480.mp4
+!public/media/reel-poster.jpg
+!public/media/theme.mp3

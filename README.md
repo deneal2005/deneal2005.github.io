@@ -133,9 +133,9 @@ On first visit the HUD boots up (起動 System online…) while the name is stam
 
 How it stays smooth: every layer is its own element and moves with `transform` or `opacity` only, so the browser composites instead of repainting. Shards are individual elements, the eyes glow on their own layer, and the only painted change (the cracks) steps in twentieths. `src/scripts/wall.ts` does one layout read per frame, eases the camera, and stops work when the section is off screen. Under reduced motion, or without JavaScript, the section is one screen showing the finished scene.
 
-### Opening footage (local only)
+### Opening footage and soundtrack
 
-If `public/media/` holds footage, it plays as the opening shot and cuts to the wall on the first scroll. That folder is **git-ignored**: the footage and soundtrack used while developing are third-party and copyrighted, so they are never committed or deployed. Builds without them (CI, GitHub Pages) open straight on the wall, and the Sound toggle hides itself.
+If `public/media/` holds footage, it plays as the opening shot and cuts to the wall on the first scroll; if it holds `theme.mp3`, a Sound toggle appears in the command bar. The current footage and soundtrack are third-party *Attack on Titan* material, published by the owner's decision; to take them down, delete the files (and purge them from history if needed). Everything else in `public/media/` (such as the dossier avatar) is git-ignored and local only. Builds without the files still work: the page opens straight on the wall, and the Sound toggle hides itself.
 
 | File | What |
 | --- | --- |
