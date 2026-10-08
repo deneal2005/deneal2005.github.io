@@ -21,7 +21,8 @@ function findBrowser() {
   return path;
 }
 
-export async function launch() {
+/** `args`: extra Chrome flags, e.g. ['--autoplay-policy=document-user-activation-required'] to test like a real browser. */
+export async function launch({ args = [] } = {}) {
   const port = 9300 + Math.floor(Math.random() * 500);
   const chrome = spawn(findBrowser(), [
     '--headless=new',
@@ -29,6 +30,7 @@ export async function launch() {
     '--no-first-run',
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${mkdtempSync(join(tmpdir(), 'cdp-'))}`,
+    ...args,
     'about:blank',
   ]);
 
