@@ -28,9 +28,10 @@ pnpm-debug.log*
 
 .vercel
 
-# Opening footage and soundtrack are published (the owner's decision, 2026-10-09).
-# Everything else in public/media stays local, e.g. the dossier avatar.
+# Opening footage, soundtrack and the dossier avatar are published (the owner's
+# decision, 2026-10-09). Anything else dropped into public/media stays local.
 public/media/*
+!public/media/portrait.jpg
 !public/media/reel-720.mp4
 !public/media/reel-480.mp4
 !public/media/reel-poster.jpg

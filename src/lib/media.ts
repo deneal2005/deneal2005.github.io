@@ -4,7 +4,7 @@ import { join } from 'node:path';
 /**
  * The opening reel's media, resolved at build time from public/media/.
  *
- * The footage and soundtrack are committed and deployed (the owner's choice;
+ * The footage, soundtrack and avatar are committed and deployed (the owner's choice;
  * they are third-party material). Anything else in public/media stays
  * git-ignored. Every file is optional: without the reel the hero opens on the
  * drawn wall, and without the soundtrack the sound toggle hides itself.

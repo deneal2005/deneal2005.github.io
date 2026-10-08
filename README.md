@@ -135,7 +135,7 @@ How it stays smooth: every layer is its own element and moves with `transform` o
 
 ### Opening footage and soundtrack
 
-If `public/media/` holds footage, it plays as the opening shot and cuts to the wall on the first scroll; if it holds `theme.mp3`, a Sound toggle appears in the command bar. The current footage and soundtrack are third-party *Attack on Titan* material, published by the owner's decision; to take them down, delete the files (and purge them from history if needed). Everything else in `public/media/` (such as the dossier avatar) is git-ignored and local only. Builds without the files still work: the page opens straight on the wall, and the Sound toggle hides itself.
+If `public/media/` holds footage, it plays as the opening shot and cuts to the wall on the first scroll; if it holds `theme.mp3`, a Sound toggle appears in the command bar. The current footage and soundtrack are third-party *Attack on Titan* material, published by the owner's decision; to take them down, delete the files (and purge them from history if needed). The dossier avatar (`portrait.jpg`, used when `profile.portrait` is empty) is published the same way. Anything else in `public/media/` is git-ignored and local only. Builds without the files still work: the page opens straight on the wall, and the Sound toggle hides itself.
 
 | File | What |
 | --- | --- |

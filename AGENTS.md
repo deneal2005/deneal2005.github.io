@@ -13,7 +13,7 @@ Delin Thangjam's portfolio, set in a dark Japanese military world: a colossal wa
 - Japanese text must mean what it says and fit its place (sector labels, classifications, stamps, warnings). Never decorative filler.
 - All art is original and drawn in code. Never copy official Attack on Titan logos, characters, panels or promotional art.
 - The opening sequence must stay compositor-only: animate `transform`/`opacity` on separate elements, never per-frame paint properties (see README, "The opening sequence").
-- `public/media/`: the opening footage (`reel-*`) and soundtrack (`theme.mp3`) are committed and deployed by the owner's choice; they are third-party *Attack on Titan* material, so expect they may need removing on a takedown. Anything else there (e.g. `portrait.jpg`) stays git-ignored. Builds must keep working without any of it: the hero opens on the wall and the sound toggle hides (`src/lib/media.ts`).
+- `public/media/`: the opening footage (`reel-*`) and soundtrack (`theme.mp3`) and the dossier avatar (`portrait.jpg`) are committed and deployed by the owner's choice; they are third-party *Attack on Titan* material, so expect they may need removing on a takedown. Anything else there stays git-ignored. Builds must keep working without any of it: the hero opens on the wall and the sound toggle hides (`src/lib/media.ts`).
 - Every animation must respect `prefers-reduced-motion`, and content must be readable without JavaScript (hidden states only apply under `html.js`).
 
 ## Where things live
